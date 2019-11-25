@@ -25,16 +25,16 @@ public class Practica3 {
         AgentsConnection.connect(
                 "isg2.ugr.es",      // Servidor de la plataforma o localhost
                 6000,               // Puerto de escucha
-                "Practica2",        // VirtualHost
+                "Practica3",        // VirtualHost
                 "Eagle",            // Usuario
                 "Hzrwtags",         // Password
                 false               // Codificar las conexiones SSL
         );
         
-        Agente agente;
+        Interlocutor agente;
         
         try {
-            agente = new Agente(new AgentID("Grupoe6_3"), "map10");
+            agente = new Interlocutor(new AgentID("Grupoe"), "playground", true);
         } catch (Exception ex) {
             System.out.println("Error el agente ya existe en la plataforma");
             return;
