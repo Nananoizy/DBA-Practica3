@@ -1,4 +1,4 @@
-package practica2;
+package practica3;
 
 /**
  * Estados en los que se puede encontrar el agente

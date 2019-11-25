@@ -1,4 +1,4 @@
-package practica2;
+package practica3;
 
 import es.upv.dsic.gti_ia.core.AgentID;
 import es.upv.dsic.gti_ia.core.AgentsConnection;
@@ -11,7 +11,7 @@ import es.upv.dsic.gti_ia.core.AgentsConnection;
  * @author Mariana Orihuela Cazorla
  * @author Yang Chen
  */
-public class Practica2 {
+public class Practica3 {
 
     /**
      * Método main del proyecto en el que
