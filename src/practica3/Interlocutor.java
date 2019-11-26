@@ -116,7 +116,7 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nSe ha podido hacer login con éxito");
             outbox = new ACLMessage();
             outbox.setSender(this.getAid());
-            outbox.setReceiver(new AgentID("Controller"));
+            outbox.setReceiver(new AgentID("Elnath"));
             outbox.setPerformative(ACLMessage.CANCEL);
             outbox.setConversationId(cId);
             this.send(outbox);
@@ -157,7 +157,7 @@ public class Interlocutor extends SuperAgent {
         /* envío */
         outbox = new ACLMessage();
         outbox.setSender(this.getAid());
-        outbox.setReceiver(new AgentID("Controller"));
+        outbox.setReceiver(new AgentID("Elnath"));
         outbox.setPerformative(ACLMessage.SUBSCRIBE);
         outbox.setContent(mensaje);
         this.send(outbox);
