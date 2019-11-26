@@ -107,6 +107,7 @@ public class Interlocutor extends SuperAgent {
         
         try {
             inbox = receiveACLMessage();
+            cId = inbox.getConversationId();
         } catch (InterruptedException ex) {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("No se puede recibir el mensaje");
@@ -119,6 +120,7 @@ public class Interlocutor extends SuperAgent {
             outbox.setReceiver(new AgentID("Elnath"));
             outbox.setPerformative(ACLMessage.CANCEL);
             outbox.setConversationId(cId);
+            outbox.setContent("");
             this.send(outbox);
             
             try {
