@@ -188,7 +188,11 @@ public class Interlocutor extends SuperAgent {
         rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true);
         rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true);
         
-        mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, "");
+        JsonObject objetoJSONInicio = new JsonObject();
+        objetoJSONInicio.add("session", sessionKey);
+        String content = objetoJSONInicio.toString();
+        
+        mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, content);
         
     }
     

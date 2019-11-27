@@ -30,11 +30,7 @@ public class Mosca extends SuperAgent {
      * Estado actual del agente.
      */
     Estados estado;
-    /**
-     * Mapa que recorre el agente.
-     */
-    ArrayList<Integer> mapaActual;   
-    String nombreMapaActual;
+
     /**
      * Clave de sesión para hacer login y logout.
      */
@@ -81,7 +77,6 @@ public class Mosca extends SuperAgent {
     public Mosca(AgentID aid, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
-        mapaActual = new ArrayList<Integer>();  
     }
     
     
