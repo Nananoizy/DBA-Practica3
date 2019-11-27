@@ -7,11 +7,13 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.codehaus.jettison.json.JSONArray;
 
 /**
  * Clase que define al agente, su comportamiento, sensores y comunicaciones
@@ -23,7 +25,13 @@ import java.util.logging.Logger;
  */
 public class Interlocutor extends SuperAgent {
     
+    /**
+     * Drones de la práctica.
+     */
     
+    Halcon halcon;
+    Mosca mosca;
+    Rescate rescate1, rescate2;
     /**
      * Estado actual del agente.
      */
@@ -31,7 +39,8 @@ public class Interlocutor extends SuperAgent {
     /**
      * Mapa que recorre el agente.
      */
-    String mapaActual;
+    ArrayList<Integer> mapaActual;   
+    String nombreMapaActual;
     /**
      * Clave de sesión para hacer login y logout.
      */
@@ -39,7 +48,7 @@ public class Interlocutor extends SuperAgent {
     /**
      * Dimensiones y alturas del mapa.
      */
-    int dimX, dimY, alturaMin, alturaMax;
+    int dimX, dimY;
     
     /**
      * Bandeja de entrada y salida de mensajes.
@@ -58,6 +67,12 @@ public class Interlocutor extends SuperAgent {
      */
     
     String cId = "";
+    
+    /**
+     * Clave de sesión.
+     */
+    
+    String sessionKey = "";
    
     
     /**
@@ -72,7 +87,8 @@ public class Interlocutor extends SuperAgent {
     public Interlocutor(AgentID aid, String mapa, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
-        mapaActual = mapa;
+        nombreMapaActual = mapa;
+        mapaActual = new ArrayList<Integer>();  
     }
     
     
@@ -107,21 +123,39 @@ public class Interlocutor extends SuperAgent {
         
         try {
             inbox = receiveACLMessage();
-            cId = inbox.getConversationId();
         } catch (InterruptedException ex) {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("No se puede recibir el mensaje");
         }
         
+        // SI HE CONSEGUIDO SUSCRIBIRME A UN MUNDO
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
             System.out.println("\nSe ha podido hacer login con éxito");
-            outbox = new ACLMessage();
-            outbox.setSender(this.getAid());
-            outbox.setReceiver(new AgentID("Elnath"));
-            outbox.setPerformative(ACLMessage.CANCEL);
-            outbox.setConversationId(cId);
-            outbox.setContent("");
-            this.send(outbox);
+            
+            JsonObject objeto = Json.parse(inbox.getContent()).asObject();  
+            cId = inbox.getConversationId();
+            sessionKey = objeto.get("session").asString();
+            
+            ///EXTRAER MAPA
+            JsonArray mapArray = objeto.get("map").asArray();
+            
+            for (int i = 0; i < mapArray.size() ; i++) {
+                mapaActual.add( mapArray.get(i).asInt());
+            }
+            
+            //DIMENSIONES DEL MAPA
+            dimX = objeto.get("dimx").asInt();
+            dimY = objeto.get("dimy").asInt();
+            
+            try {   
+                // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
+
+                levantarDrones();
+                
+            } catch (Exception ex) {
+                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            cancelarPartida();
             
             try {
                 inbox = receiveACLMessage();
@@ -133,24 +167,60 @@ public class Interlocutor extends SuperAgent {
             if(inbox.getPerformativeInt() == ACLMessage.AGREE)
                 System.out.println("\nSe ha cerrado sesión");
             else
-                System.out.println("\nNo se ha cerrado sesión");
+                System.out.println("\nNo se ha cerrado sesión"); 
         }
         else{
             System.out.println("\nNo se ha podido hacer login con éxito");
         }
     }
     
+    /**
+     * Método que levanta a los drones
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    public void levantarDrones() throws Exception{
+        
+        //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
+        mosca = new Mosca(new AgentID("Grupoe_mosca"), true);
+        halcon = new Halcon(new AgentID("Grupoe_halcon"), true);
+        rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true);
+        rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true);
+        
+        mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, "");
+        
+    }
+    
+    /**
+     * Método que crea un mensaje que se manda
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public void mandaMensaje(String receptor, int performativa, String content){
+        
+        outbox = new ACLMessage();
+        outbox.setSender(this.getAid());
+        outbox.setReceiver(new AgentID(receptor));
+        outbox.setPerformative(performativa);
+        outbox.setConversationId(cId);
+        outbox.setContent(content);
+        this.send(outbox);
+        
+    }
     
     /**
      * Envío del mensaje para hacer login
      * 
      * 
-     * @author Adrian Ruiz Lopez
+     * @author Mariana Orihuela Cazorla
      */
     public void login() {
         /* Preparación del Mensaje */
         JsonObject objetoJSON = new JsonObject();
-        objetoJSON.add("map",mapaActual);
+        objetoJSON.add("map",nombreMapaActual);
         objetoJSON.add("user", "Eagle");
         objetoJSON.add("password", "Hzrwtags");
         
@@ -163,6 +233,45 @@ public class Interlocutor extends SuperAgent {
         outbox.setPerformative(ACLMessage.SUBSCRIBE);
         outbox.setContent(mensaje);
         this.send(outbox);
+    }
+    
+    /**
+     * Envío del mensaje para cancelar la partida
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    public void cancelarPartida(){
+        
+        outbox = new ACLMessage();
+            outbox.setSender(this.getAid());
+            outbox.setReceiver(new AgentID("Elnath"));
+            outbox.setPerformative(ACLMessage.CANCEL);
+            outbox.setConversationId(cId);
+            outbox.setContent("");
+            this.send(outbox);
+            
+    }
+    
+    /**
+     * Extracción de la traza del mapa
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    public void extraerTraza() throws FileNotFoundException, IOException {
+        
+            JsonObject injson = Json.parse(inbox.getContent()).asObject();
+            JsonArray ja = injson.get("map").asArray();
+            byte data[] = new byte [ja.size()];
+            for (int i = 0; i < data.length; i++){
+                data[i] = (byte) ja.get(i).asInt();
+            }
+            FileOutputStream fos = new FileOutputStream("mitraza.png");
+            fos.write(data);
+            fos.close();
+            System.out.println("Traza guardada");
+   
     }
     
     /**
