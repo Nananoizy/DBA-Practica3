@@ -41,6 +41,11 @@ public class Mosca extends SuperAgent {
     int dimX, dimY;
     
     /**
+     * Rol del dron.
+     */
+    String rol;
+    
+    /**
      * Bandeja de entrada y salida de mensajes.
      */
     ACLMessage outbox = null;
@@ -77,6 +82,7 @@ public class Mosca extends SuperAgent {
     public Mosca(AgentID aid, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
+        rol = "fly";
     }
     
     
@@ -107,7 +113,8 @@ public class Mosca extends SuperAgent {
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
             this.cId = inbox.getConversationId();
-            
+            JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+            sessionKey = objeto.get("session").asString();
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
     }

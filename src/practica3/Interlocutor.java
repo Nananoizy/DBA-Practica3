@@ -150,14 +150,9 @@ public class Interlocutor extends SuperAgent {
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
             cancelarPartida();
             
-            recibeMensaje();
-            
-            if(inbox.getPerformativeInt() == ACLMessage.AGREE)
-                System.out.println("\nSe ha cerrado sesión");
-            else
-                System.out.println("\nNo se ha cerrado sesión"); 
         }
         else{
             System.out.println("\nNo se ha podido hacer login con éxito");
@@ -195,7 +190,8 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nSe ha levantado la mosca"); 
         }
         else{
-            System.out.println("\nNo se ha levantado la mosca"); 
+            System.out.println("\nNo se ha levantado la mosca");
+            cancelarPartida();
         }
         
         // DESPUES EL HALCON
@@ -214,7 +210,8 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nSe ha levantado el halcon"); 
         }
         else{
-            System.out.println("\nNo se ha levantado el halcon"); 
+            System.out.println("\nNo se ha levantado el halcon");
+            cancelarPartida();
         }
         
         // Y LOS DOS DRONES DE RESCATE
@@ -233,7 +230,8 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nSe ha levantado el rescate 1"); 
         }
         else{
-            System.out.println("\nNo se ha levantado el rescate 1"); 
+            System.out.println("\nNo se ha levantado el rescate 1");
+            cancelarPartida();
         }
         
         rescate2.start();
@@ -250,7 +248,8 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nSe ha levantado el rescate 2"); 
         }
         else{
-            System.out.println("\nNo se ha levantado el rescate 2"); 
+            System.out.println("\nNo se ha levantado el rescate 2");
+            cancelarPartida();
         }
         
     }
@@ -331,6 +330,13 @@ public class Interlocutor extends SuperAgent {
             outbox.setConversationId(cId);
             outbox.setContent("");
             this.send(outbox);
+            
+            recibeMensaje();
+            
+        if(inbox.getPerformativeInt() == ACLMessage.AGREE)
+            System.out.println("\nSe ha cerrado sesión");
+        else
+            System.out.println("\nNo se ha cerrado sesión"); 
             
     }
     

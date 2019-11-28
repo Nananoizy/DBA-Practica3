@@ -45,6 +45,11 @@ public class Halcon extends SuperAgent {
     int dimX, dimY;
     
     /**
+     * Rol concreto del dron.
+     */
+    String rol;
+    
+    /**
      * Bandeja de entrada y salida de mensajes.
      */
     ACLMessage outbox = null;
@@ -81,6 +86,7 @@ public class Halcon extends SuperAgent {
     public Halcon(AgentID aid, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
+        rol = "hawk";
     }
     
     
@@ -111,7 +117,8 @@ public class Halcon extends SuperAgent {
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
             this.cId = inbox.getConversationId();
-            
+            JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+            sessionKey = objeto.get("session").asString();
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
         
