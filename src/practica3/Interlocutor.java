@@ -121,12 +121,7 @@ public class Interlocutor extends SuperAgent {
         //intentamos suscribirnos al mundo
         login();
         
-        try {
-            inbox = receiveACLMessage();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("No se puede recibir el mensaje");
-        }
+        recibeMensaje();
         
         // SI HE CONSEGUIDO SUSCRIBIRME A UN MUNDO
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
@@ -157,12 +152,7 @@ public class Interlocutor extends SuperAgent {
             }
             cancelarPartida();
             
-            try {
-                inbox = receiveACLMessage();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("No se puede recibir el mensaje");
-            }
+            recibeMensaje();
             
             if(inbox.getPerformativeInt() == ACLMessage.AGREE)
                 System.out.println("\nSe ha cerrado sesión");
@@ -188,11 +178,80 @@ public class Interlocutor extends SuperAgent {
         rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true);
         rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true);
         
+        
+        // LEVANTAMOS PRIMERO LA MOSCA
+        
+        mosca.start();
+        
         JsonObject objetoJSONInicio = new JsonObject();
         objetoJSONInicio.add("session", sessionKey);
         String content = objetoJSONInicio.toString();
         
         mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, content);
+        
+        recibeMensaje();
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            System.out.println("\nSe ha levantado la mosca"); 
+        }
+        else{
+            System.out.println("\nNo se ha levantado la mosca"); 
+        }
+        
+        // DESPUES EL HALCON
+        
+        halcon.start();
+        
+        objetoJSONInicio = new JsonObject();
+        objetoJSONInicio.add("session", sessionKey);
+        content = objetoJSONInicio.toString();
+        
+        mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, content);
+        
+        recibeMensaje();
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            System.out.println("\nSe ha levantado el halcon"); 
+        }
+        else{
+            System.out.println("\nNo se ha levantado el halcon"); 
+        }
+        
+        // Y LOS DOS DRONES DE RESCATE
+        
+        rescate1.start();
+        
+        objetoJSONInicio = new JsonObject();
+        objetoJSONInicio.add("session", sessionKey);
+        content = objetoJSONInicio.toString();
+        
+        mandaMensaje("Grupoe_rescate1", ACLMessage.INFORM, content);
+        
+        recibeMensaje();
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            System.out.println("\nSe ha levantado el rescate 1"); 
+        }
+        else{
+            System.out.println("\nNo se ha levantado el rescate 1"); 
+        }
+        
+        rescate2.start();
+        
+        objetoJSONInicio = new JsonObject();
+        objetoJSONInicio.add("session", sessionKey);
+        content = objetoJSONInicio.toString();
+        
+        mandaMensaje("Grupoe_rescate2", ACLMessage.INFORM, content);
+        
+        recibeMensaje();
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            System.out.println("\nSe ha levantado el rescate 2"); 
+        }
+        else{
+            System.out.println("\nNo se ha levantado el rescate 2"); 
+        }
         
     }
     
@@ -212,6 +271,24 @@ public class Interlocutor extends SuperAgent {
         outbox.setConversationId(cId);
         outbox.setContent(content);
         this.send(outbox);
+        
+    }
+    
+        /**
+     * Método que recibe un mensaje
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public void recibeMensaje(){
+        
+        try {
+                inbox = receiveACLMessage();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("No se puede recibir el mensaje");
+            }
         
     }
     

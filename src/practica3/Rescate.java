@@ -81,7 +81,6 @@ public class Rescate extends SuperAgent {
     public Rescate(AgentID aid, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
-        mapaActual = new ArrayList<Integer>();  
     }
     
     
@@ -107,6 +106,14 @@ public class Rescate extends SuperAgent {
     @Override
     public void execute() {        
  
+        recibeMensaje();
+        
+        //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
+        if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+            this.cId = inbox.getConversationId();
+            
+            mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
+        }
     }
     
   
@@ -123,6 +130,41 @@ public class Rescate extends SuperAgent {
     }
     
         
+    /**
+     * Método que crea un mensaje que se manda
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
     
+    public void mandaMensaje(String receptor, int performativa, String content){
+        
+        outbox = new ACLMessage();
+        outbox.setSender(this.getAid());
+        outbox.setReceiver(new AgentID(receptor));
+        outbox.setPerformative(performativa);
+        outbox.setConversationId(cId);
+        outbox.setContent(content);
+        this.send(outbox);
+        
+    }
+    
+    /**
+     * Método que recibe un mensaje
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public void recibeMensaje(){
+        
+        try {
+                inbox = receiveACLMessage();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("No se puede recibir el mensaje");
+            }
+        
+    }
     
 }

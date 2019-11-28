@@ -102,16 +102,13 @@ public class Mosca extends SuperAgent {
     @Override
     public void execute() {        
  
-        try {
-            //nada más ser levantado, el agente mosca va a esperar a que el interlocutor le mande los datos del mundo
-            inbox = receiveACLMessage();
-        } catch (InterruptedException ex) {
-            System.out.println("\nNo se ha podido recibir el mensaje");
-        }
+        recibeMensaje();
         
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-            System.out.println("\nHe recibido el mensaje");
+            this.cId = inbox.getConversationId();
+            
+            mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
     }
     
@@ -128,7 +125,41 @@ public class Mosca extends SuperAgent {
  
     }
     
-        
+        /**
+     * Método que crea un mensaje que se manda
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
     
+    public void mandaMensaje(String receptor, int performativa, String content){
+        
+        outbox = new ACLMessage();
+        outbox.setSender(this.getAid());
+        outbox.setReceiver(new AgentID(receptor));
+        outbox.setPerformative(performativa);
+        outbox.setConversationId(cId);
+        outbox.setContent(content);
+        this.send(outbox);
+        
+    }
+    
+    /**
+     * Método que recibe un mensaje
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public void recibeMensaje(){
+        
+        try {
+                inbox = receiveACLMessage();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("No se puede recibir el mensaje");
+            }
+        
+    }
     
 }
