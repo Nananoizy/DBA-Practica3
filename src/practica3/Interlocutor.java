@@ -147,6 +147,8 @@ public class Interlocutor extends SuperAgent {
 
                 levantarDrones();
                 
+                // si todo ha ido bien, notificamos a los drones de que pueden conectarse
+                
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -198,10 +200,6 @@ public class Interlocutor extends SuperAgent {
         
         halcon.start();
         
-        objetoJSONInicio = new JsonObject();
-        objetoJSONInicio.add("session", sessionKey);
-        content = objetoJSONInicio.toString();
-        
         mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, content);
         
         recibeMensaje();
@@ -218,9 +216,6 @@ public class Interlocutor extends SuperAgent {
         
         rescate1.start();
         
-        objetoJSONInicio = new JsonObject();
-        objetoJSONInicio.add("session", sessionKey);
-        content = objetoJSONInicio.toString();
         
         mandaMensaje("Grupoe_rescate1", ACLMessage.INFORM, content);
         
@@ -235,10 +230,6 @@ public class Interlocutor extends SuperAgent {
         }
         
         rescate2.start();
-        
-        objetoJSONInicio = new JsonObject();
-        objetoJSONInicio.add("session", sessionKey);
-        content = objetoJSONInicio.toString();
         
         mandaMensaje("Grupoe_rescate2", ACLMessage.INFORM, content);
         
