@@ -393,10 +393,40 @@ public class Interlocutor extends SuperAgent {
     
     public boolean compruebaCasilla(int x, int y, int alturaMax){
         
-        /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
-        // superior izquierda dejando 10 unidades de margen con los bordes
+        /// Hay que comprobar tanto si van a spawnear drones en esa posicion como si
+        // no se puede llegar porque es la altura maxima
         
-        return true;
+        int alturaCasilla;
+        
+        boolean sePuedeSpawnear = true;
+        
+        alturaCasilla = mapaActual.get(x + y*dimX);
+        
+        if (alturaCasilla > alturaMax){
+            sePuedeSpawnear = false;
+        }
+        
+        //recorro el vector de spawns y compruebo que no se vaya a instanciar otro dron ahi
+        
+        if (spawns.size() > 0){
+            
+            for (int i = 0; i < spawns.size(); i++){
+                
+                // si el i es par compruebo la x y si no coincide, ya no estan en la misma casilla
+                if ((i % 2) == 0){
+                    
+                    if (x == spawns.get(i)){
+                        
+                        // compruebo la y y si es igual, termino
+                        if (y == spawns.get(i)){
+                            sePuedeSpawnear = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return sePuedeSpawnear;
     }
     
     /**
