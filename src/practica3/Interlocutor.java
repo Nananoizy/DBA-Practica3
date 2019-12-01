@@ -196,6 +196,8 @@ public class Interlocutor extends SuperAgent {
         }
         
         objetoJSONInicio.add("map", mapaEnviado);
+        objetoJSONInicio.add("posInicioX",spawns.get(0));
+        objetoJSONInicio.add("posInicioY",spawns.get(1));
             
         String content = objetoJSONInicio.toString();
         
@@ -219,6 +221,13 @@ public class Interlocutor extends SuperAgent {
         
         halcon.start();
         
+        objetoJSONInicio.remove("posInicioX");
+        objetoJSONInicio.remove("posInicioY");
+        objetoJSONInicio.add("posInicioX",spawns.get(2));
+        objetoJSONInicio.add("posInicioY",spawns.get(3));
+            
+        content = objetoJSONInicio.toString();    
+        
         mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, content);
         
         recibeMensaje();
@@ -235,6 +244,12 @@ public class Interlocutor extends SuperAgent {
         
         rescate1.start();
         
+        objetoJSONInicio.remove("posInicioX");
+        objetoJSONInicio.remove("posInicioY");
+        objetoJSONInicio.add("posInicioX",spawns.get(4));
+        objetoJSONInicio.add("posInicioY",spawns.get(5));
+            
+        content = objetoJSONInicio.toString(); 
         
         mandaMensaje("Grupoe_rescate1", ACLMessage.INFORM, content);
         
@@ -249,6 +264,13 @@ public class Interlocutor extends SuperAgent {
         }
         
         rescate2.start();
+        
+        objetoJSONInicio.remove("posInicioX");
+        objetoJSONInicio.remove("posInicioY");
+        objetoJSONInicio.add("posInicioX",spawns.get(6));
+        objetoJSONInicio.add("posInicioY",spawns.get(7));
+            
+        content = objetoJSONInicio.toString(); 
         
         mandaMensaje("Grupoe_rescate2", ACLMessage.INFORM, content);
         
