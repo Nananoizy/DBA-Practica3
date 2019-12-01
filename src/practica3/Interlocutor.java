@@ -198,6 +198,9 @@ public class Interlocutor extends SuperAgent {
         objetoJSONInicio.add("map", mapaEnviado);
         objetoJSONInicio.add("posInicioX",spawns.get(0));
         objetoJSONInicio.add("posInicioY",spawns.get(1));
+        
+        objetoJSONInicio.add("dimMaxX",dimX);
+        objetoJSONInicio.add("dimMaxY",dimY);
             
         String content = objetoJSONInicio.toString();
         

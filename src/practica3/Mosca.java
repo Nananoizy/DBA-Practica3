@@ -41,6 +41,11 @@ public class Mosca extends SuperAgent {
     int dimX, dimY;
     
     /**
+     * Dimensiones y alturas del mapa.
+     */
+    int posInicioX, posInicioY;
+    
+    /**
      * Rol del dron.
      */
     String rol;
@@ -128,6 +133,11 @@ public class Mosca extends SuperAgent {
             for (int i = 0; i < mapArray.size() ; i++) {
                 mapaActual.add( mapArray.get(i).asInt());
             }
+            
+            posInicioX = objeto.get("posInicioX").asInt();
+            posInicioY = objeto.get("posInicioY").asInt();
+            dimX = objeto.get("dimMaxX").asInt();
+            dimY = objeto.get("dimMaxY").asInt();
             
             //System.out.println(mapaActual);
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");

@@ -43,7 +43,10 @@ public class Halcon extends SuperAgent {
      * Dimensiones y alturas del mapa.
      */
     int dimX, dimY;
-    
+    /**
+     * Dimensiones y alturas del mapa.
+     */
+    int posInicioX, posInicioY;
     /**
      * Rol concreto del dron.
      */
@@ -124,6 +127,12 @@ public class Halcon extends SuperAgent {
             for (int i = 0; i < mapArray.size() ; i++) {
                 mapaActual.add( mapArray.get(i).asInt());
             }
+            
+            posInicioX = objeto.get("posInicioX").asInt();
+            posInicioY = objeto.get("posInicioY").asInt();
+            dimX = objeto.get("dimMaxX").asInt();
+            dimY = objeto.get("dimMaxY").asInt();
+            
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
         
