@@ -119,6 +119,11 @@ public class Rescate extends SuperAgent {
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
+            JsonArray mapArray = objeto.get("map").asArray();
+            
+            for (int i = 0; i < mapArray.size() ; i++) {
+                mapaActual.add( mapArray.get(i).asInt());
+            }
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
     }

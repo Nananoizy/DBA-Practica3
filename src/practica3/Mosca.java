@@ -46,6 +46,11 @@ public class Mosca extends SuperAgent {
     String rol;
     
     /**
+     * Mapa en el que se va a operar.
+     */
+    ArrayList<Integer> mapaActual;
+    
+    /**
      * Bandeja de entrada y salida de mensajes.
      */
     ACLMessage outbox = null;
@@ -83,6 +88,8 @@ public class Mosca extends SuperAgent {
         super(aid);
         this.hosting = host;
         rol = "fly";
+        mapaActual = new ArrayList<Integer>();  
+
     }
     
     
@@ -109,12 +116,20 @@ public class Mosca extends SuperAgent {
     public void execute() {        
  
         recibeMensaje();
-        
+              
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
+            
+            JsonArray mapArray = objeto.get("map").asArray();
+            
+            for (int i = 0; i < mapArray.size() ; i++) {
+                mapaActual.add( mapArray.get(i).asInt());
+            }
+            
+            //System.out.println(mapaActual);
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
     }

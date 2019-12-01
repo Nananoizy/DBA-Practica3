@@ -57,6 +57,15 @@ public class Interlocutor extends SuperAgent {
     ACLMessage inbox = null;
     
     /**
+     * Array que contiene las parejas de puntos en las que van a aparecer los drones.
+     * 
+     * La posicion par va asociada a la x y la impar a la y
+     * De esta forma 0 sería la x de la mosca y 1 la y
+     * El orden es mosca - halcon - rescate1 - rescate2
+     */
+    ArrayList<Integer> spawns; 
+    
+    /**
      * Booleano que indica si el agente empieza la partida (hostea) o no.
      */
 
@@ -145,6 +154,7 @@ public class Interlocutor extends SuperAgent {
             try {   
                 // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
 
+                calculaSpawn();
                 levantarDrones();
                 
                 // si todo ha ido bien, notificamos a los drones de que pueden conectarse
@@ -175,14 +185,23 @@ public class Interlocutor extends SuperAgent {
         rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true);
         rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true);
         
+        // ELEMENTOS DE LA CONEXION
+        
+        JsonObject objetoJSONInicio = new JsonObject();
+        objetoJSONInicio.add("session", sessionKey);
+        JsonArray mapaEnviado = new JsonArray();
+        
+        for (int i = 0; i < mapaActual.size() ; i++) {
+                mapaEnviado.add(mapaActual.get(i));
+        }
+        
+        objetoJSONInicio.add("map", mapaEnviado);
+            
+        String content = objetoJSONInicio.toString();
         
         // LEVANTAMOS PRIMERO LA MOSCA
         
         mosca.start();
-        
-        JsonObject objetoJSONInicio = new JsonObject();
-        objetoJSONInicio.add("session", sessionKey);
-        String content = objetoJSONInicio.toString();
         
         mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, content);
         
@@ -243,6 +262,141 @@ public class Interlocutor extends SuperAgent {
             cancelarPartida();
         }
         
+    }
+    
+    /**
+     * Método que calcula las posiciones donde va a spawnear cada dron
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public boolean calculaSpawn(){
+        
+        /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
+        // superior izquierda dejando 10 unidades de margen con los bordes
+        
+        int xTemp, yTemp;
+        boolean posicionCorrecta = false;
+        
+        //MOSCA
+        
+        xTemp = 9;
+        yTemp = 9;
+        
+        posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
+        
+        //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
+        while (!(posicionCorrecta) && (xTemp > 0) && (yTemp > 0)){
+            xTemp --;
+            yTemp --;
+            compruebaCasilla(xTemp,yTemp,255);
+        }
+        
+        //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
+        
+        if (compruebaCasilla(xTemp,yTemp,255)){
+            cancelarPartida();
+            return false;
+        }
+        else{  // si la posicion es correcta, añadimos al array las posiciones
+            spawns.add(xTemp);
+            spawns.add(yTemp);
+        }
+        
+        /// HALCON
+        
+        xTemp = 49;
+        yTemp = dimY - 49;
+        
+        posicionCorrecta = compruebaCasilla(xTemp,yTemp,230);
+        
+        //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
+        while (!(posicionCorrecta) && (xTemp > 0) && (yTemp < dimY)){
+            xTemp --;
+            yTemp ++;
+            compruebaCasilla(xTemp,yTemp,230);
+        }
+        
+        //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
+        
+        if (compruebaCasilla(xTemp,yTemp,230)){
+            cancelarPartida();
+            return false;
+        }
+        else{  // si la posicion es correcta, añadimos al array las posiciones
+            spawns.add(xTemp);
+            spawns.add(yTemp);
+        }
+        
+        /// RESCATE 1
+        
+        xTemp = dimX / 2;
+        yTemp = dimY / 4;
+        
+        posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
+        
+        //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
+        while (!(posicionCorrecta) && (xTemp < dimX)){
+            xTemp ++;
+            compruebaCasilla(xTemp,yTemp,255);
+        }
+        
+        //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
+        
+        if (compruebaCasilla(xTemp,yTemp,255)){
+            cancelarPartida();
+            return false;
+        }
+        else{  // si la posicion es correcta, añadimos al array las posiciones
+            spawns.add(xTemp);
+            spawns.add(yTemp);
+        }
+        
+        /// RESCATE 2
+        
+        xTemp = dimX / 2;
+        yTemp = dimY - (dimY / 4);
+        
+        posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
+        
+        //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
+        while (!(posicionCorrecta) && (xTemp < dimX)){
+            xTemp ++;
+            compruebaCasilla(xTemp,yTemp,255);
+        }
+        
+        //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
+        
+        if (compruebaCasilla(xTemp,yTemp,255)){
+            cancelarPartida();
+            return false;
+        }
+        else{  // si la posicion es correcta, añadimos al array las posiciones
+            spawns.add(xTemp);
+            spawns.add(yTemp);
+        }
+        
+        
+        return true;
+    }
+    
+    /**
+     * Método que comprueba unas casillas concretas
+     * 
+     * @param x Coordenada x que se va a comprobar
+     * @param y Coordenada y que se va a comprobar
+     * @param alturaMax altura maxima a la que puede volar el dron concreto
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public boolean compruebaCasilla(int x, int y, int alturaMax){
+        
+        /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
+        // superior izquierda dejando 10 unidades de margen con los bordes
+        
+        return true;
     }
     
     /**
