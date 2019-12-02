@@ -97,7 +97,8 @@ public class Interlocutor extends SuperAgent {
         super(aid);
         this.hosting = host;
         nombreMapaActual = mapa;
-        mapaActual = new ArrayList<Integer>();  
+        mapaActual = new ArrayList<Integer>();
+        spawns = new ArrayList<Integer>();
     }
     
     
@@ -150,6 +151,17 @@ public class Interlocutor extends SuperAgent {
             //DIMENSIONES DEL MAPA
             dimX = objeto.get("dimx").asInt();
             dimY = objeto.get("dimy").asInt();
+            
+            
+            System.out.println("dimx: " + dimX + " dimy: " + dimY);
+            System.out.println("mapasize: " + mapArray.size());
+            int i = 0;
+            while (dimX > i) {
+                System.out.println(mapaActual.get(i));
+                i++;
+            }
+            System.out.println("i: " + i);
+            
             
             try {   
                 // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
@@ -414,6 +426,7 @@ public class Interlocutor extends SuperAgent {
      * @param alturaMax altura maxima a la que puede volar el dron concreto
      * 
      * @author Mariana Orihuela Cazorla
+     * @author David Infante Casas
      */
     
     public boolean compruebaCasilla(int x, int y, int alturaMax){
@@ -425,14 +438,14 @@ public class Interlocutor extends SuperAgent {
         
         boolean sePuedeSpawnear = true;
         
-        alturaCasilla = mapaActual.get(x + y*dimX);
+        // Suponemos que x, y, dimX y dimY empiezan en 0
+        alturaCasilla = mapaActual.get((x+1) + (dimX+1)*((dimY+1) - (Math.abs(dimY - y)+1)) - 1);
         
         if (alturaCasilla > alturaMax){
             sePuedeSpawnear = false;
         }
         
         //recorro el vector de spawns y compruebo que no se vaya a instanciar otro dron ahi
-        
         if (spawns.size() > 0){
             
             for (int i = 0; i < spawns.size(); i++){

@@ -23,78 +23,20 @@ import org.codehaus.jettison.json.JSONArray;
  * @author Mariana Orihuela Cazorla
  * @author Yang Chen
  */
-public class Mosca extends SuperAgent {
-    
-    
-    /**
-     * Estado actual del agente.
-     */
-    Estados estado;
-
-    /**
-     * Clave de sesión para hacer login y logout.
-     */
-    String key;
-    /**
-     * Dimensiones y alturas del mapa.
-     */
-    int dimX, dimY;
-    
-    /**
-     * Dimensiones y alturas del mapa.
-     */
-    int posInicioX, posInicioY;
-    
-    /**
-     * Rol del dron.
-     */
-    String rol;
-    
-    /**
-     * Mapa en el que se va a operar.
-     */
-    ArrayList<Integer> mapaActual;
-    
-    /**
-     * Bandeja de entrada y salida de mensajes.
-     */
-    ACLMessage outbox = null;
-    ACLMessage inbox = null;
-    
-    /**
-     * Booleano que indica si el agente empieza la partida (hostea) o no.
-     */
-
-    boolean hosting;
-    
-    /**
-     * Conversation ID.
-     */
-    
-    String cId = "";
-    
-    /**
-     * Clave de sesión.
-     */
-    
-    String sessionKey = "";
+public class Mosca extends Dron {
    
     
     /**
      * Crea un nuevo Agente
      * 
      * @param aid ID del agente
-     * @param mapa Mapa que va a recorrer el agente
      * @throws Exception
      * 
-     * @author Adrián Ruiz Lopez
+     * @author David Infante Casas
      */
     public Mosca(AgentID aid, boolean host) throws Exception {
-        super(aid);
-        this.hosting = host;
+        super(aid, host);
         rol = "fly";
-        mapaActual = new ArrayList<Integer>();  
-
     }
     
     
@@ -127,7 +69,6 @@ public class Mosca extends SuperAgent {
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
-            
             JsonArray mapArray = objeto.get("map").asArray();
             
             for (int i = 0; i < mapArray.size() ; i++) {
@@ -139,7 +80,6 @@ public class Mosca extends SuperAgent {
             dimX = objeto.get("dimMaxX").asInt();
             dimY = objeto.get("dimMaxY").asInt();
             
-            //System.out.println(mapaActual);
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
     }
@@ -155,43 +95,6 @@ public class Mosca extends SuperAgent {
     public void finalize() {
         super.finalize();
  
-    }
-    
-        /**
-     * Método que crea un mensaje que se manda
-     * 
-     * 
-     * @author Mariana Orihuela Cazorla
-     */
-    
-    public void mandaMensaje(String receptor, int performativa, String content){
-        
-        outbox = new ACLMessage();
-        outbox.setSender(this.getAid());
-        outbox.setReceiver(new AgentID(receptor));
-        outbox.setPerformative(performativa);
-        outbox.setConversationId(cId);
-        outbox.setContent(content);
-        this.send(outbox);
-        
-    }
-    
-    /**
-     * Método que recibe un mensaje
-     * 
-     * 
-     * @author Mariana Orihuela Cazorla
-     */
-    
-    public void recibeMensaje(){
-        
-        try {
-                inbox = receiveACLMessage();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("No se puede recibir el mensaje");
-            }
-        
     }
     
 }

@@ -23,72 +23,19 @@ import org.codehaus.jettison.json.JSONArray;
  * @author Mariana Orihuela Cazorla
  * @author Yang Chen
  */
-public class Halcon extends SuperAgent {
-    
-    
-    /**
-     * Estado actual del agente.
-     */
-    Estados estado;
-    /**
-     * Mapa que recorre el agente.
-     */
-    ArrayList<Integer> mapaActual;   
-    String nombreMapaActual;
-    /**
-     * Clave de sesión para hacer login y logout.
-     */
-    String key;
-    /**
-     * Dimensiones y alturas del mapa.
-     */
-    int dimX, dimY;
-    /**
-     * Dimensiones y alturas del mapa.
-     */
-    int posInicioX, posInicioY;
-    /**
-     * Rol concreto del dron.
-     */
-    String rol;
-    
-    /**
-     * Bandeja de entrada y salida de mensajes.
-     */
-    ACLMessage outbox = null;
-    ACLMessage inbox = null;
-    
-    /**
-     * Booleano que indica si el agente empieza la partida (hostea) o no.
-     */
-
-    boolean hosting;
-    
-    /**
-     * Conversation ID.
-     */
-    
-    String cId = "";
-    
-    /**
-     * Clave de sesión.
-     */
-    
-    String sessionKey = "";
-   
+public class Halcon extends Dron {
+       
     
     /**
      * Crea un nuevo Agente
      * 
      * @param aid ID del agente
-     * @param mapa Mapa que va a recorrer el agente
      * @throws Exception
      * 
      * @author Adrián Ruiz Lopez
      */
     public Halcon(AgentID aid, boolean host) throws Exception {
-        super(aid);
-        this.hosting = host;
+        super(aid, host);
         rol = "hawk";
     }
     
@@ -135,7 +82,6 @@ public class Halcon extends SuperAgent {
             
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
         }
-        
     }
     
     
@@ -150,44 +96,6 @@ public class Halcon extends SuperAgent {
     public void finalize() {
         super.finalize();
  
-    }
-    
-        
-    /**
-     * Método que crea un mensaje que se manda
-     * 
-     * 
-     * @author Mariana Orihuela Cazorla
-     */
-    
-    public void mandaMensaje(String receptor, int performativa, String content){
-        
-        outbox = new ACLMessage();
-        outbox.setSender(this.getAid());
-        outbox.setReceiver(new AgentID(receptor));
-        outbox.setPerformative(performativa);
-        outbox.setConversationId(cId);
-        outbox.setContent(content);
-        this.send(outbox);
-        
-    }
-    
-    /**
-     * Método que recibe un mensaje
-     * 
-     * 
-     * @author Mariana Orihuela Cazorla
-     */
-    
-    public void recibeMensaje(){
-        
-        try {
-                inbox = receiveACLMessage();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("No se puede recibir el mensaje");
-            }
-        
     }
     
 }
