@@ -164,8 +164,8 @@ public class Interlocutor extends SuperAgent {
             try {   
                 // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
 
-               // calculaSpawn();
-                //levantarDrones();
+                calculaSpawn();
+                levantarDrones();
                 
                 // si todo ha ido bien, notificamos a los drones de que pueden conectarse
                 
@@ -305,7 +305,7 @@ public class Interlocutor extends SuperAgent {
         
         /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
         // superior izquierda dejando 10 unidades de margen con los bordes
-        
+        System.out.println("\n Entro en calcula spawn");
         int xTemp, yTemp;
         boolean posicionCorrecta = false;
         
@@ -320,18 +320,22 @@ public class Interlocutor extends SuperAgent {
         while (!(posicionCorrecta) && (xTemp > 0) && (yTemp > 0)){
             xTemp --;
             yTemp --;
-            compruebaCasilla(xTemp,yTemp,255);
+            posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
         }
+        
         
         //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
         
-        if (compruebaCasilla(xTemp,yTemp,255)){
+        if (!compruebaCasilla(xTemp,yTemp,255)){
             cancelarPartida();
             return false;
         }
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
+            
+            //System.out.println("\n Puedo spawnear mosca en: " + xTemp + " " + yTemp);
+
         }
         
         /// HALCON
@@ -345,18 +349,19 @@ public class Interlocutor extends SuperAgent {
         while (!(posicionCorrecta) && (xTemp > 0) && (yTemp < dimY)){
             xTemp --;
             yTemp ++;
-            compruebaCasilla(xTemp,yTemp,230);
+            posicionCorrecta = compruebaCasilla(xTemp,yTemp,230);
         }
         
         //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
         
-        if (compruebaCasilla(xTemp,yTemp,230)){
+        if (!compruebaCasilla(xTemp,yTemp,230)){
             cancelarPartida();
             return false;
         }
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
+            //System.out.println("\n Puedo spawnear halcon en: " + xTemp + " " + yTemp);
         }
         
         /// RESCATE 1
@@ -369,18 +374,19 @@ public class Interlocutor extends SuperAgent {
         //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
         while (!(posicionCorrecta) && (xTemp < dimX)){
             xTemp ++;
-            compruebaCasilla(xTemp,yTemp,255);
+            posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
         }
         
         //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
         
-        if (compruebaCasilla(xTemp,yTemp,255)){
+        if (!compruebaCasilla(xTemp,yTemp,255)){
             cancelarPartida();
             return false;
         }
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
+            //System.out.println("\n Puedo spawnear rescate1 en: " + xTemp + " " + yTemp);
         }
         
         /// RESCATE 2
@@ -393,18 +399,20 @@ public class Interlocutor extends SuperAgent {
         //Mientras que la posicion no sea correcta y no se haya llegado a los limites del mundo
         while (!(posicionCorrecta) && (xTemp < dimX)){
             xTemp ++;
-            compruebaCasilla(xTemp,yTemp,255);
+            posicionCorrecta = compruebaCasilla(xTemp,yTemp,255);
         }
         
         //en caso de que compruebaCasilla devuelva false definitivo, se hace un cancel
         
-        if (compruebaCasilla(xTemp,yTemp,255)){
+        if (!compruebaCasilla(xTemp,yTemp,255)){
             cancelarPartida();
             return false;
         }
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
+            //System.out.println("\n Puedo spawnear rescate2 en: " + xTemp + " " + yTemp);
+
         }
         
         
@@ -449,7 +457,7 @@ public class Interlocutor extends SuperAgent {
                     if (x == spawns.get(i)){
                         
                         // compruebo la y y si es igual, termino
-                        if (y == spawns.get(i)){
+                        if (y == spawns.get(i+1)){
                             sePuedeSpawnear = false;
                         }
                     }
