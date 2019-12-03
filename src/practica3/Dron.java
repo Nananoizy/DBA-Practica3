@@ -114,7 +114,6 @@ public abstract class Dron extends SuperAgent {
     @Override
     public void finalize() {
         super.finalize();
- 
     }
     
     
@@ -126,8 +125,7 @@ public abstract class Dron extends SuperAgent {
      * @author Mariana Orihuela Cazorla
      */
     
-    public void mandaMensaje(String receptor, int performativa, String content){
-        
+    public void mandaMensaje(String receptor, int performativa, String content) {
         outbox = new ACLMessage();
         outbox.setSender(this.getAid());
         outbox.setReceiver(new AgentID(receptor));
@@ -135,7 +133,6 @@ public abstract class Dron extends SuperAgent {
         outbox.setConversationId(cId);
         outbox.setContent(content);
         this.send(outbox);
-        
     }
     
     /**
@@ -145,15 +142,13 @@ public abstract class Dron extends SuperAgent {
      * @author Mariana Orihuela Cazorla
      */
     
-    public void recibeMensaje(){
-        
+    public void recibeMensaje() {
         try {
-                inbox = receiveACLMessage();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("No se puede recibir el mensaje");
-            }
-        
+            inbox = receiveACLMessage();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("No se puede recibir el mensaje");
+        }
     }
     
 }

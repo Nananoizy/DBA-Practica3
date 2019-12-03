@@ -65,7 +65,7 @@ public class Mosca extends Dron {
         recibeMensaje();
               
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
-        if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+        if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
@@ -76,6 +76,30 @@ public class Mosca extends Dron {
             dimY = objeto.get("dimMaxY").asInt();
             
             mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
+            
+            // Check in
+            JsonObject objetoJSON = new JsonObject();
+            objetoJSON.add("command", "checkin");
+            objetoJSON.add("session", "master");
+            objetoJSON.add("rol", this.rol);
+            objetoJSON.add("x", posInicioX);
+            objetoJSON.add("y", posInicioY);
+            mandaMensaje("Elnath", ACLMessage.REQUEST , "");
+            
+            // Respuesta al check in
+            recibeMensaje();
+            
+            if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
+                this.cId = inbox.getConversationId();
+                objeto = Json.parse(inbox.getContent()).asObject();
+                System.out.println(objeto.get("result").asString());
+            } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
+                System.out.println("Error FAILURE\n");
+            } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
+                System.out.println("Error REFUSE\n");
+            } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
+                System.out.println("Error NOT UNDERSTOOD\n");
+            }            
         }
     }
     
