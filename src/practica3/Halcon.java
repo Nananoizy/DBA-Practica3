@@ -69,12 +69,7 @@ public class Halcon extends Dron {
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
-            JsonArray mapArray = objeto.get("map").asArray();
-            
-            for (int i = 0; i < mapArray.size() ; i++) {
-                mapaActual.add( mapArray.get(i).asInt());
-            }
-            
+
             posInicioX = objeto.get("posInicioX").asInt();
             posInicioY = objeto.get("posInicioY").asInt();
             dimX = objeto.get("dimMaxX").asInt();

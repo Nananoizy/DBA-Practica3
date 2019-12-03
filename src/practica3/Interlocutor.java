@@ -7,12 +7,18 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import org.codehaus.jettison.json.JSONArray;
 
 /**
@@ -39,7 +45,7 @@ public class Interlocutor extends SuperAgent {
     /**
      * Mapa que recorre el agente.
      */
-    ArrayList<Integer> mapaActual;   
+    BufferedImage mapaActual;   
     String nombreMapaActual;
     /**
      * Clave de sesión para hacer login y logout.
@@ -97,7 +103,6 @@ public class Interlocutor extends SuperAgent {
         super(aid);
         this.hosting = host;
         nombreMapaActual = mapa;
-        mapaActual = new ArrayList<Integer>();
         spawns = new ArrayList<Integer>();
     }
     
@@ -141,11 +146,11 @@ public class Interlocutor extends SuperAgent {
             cId = inbox.getConversationId();
             sessionKey = objeto.get("session").asString();
             
-            ///EXTRAER MAPA
-            JsonArray mapArray = objeto.get("map").asArray();
-            
-            for (int i = 0; i < mapArray.size() ; i++) {
-                mapaActual.add( mapArray.get(i).asInt());
+            try {         
+                ///EXTRAER MAPA
+                extraerTraza();
+            } catch (IOException ex) {
+                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             //DIMENSIONES DEL MAPA
@@ -154,20 +159,13 @@ public class Interlocutor extends SuperAgent {
             
             
             System.out.println("dimx: " + dimX + " dimy: " + dimY);
-            System.out.println("mapasize: " + mapArray.size());
-            int i = 0;
-            while (dimX > i) {
-                System.out.println(mapaActual.get(i));
-                i++;
-            }
-            System.out.println("i: " + i);
             
             
             try {   
                 // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
 
-                calculaSpawn();
-                levantarDrones();
+               // calculaSpawn();
+                //levantarDrones();
                 
                 // si todo ha ido bien, notificamos a los drones de que pueden conectarse
                 
@@ -202,12 +200,7 @@ public class Interlocutor extends SuperAgent {
         JsonObject objetoJSONInicio = new JsonObject();
         objetoJSONInicio.add("session", sessionKey);
         JsonArray mapaEnviado = new JsonArray();
-        
-        for (int i = 0; i < mapaActual.size() ; i++) {
-                mapaEnviado.add(mapaActual.get(i));
-        }
-        
-        objetoJSONInicio.add("map", mapaEnviado);
+
         objetoJSONInicio.add("posInicioX",spawns.get(0));
         objetoJSONInicio.add("posInicioY",spawns.get(1));
         
@@ -439,7 +432,7 @@ public class Interlocutor extends SuperAgent {
         boolean sePuedeSpawnear = true;
         
         // Suponemos que x, y, dimX y dimY empiezan en 0
-        alturaCasilla = mapaActual.get((x+1) + (dimX+1)*((dimY+1) - (Math.abs(dimY - y)+1)) - 1);
+        alturaCasilla = consultaAltura(x, y);
         
         if (alturaCasilla > alturaMax){
             sePuedeSpawnear = false;
@@ -571,7 +564,19 @@ public class Interlocutor extends SuperAgent {
             fos.write(data);
             fos.close();
             System.out.println("Traza guardada");
-   
+            
+            mapaActual = ImageIO.read(new File("mitraza.png")); /// mapaActual YA es la matriz
+    }
+    
+    /**
+     * Método que nos devuelve la altura de una determinada casilla del mapa
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public int consultaAltura(int x, int y){
+        int altura = new Color(mapaActual.getRGB(x, y)).getBlue();
+        return altura;
     }
     
     /**
