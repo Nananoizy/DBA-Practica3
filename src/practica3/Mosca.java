@@ -97,8 +97,18 @@ public class Mosca extends Dron {
                 //System.out.println("mosca: " + objeto.get("result").asString());
                 
                 datosCheckin();
-                System.out.println("fuelrate mosca: " + this.fuelrate);
                 mandaMensaje("Grupoe", ACLMessage.CONFIRM, "mosca");
+                
+                //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
+                recibeMensaje();
+                
+                //ya que sabemos a donde movernos, pedimos sensores
+                mandaMensaje("Elnath", ACLMessage.QUERY_REF, "");
+                this.replyWth = inbox.getReplyWith();
+                
+                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
+                    // interpreta los resultados de los sensores
+                }
 
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 mandaMensaje("Grupoe", ACLMessage.FAILURE, "mosca");
@@ -109,7 +119,8 @@ public class Mosca extends Dron {
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
                 mandaMensaje("Grupoe", ACLMessage.NOT_UNDERSTOOD, "mosca");
                 System.out.println("Error NOT UNDERSTOOD\n");
-            }            
+            }
+
         }
     }
     

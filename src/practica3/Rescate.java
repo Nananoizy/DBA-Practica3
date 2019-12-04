@@ -97,8 +97,12 @@ public class Rescate extends Dron {
                 //System.out.println("rescate: " + objeto.get("result").asString());
                 datosCheckin();
                 
-                System.out.println("fuelrate rescate: " + this.fuelrate);
                 mandaMensaje("Grupoe", ACLMessage.CONFIRM, "rescate");
+                
+                //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
+                //recibeMensaje();
+                
+         
                 
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 mandaMensaje("Grupoe", ACLMessage.FAILURE, "rescate");

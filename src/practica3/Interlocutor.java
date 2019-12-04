@@ -169,6 +169,14 @@ public class Interlocutor extends SuperAgent {
                 
                 // SI SE HAN LEVANTADO BIEN LOS DRONES, PUEDEN EMPEZAR A MOVERSE
                 
+                // Es un request porque le va a preguntar si puede moverse a esa siguiente casilla, si no, mandará otra coordenada
+                mandaMensaje("Grupoe_mosca", ACLMessage.REQUEST, "NW");
+                mandaMensaje("Grupoe_halcon", ACLMessage.REQUEST, "NW");
+                
+                //A los de rescate no se le dice que se muevan porque no se conocen todavia alemanes
+                //mandaMensaje("Grupoe_rescate1", ACLMessage.REQUEST, "NW");
+                //mandaMensaje("Grupoe_rescate2", ACLMessage.REQUEST, "NW");
+                
                 
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);

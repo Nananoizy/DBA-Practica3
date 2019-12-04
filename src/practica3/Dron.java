@@ -162,6 +162,11 @@ public abstract class Dron extends SuperAgent {
         outbox.setReceiver(new AgentID(receptor));
         outbox.setPerformative(performativa);
         outbox.setConversationId(cId);
+        
+        if (!replyWth.equals("")){
+            outbox.setInReplyTo(replyWth);
+        }
+        
         outbox.setContent(content);
         this.send(outbox);
     }

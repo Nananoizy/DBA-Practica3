@@ -98,8 +98,11 @@ public class Halcon extends Dron {
                 //System.out.println("halcon: "+ objeto.get("result").asString());
                 
                 datosCheckin();
-                System.out.println("fuelrate halcon: " + this.fuelrate);
                 mandaMensaje("Grupoe", ACLMessage.CONFIRM, "halcon");
+                
+                //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
+                recibeMensaje();
+                
                 
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 System.out.println("Error FAILURE\n");
