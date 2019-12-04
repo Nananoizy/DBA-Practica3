@@ -28,11 +28,6 @@ public abstract class Dron extends SuperAgent {
      */
     Estados estado;
     /**
-     * Mapa que recorre el agente.
-     */
-    ArrayList<Integer> mapaActual;   
-    String nombreMapaActual;
-    /**
      * Clave de sesión para hacer login y logout.
      */
     String key;
@@ -65,6 +60,27 @@ public abstract class Dron extends SuperAgent {
      * Clave de sesión.
      */
     String sessionKey = "";
+    /**
+     * Reply with para las conversaciones con el controlador.
+     */
+    String replyWth = "";
+    /**
+     * Cantidad de fuel que gasta el dron en cada paso.
+     */
+    float fuelrate;
+    /**
+     * Altura maxima a la que puede volar.
+     */
+    int maxlevel;
+    /**
+     * Visibilidad del gonio.
+     */
+    int visibility;
+    /**
+     * Visibilidad del infrarrojos.
+     */
+    int range;
+    
     
     
     
@@ -79,7 +95,6 @@ public abstract class Dron extends SuperAgent {
     public Dron(AgentID aid, boolean host) throws Exception {
         super(aid);
         this.hosting = host;
-        mapaActual = new ArrayList<Integer>();  
     }
     
     
@@ -116,7 +131,23 @@ public abstract class Dron extends SuperAgent {
         super.finalize();
     }
     
+    /**
+     * Método que interpreta los datos del checkin
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
     
+    public void datosCheckin(){
+        
+         JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+         
+         fuelrate = objeto.get("fuelrate").asFloat();
+         maxlevel = objeto.get("maxlevel").asInt();
+         visibility = objeto.get("visibility").asInt();
+         range = objeto.get("range").asInt();
+         
+    }
     
     /**
      * Método que crea un mensaje que se manda

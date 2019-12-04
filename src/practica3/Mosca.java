@@ -69,7 +69,6 @@ public class Mosca extends Dron {
             this.cId = inbox.getConversationId();
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             sessionKey = objeto.get("session").asString();
-
             posInicioX = objeto.get("posInicioX").asInt();
             posInicioY = objeto.get("posInicioY").asInt();
             dimX = objeto.get("dimMaxX").asInt();
@@ -80,24 +79,35 @@ public class Mosca extends Dron {
             // Check in
             JsonObject objetoJSON = new JsonObject();
             objetoJSON.add("command", "checkin");
-            objetoJSON.add("session", "master");
+            objetoJSON.add("session", sessionKey);
             objetoJSON.add("rol", this.rol);
             objetoJSON.add("x", posInicioX);
             objetoJSON.add("y", posInicioY);
-            mandaMensaje("Elnath", ACLMessage.REQUEST , "");
+            
+            String content = objetoJSON.toString();
+            mandaMensaje("Elnath", ACLMessage.REQUEST , content);
             
             // Respuesta al check in
             recibeMensaje();
             
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
+                this.replyWth = inbox.getReplyWith();
                 objeto = Json.parse(inbox.getContent()).asObject();
-                System.out.println(objeto.get("result").asString());
+                //System.out.println("mosca: " + objeto.get("result").asString());
+                
+                datosCheckin();
+                System.out.println("fuelrate mosca: " + this.fuelrate);
+                mandaMensaje("Grupoe", ACLMessage.CONFIRM, "mosca");
+
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
+                mandaMensaje("Grupoe", ACLMessage.FAILURE, "mosca");
                 System.out.println("Error FAILURE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
+                mandaMensaje("Grupoe", ACLMessage.REFUSE, "mosca");
                 System.out.println("Error REFUSE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
+                mandaMensaje("Grupoe", ACLMessage.NOT_UNDERSTOOD, "mosca");
                 System.out.println("Error NOT UNDERSTOOD\n");
             }            
         }

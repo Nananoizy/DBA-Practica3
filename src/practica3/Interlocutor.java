@@ -167,7 +167,8 @@ public class Interlocutor extends SuperAgent {
                 calculaSpawn();
                 levantarDrones();
                 
-                // si todo ha ido bien, notificamos a los drones de que pueden conectarse
+                // SI SE HAN LEVANTADO BIEN LOS DRONES, PUEDEN EMPEZAR A MOVERSE
+                
                 
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
@@ -189,6 +190,7 @@ public class Interlocutor extends SuperAgent {
      */
     public void levantarDrones() throws Exception{
         
+        System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
         mosca = new Mosca(new AgentID("Grupoe_mosca"), true);
         halcon = new Halcon(new AgentID("Grupoe_halcon"), true);
@@ -292,6 +294,18 @@ public class Interlocutor extends SuperAgent {
             cancelarPartida();
         }
         
+        //Se comprueba que los drones han podido hacer checkin correctamente
+        for (int i = 0; i < 4; i++){
+            recibeMensaje();  
+            if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+                System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
+            }
+            else{
+                System.out.println ("No se ha podido hacer checkin de: " + inbox.getContent() + ", cancelando partida");
+                cancelarPartida();
+            }
+        }
+        
     }
     
     /**
@@ -305,7 +319,7 @@ public class Interlocutor extends SuperAgent {
         
         /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
         // superior izquierda dejando 10 unidades de margen con los bordes
-        System.out.println("\n Entro en calcula spawn");
+        //System.out.println("\n Entro en calcula spawn");
         int xTemp, yTemp;
         boolean posicionCorrecta = false;
         
