@@ -34,8 +34,8 @@ public class Halcon extends Dron {
      * 
      * @author Adrián Ruiz Lopez
      */
-    public Halcon(AgentID aid, boolean host) throws Exception {
-        super(aid, host);
+    public Halcon(AgentID aid, boolean host,String nombreArchivo) throws Exception {
+        super(aid, host,nombreArchivo);
         rol = "hawk";
     }
     

@@ -7,12 +7,16 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import org.codehaus.jettison.json.JSONArray;
 
 /**
@@ -81,6 +85,10 @@ public abstract class Dron extends SuperAgent {
      */
     int range;
     
+    /**
+     * Mapa Completo.
+    */
+    BufferedImage mapa;
     
     
     
@@ -92,9 +100,10 @@ public abstract class Dron extends SuperAgent {
      * 
      * @author David Infante Casas
      */
-    public Dron(AgentID aid, boolean host) throws Exception {
+    public Dron(AgentID aid, boolean host, String nombreArchivo) throws Exception {
         super(aid);
         this.hosting = host;
+        this.cargarMapa(nombreArchivo);
     }
     
     
@@ -186,5 +195,70 @@ public abstract class Dron extends SuperAgent {
             System.out.println("No se puede recibir el mensaje");
         }
     }
+    
+    
+     
+    /**
+    * Método que carga el mapa de disco
+    * 
+    * 
+    * @author Adrián Ruiz Lopez
+    */
+    public void cargarMapa( String urlArchivo ) throws IOException{
+        mapa = ImageIO.read( new File(urlArchivo) );
+    }
+    
+     
+    /**
+    * Método que consulta una altura en el mapa
+    * 
+    * 
+    * @author Adrián Ruiz Lopez
+    */
+    public int consultaAltura(int x, int y){
+        int altura = new Color(mapa.getRGB(x, y)).getBlue();
+        return altura;
+    }
+    
+    
+    /**
+    * Método DE EJEMPLO QUE NOS SERVIRÁ DESPUES (SI NO BORRAR)
+    * 
+    * 
+    * @author Adrián Ruiz Lopez
+    */
+    public void metodo( String dir ){
+        
+        switch(dir){
+            case "N":
+                
+                break;
+            case "NW":
+                
+                break;
+            case "W":
+                
+                break;
+            case "S":
+                
+                break;
+            case "SE":
+                
+                break;
+            case "E":
+                
+                break;
+            case "NE":
+                
+                break;
+            case "SW":
+                
+                break;
+        }
+        
+        
+    }
+    
+    
     
 }

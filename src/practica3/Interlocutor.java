@@ -200,10 +200,10 @@ public class Interlocutor extends SuperAgent {
         
         System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
-        mosca = new Mosca(new AgentID("Grupoe_mosca"), true);
-        halcon = new Halcon(new AgentID("Grupoe_halcon"), true);
-        rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true);
-        rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true);
+        mosca = new Mosca(new AgentID("Grupoe_mosca"), true, nombreMapaActual+".png");
+        halcon = new Halcon(new AgentID("Grupoe_halcon"), true, nombreMapaActual+".png");
+        rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true, nombreMapaActual+".png");
+        rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true, nombreMapaActual+".png");
         
         // ELEMENTOS DE LA CONEXION
         
@@ -590,12 +590,12 @@ public class Interlocutor extends SuperAgent {
             for (int i = 0; i < data.length; i++){
                 data[i] = (byte) ja.get(i).asInt();
             }
-            FileOutputStream fos = new FileOutputStream("mitraza.png");
+            FileOutputStream fos = new FileOutputStream(nombreMapaActual+".png");
             fos.write(data);
             fos.close();
             System.out.println("Traza guardada");
             
-            mapaActual = ImageIO.read(new File("mitraza.png")); /// mapaActual YA es la matriz
+            mapaActual = ImageIO.read(new File(nombreMapaActual+".png")); /// mapaActual YA es la matriz
     }
     
     /**

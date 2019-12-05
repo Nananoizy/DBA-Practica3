@@ -34,8 +34,8 @@ public class Mosca extends Dron {
      * 
      * @author David Infante Casas
      */
-    public Mosca(AgentID aid, boolean host) throws Exception {
-        super(aid, host);
+    public Mosca(AgentID aid, boolean host,String nombreArchivo) throws Exception {
+        super(aid, host,nombreArchivo);
         rol = "fly";
     }
     

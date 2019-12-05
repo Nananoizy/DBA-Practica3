@@ -34,8 +34,8 @@ public class Rescate extends Dron {
      * 
      * @author David Infante Casas
      */
-    public Rescate(AgentID aid, boolean host) throws Exception {
-        super(aid, host);
+    public Rescate(AgentID aid, boolean host, String nombreArchivo) throws Exception {
+        super(aid, host,nombreArchivo);
         rol = "rescue";
     }
     
