@@ -62,7 +62,7 @@ public class Mosca extends Dron {
     @Override
     public void execute() {        
  
-        recibeMensaje();
+        recibeMensaje("primer mensaje de levantar mosca");
               
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
@@ -74,9 +74,36 @@ public class Mosca extends Dron {
             dimX = objeto.get("dimMaxX").asInt();
             dimY = objeto.get("dimMaxY").asInt();
             
-            mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
+            // Confirmamos al interlocutor que ha recibido la orden.
+            mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM , "");
+             // Mandamos el mesnaje al interlocutor y al controlador
+            checkIn(objeto);
+            online = true;
+        }
+        
+        // cargar percepciones (como halcon?)
+        
+        while(online){
+            ///////////////////////////////////////////
+                
+            // COMPORTAMIENTO EN TIMEPO DE RESCATE.            
             
-            // Check in
+            /////////////////////////////////////////////
+            online = false;
+        }
+        
+        
+    }
+    
+    
+    
+    /**
+     * Manda el mensaje de check in al interlocutor y al controlador
+     * 
+     * @author Mariana Orihuela Cazorla
+     * @author Adrian Ruiz Lopez
+     */
+    public void checkIn( JsonObject objeto ){
             JsonObject objetoJSON = new JsonObject();
             objetoJSON.add("command", "checkin");
             objetoJSON.add("session", sessionKey);
@@ -88,7 +115,7 @@ public class Mosca extends Dron {
             mandaMensaje("Elnath", ACLMessage.REQUEST , content);
             
             // Respuesta al check in
-            recibeMensaje();
+            recibeMensaje("mensaje de check in de mosca");
             
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
@@ -97,31 +124,23 @@ public class Mosca extends Dron {
                 //System.out.println("mosca: " + objeto.get("result").asString());
                 
                 datosCheckin();
-                mandaMensaje("Grupoe", ACLMessage.CONFIRM, "mosca");
-                
-                //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
-                recibeMensaje();
-                
-                //ya que sabemos a donde movernos, pedimos sensores
-                mandaMensaje("Elnath", ACLMessage.QUERY_REF, "");
-                this.replyWth = inbox.getReplyWith();
-                
-                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
-                    // interpreta los resultados de los sensores
-                }
+                //Enviamos al interlocutor que el check si ha sido correcto.
+                mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "mosca");
 
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
-                mandaMensaje("Grupoe", ACLMessage.FAILURE, "mosca");
+                mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "mosca");
                 System.out.println("Error FAILURE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
-                mandaMensaje("Grupoe", ACLMessage.REFUSE, "mosca");
+                mandaMensaje(nombreInterlocutor, ACLMessage.REFUSE, "mosca");
                 System.out.println("Error REFUSE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
-                mandaMensaje("Grupoe", ACLMessage.NOT_UNDERSTOOD, "mosca");
+                mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "mosca");
                 System.out.println("Error NOT UNDERSTOOD\n");
             }
-
-        }
+    
+    
+    
+    
     }
     
     

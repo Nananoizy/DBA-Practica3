@@ -90,6 +90,34 @@ public abstract class Dron extends SuperAgent {
     */
     BufferedImage mapa;
     
+    /**
+     * Nombre del interlocutor.
+     */
+    String nombreInterlocutor = "Grupoe";
+    
+    /**
+     * variable que indica que esta en funcionamiento.
+     */
+    boolean online;
+    
+    /**
+     * Posicion a la que tiene que ir.
+     */
+    int nextPosX,nextPosY;
+    
+    /**
+     *  PERCEPCIONES
+     */
+    JsonObject gps;
+    JsonArray infrared;
+    JsonArray awacs;
+    JsonObject gonio;
+    int fuel;
+    boolean goal;
+    String status; // Y ESTE STATUS?
+    int torescue; // ni idea de que es tamapoco
+    double energy; // ni idea
+    boolean cancel; // ni idea
     
     
     /**
@@ -187,12 +215,12 @@ public abstract class Dron extends SuperAgent {
      * @author Mariana Orihuela Cazorla
      */
     
-    public void recibeMensaje() {
+    public void recibeMensaje( String cadena) {
         try {
             inbox = receiveACLMessage();
         } catch (InterruptedException ex) {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("No se puede recibir el mensaje");
+            System.out.println("No se puede recibir el mensaje" + cadena);
         }
     }
     
