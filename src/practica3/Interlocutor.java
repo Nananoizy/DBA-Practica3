@@ -88,6 +88,10 @@ public class Interlocutor extends SuperAgent {
      */
     
     String sessionKey = "";
+    
+    
+    
+    boolean online;
    
     
     /**
@@ -168,19 +172,22 @@ public class Interlocutor extends SuperAgent {
                 levantarDrones();
                 
                 // SI SE HAN LEVANTADO BIEN LOS DRONES, PUEDEN EMPEZAR A MOVERSE
-                
-                // Es un request porque le va a preguntar si puede moverse a esa siguiente casilla, si no, mandará otra coordenada
-                mandaMensaje("Grupoe_mosca", ACLMessage.REQUEST, "NW");
-                mandaMensaje("Grupoe_halcon", ACLMessage.REQUEST, "NW");
-                
-                //A los de rescate no se le dice que se muevan porque no se conocen todavia alemanes
-                //mandaMensaje("Grupoe_rescate1", ACLMessage.REQUEST, "NW");
-                //mandaMensaje("Grupoe_rescate2", ACLMessage.REQUEST, "NW");
-                
+                online = false;
                 
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            // BUCLE CORRESPONDIENE A LA PARTE DE RESCATE:
+            while ( online ){
+                recibeMensaje();
+                AgentID receptor = inbox.getReceiver();
+                
+                //deberiamos discintiguir quien le estan enviando el mensaje e ir realizando las diferentes acciones.
+                online = false;
+            }
+            
+            
             
             cancelarPartida();
             

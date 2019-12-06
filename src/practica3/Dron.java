@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -247,6 +248,52 @@ public abstract class Dron extends SuperAgent {
         int altura = new Color(mapa.getRGB(x, y)).getBlue();
         return altura;
     }
+    
+    
+    /**
+     * Realiza las percepciones con el controlador
+     * 
+     * @author Adrian Ruiz Lopez
+     */
+    public void cargarPercepciones(){
+        mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
+        recibeMensaje("mensaje de pedirPercepciones");
+        
+        if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
+            JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+            JsonObject result =  objeto.get("result").asObject();
+            gps = result.get("gps").asObject();
+            infrared = result.get("infrared").asArray();
+            gonio = result.get("gonio").asObject();
+            fuel = result.get("fuel").asInt();
+            goal = result.get("goal").asBoolean();
+            status = result.get("status").asString();
+            awacs = result.get("awacs").asArray();
+            torescue = result.get("torescue").asInt();
+            energy = result.get("energy").asDouble();
+            cancel =result.get("cancel").asBoolean();
+            /*
+            System.out.println("GPS -> "+gps);
+            System.out.println("INFRAROJOS -> "+infrared);
+            System.out.println("GONIO -> "+ gonio);
+            System.out.println("FUEL -> "+ fuel);
+            System.out.println("GOAL -> "+ goal);
+            System.out.println("STATUS -> "+ status);
+            System.out.println("AWACS -> "+ awacs);
+            System.out.println("TORESCUE -> "+ torescue);
+            System.out.println("ENERGY -> "+ energy);
+            System.out.println("CANCEL -> "+ cancel);
+            */
+           // System.out.println("INFRAROJOS -> "+infrared);
+        }
+        
+    }
+    
+
+    
+    
+    
+    
     
     
     /**
