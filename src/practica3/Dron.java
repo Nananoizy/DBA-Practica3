@@ -290,6 +290,75 @@ public abstract class Dron extends SuperAgent {
     }
     
 
+    /*
+    * Recorre el sensor de inflarojos y decuelve las posiciones de los alemanes
+    */
+    public void obtenerAlemanesInfrarojos(){
+        List<JsonValue> lista = infrared.values();       
+        List<Integer> posi = new ArrayList<Integer>();
+        System.out.println("N=" + range);
+        int anchura = range-1;
+        int radio = anchura/2;
+        
+        for( int y=0;y<range;y++){
+            for(int x=0;x<range;x++){
+                
+                if( lista.get((y*anchura)+x).asInt() == 1 ){
+                       posi.add(x);
+                       posi.add(y);
+                }
+                if ( y==radio && x== radio ) System.out.print("D ");
+                else System.out.print(lista.get((y*anchura)+x) + " ");
+            }
+            System.out.println("");
+        }
+        
+        System.out.println(gps);
+        System.out.println(posi);
+        
+        
+        for(int i=0; i<posi.size();i+=2){
+            int x = posi.get(i);
+            int y = posi.get(i+1);
+            
+            
+            if( x<radio && y<radio ){
+                x = gps.get("x").asInt() - Math.abs(x-radio);
+                y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+            }else if ( x>radio && y<radio){
+                x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+            }else if ( x<radio && y>radio ){
+                x = gps.get("x").asInt() -  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+            }else if ( x>radio && y>radio ){
+                x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+            }else if ( x==radio ){
+                x = gps.get("x").asInt();
+                if( y < radio ){
+                    y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+                }else if ( y > radio ){
+                    y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+                }else{
+                    y = gps.get("y").asInt();
+                }
+            }else if ( y==radio ){
+                y = gps.get("y").asInt();
+                if( x < radio ){
+                    x = gps.get("x").asInt() -  Math.abs(x-radio) ;
+                }else if ( x > radio ){
+                    x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                }else{
+                    x = gps.get("x").asInt();
+                }
+            }
+            
+            System.out.println("Aleman -> (" + x + "," + y + ")" );
+            
+        }
+
+    }// fin obetenerAlemanesInfrarojos
     
     
     

@@ -166,82 +166,9 @@ public class Halcon extends Dron {
  
     }
     
-    
-    
 
-    public void obtenerAlemanesInfrarojos(){
-        List<JsonValue> lista = infrared.values();
-        
-        int numeroAlemanesDetectados = 0;
-        for( int i=0;i<lista.size();i++){
-           if ( lista.get(i).asInt() == 1){
-            numeroAlemanesDetectados++;
-            }
-        }
-        
-        List<Integer> posi = new ArrayList<Integer>();
-        
-        for( int y=0;y<41;y++){
-            for(int x=0;x<41;x++){
-                if( lista.get((y*40)+x).asInt() == 1 ){
-                       posi.add(x);
-                       posi.add(y);
-                }
-            }
-        }
-        System.out.println(gps);
-        System.out.println(posi);
-        
-        for(int i=0; i<posi.size();i+=2){
-            int x = posi.get(i);
-            int y = posi.get(i+1);
-            
-            if( x<20 && y<20 ){
-                x = gps.get("x").asInt() - x;
-                y = gps.get("y").asInt() - y;
-            }else if ( x>20 && y<20){
-                x = gps.get("x").asInt() + x;
-                y = gps.get("y").asInt() - y;
-            }else if ( x<20 && y>20 ){
-                x = gps.get("x").asInt() - x;
-                y = gps.get("y").asInt() + y;
-            }else if ( x>20 && y>20 ){
-                x = gps.get("x").asInt() + x;
-                y = gps.get("y").asInt() + y;
-            }else if ( x==20 ){
-                x = gps.get("x").asInt();
-                if( y < 20 ){
-                    y = gps.get("y").asInt() - y;
-                }else if ( y > 20 ){
-                    y = gps.get("y").asInt() + y;
-                }else{
-                    y = gps.get("y").asInt();
-                }
-            }else if ( y==20 ){
-                y = gps.get("y").asInt();
-                if( x < 20 ){
-                    x = gps.get("x").asInt() - x;
-                }else if ( x > 20 ){
-                    x = gps.get("x").asInt() + x;
-                }else{
-                    x = gps.get("x").asInt();
-                }
-            }
-            
-            System.out.println("Aleman -> (" + x + "," + y + ")" );
-            
-        }
-        
-        
-        
-        
-       
-
-
-
-    }
     
     
     
     
-}
+}// FIN CLASE HALCON
