@@ -98,12 +98,10 @@ public class Rescate extends Dron {
                 datosCheckin();
                 
                 mandaMensaje("Grupoe", ACLMessage.CONFIRM, "rescate");
-                
+                online = true;
                 //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
                 //recibeMensaje();
-                
-         
-                
+                  
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 mandaMensaje("Grupoe", ACLMessage.FAILURE, "rescate");
                 System.out.println("Error FAILURE\n");

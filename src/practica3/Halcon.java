@@ -38,6 +38,7 @@ public class Halcon extends Dron {
     public Halcon(AgentID aid, boolean host,String nombreArchivo) throws Exception {
         super(aid, host,nombreArchivo);
         rol = "hawk";
+        nombreDron = "halcon";
     }
     
     
@@ -81,18 +82,39 @@ public class Halcon extends Dron {
             
             // Mandamos el mesnaje al interlocutor y al controlador
             checkIn(objeto);
-            online = true;
-            
+                 
         }
         
-        //La primera vez, pedimos percepciones por primera vez:
-        cargarPercepciones();
-        obtenerAlemanesInfrarojos();
+        //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
+        recibeMensaje("todos los drones levantados");
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            online = true;
+        }
+        else
+            online = false;
+        
+        if (online){
+           //La primera vez, pedimos percepciones por primera vez:
+            cargarPercepciones();
+            //obtenerAlemanesInfrarojos();
+        }
                 
         // Una vez se ha inicializado continuamos en el bucle:
         while( online ){
             
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
+            if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == posInicioX) && (posActualY == posInicioY))){
+                pedirSiguientePosicion();
+                recibeMensaje("recibir siguiente posicion");
+                
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
+                nextPosX = objeto.get("irAX").asInt();
+                nextPosY = objeto.get("irAY").asInt();
+                
+                System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+            }
+            
             // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
                     // SI TIENE ALEMANES, MANDA UN MENSAJE AL INTERLOCUTOR Y ESPERA A QUE LE CONTESTE
@@ -128,17 +150,19 @@ public class Halcon extends Dron {
             mandaMensaje("Elnath", ACLMessage.REQUEST , content);
             
             // Respuesta al check in
-            recibeMensaje("mensaje se checkIN de halcon");
+            recibeMensaje("mensaje de checkIN de halcon");
             
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
                 objeto = Json.parse(inbox.getContent()).asObject();
+                System.out.println("Checkin halcon: " + objeto.get("result").asString());
+                posActualX = posInicioX;
+                posActualY = posInicioY;
                 
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "halcon");
-                   
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 System.out.println("Error FAILURE\n");
                 mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "halcon");

@@ -171,8 +171,6 @@ public class Interlocutor extends SuperAgent {
                 calculaSpawn();
                 levantarDrones();
                 
-                // SI SE HAN LEVANTADO BIEN LOS DRONES, PUEDEN EMPEZAR A MOVERSE
-                online = false;
                 
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
@@ -181,7 +179,11 @@ public class Interlocutor extends SuperAgent {
             // BUCLE CORRESPONDIENE A LA PARTE DE RESCATE:
             while ( online ){
                 recibeMensaje();
-                AgentID receptor = inbox.getReceiver();
+                //AgentID receptor = inbox.getReceiver();
+                
+                if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){
+                    
+                }
                 
                 //deberiamos discintiguir quien le estan enviando el mensaje e ir realizando las diferentes acciones.
                 online = false;
@@ -309,17 +311,28 @@ public class Interlocutor extends SuperAgent {
             cancelarPartida();
         }
         
+        int checked = 0;
         //Se comprueba que los drones han podido hacer checkin correctamente
         for (int i = 0; i < 4; i++){
             recibeMensaje();  
             if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
                 System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
+                checked++;
             }
             else{
                 System.out.println ("No se ha podido hacer checkin de: " + inbox.getContent() + ", cancelando partida");
                 cancelarPartida();
             }
         }
+        
+        if (checked == 4){
+            System.out.println ("Todos los drones operativos");
+            mandaMensaje("Grupoe_mosca", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe_halcon", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe_rescate1", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe_rescate2", ACLMessage.CONFIRM, "");
+        }
+       
         
     }
     
@@ -603,6 +616,35 @@ public class Interlocutor extends SuperAgent {
             System.out.println("Traza guardada");
             
             mapaActual = ImageIO.read(new File(nombreMapaActual+".png")); /// mapaActual YA es la matriz
+    }
+    
+    
+    /**
+     * Método que nos devuelve la dirección en la que tiene que ir el dron que pregunte
+     * 
+     * @author Mariana Orihuela Cazorla
+     * @param x: posicion actual x del dron
+     * @param y: posicion actual y del dron
+     * @param nombreDron: nombre del dron que pide dirección
+     */
+    public void respondeDireccion(int x, int y, String nombreDron){
+        // calcula dependiendo de dónde están los demás drones, a dónde tiene que ir el dron actual
+        
+        int irAX = -1;
+        int irAY = -1;
+        JsonObject objetoJSON = new JsonObject();
+        
+        if (nombreDron == "halcon"){
+            irAX = dimX - 49;
+            irAY = 49;
+            
+            objetoJSON.add("irAX",irAX);
+            objetoJSON.add("irAY",irAY);   
+            String mensaje = objetoJSON.toString();
+        
+            mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, mensaje);
+        }
+        
     }
     
     /**

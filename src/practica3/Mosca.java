@@ -37,6 +37,7 @@ public class Mosca extends Dron {
     public Mosca(AgentID aid, boolean host,String nombreArchivo) throws Exception {
         super(aid, host,nombreArchivo);
         rol = "fly";
+        nombreDron = "mosca";
     }
     
     
@@ -78,10 +79,23 @@ public class Mosca extends Dron {
             mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM , "");
              // Mandamos el mesnaje al interlocutor y al controlador
             checkIn(objeto);
-            online = true;
+            
         }
         
-        // cargar percepciones (como halcon?)
+        //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
+        recibeMensaje("todos los drones levantados");
+        
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
+            online = true;
+        }
+        else
+            online = false;
+        
+        // cargamos las percepciones
+        
+        if (online){
+            cargarPercepciones();
+        }
         
         while(online){
             ///////////////////////////////////////////
@@ -121,12 +135,13 @@ public class Mosca extends Dron {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
                 objeto = Json.parse(inbox.getContent()).asObject();
-                //System.out.println("mosca: " + objeto.get("result").asString());
+                posActualX = posInicioX;
+                posActualY = posInicioY;
+                System.out.println("Checkin mosca: " + objeto.get("result").asString());
                 
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "mosca");
-
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "mosca");
                 System.out.println("Error FAILURE\n");
@@ -136,10 +151,7 @@ public class Mosca extends Dron {
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
                 mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "mosca");
                 System.out.println("Error NOT UNDERSTOOD\n");
-            }
-    
-    
-    
+            } 
     
     }
     

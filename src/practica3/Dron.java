@@ -97,9 +97,19 @@ public abstract class Dron extends SuperAgent {
     String nombreInterlocutor = "Grupoe";
     
     /**
+     * Nombre del dron.
+     */
+    String nombreDron;
+    
+    /**
      * variable que indica que esta en funcionamiento.
      */
-    boolean online;
+    boolean online = false;
+    
+    /**
+     * Posicion a la que tiene que ir.
+     */
+    int posActualX,posActualY;
     
     /**
      * Posicion a la que tiene que ir.
@@ -133,6 +143,8 @@ public abstract class Dron extends SuperAgent {
         super(aid);
         this.hosting = host;
         this.cargarMapa(nombreArchivo);
+        this.nextPosX = -1;
+        this.nextPosY = -1;
     }
     
     
@@ -210,6 +222,27 @@ public abstract class Dron extends SuperAgent {
     }
     
     /**
+     * Método que ejecuta el dron para preguntar acerca de la siguiente posición a la que moverse
+     * 
+     * 
+     * @author Mariana Orihuela Cazorla
+     */
+    
+    public void pedirSiguientePosicion() {
+
+        JsonObject objetoJSON = new JsonObject();
+        objetoJSON.add("dron", nombreDron);
+        objetoJSON.add("posX", posActualX);
+        objetoJSON.add("posY", posActualY);
+
+        String content = objetoJSON.toString();
+        
+        System.out.println("pidiendo siguiente posicion" + nombreDron);
+            
+        mandaMensaje(nombreInterlocutor, ACLMessage.QUERY_REF, content);
+    }
+    
+    /**
      * Método que recibe un mensaje
      * 
      * 
@@ -257,7 +290,7 @@ public abstract class Dron extends SuperAgent {
      */
     public void cargarPercepciones(){
         mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
-        recibeMensaje("mensaje de pedirPercepciones");
+        recibeMensaje("mensaje de pedir Percepciones");
         
         if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
