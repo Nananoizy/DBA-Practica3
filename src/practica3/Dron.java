@@ -237,7 +237,7 @@ public abstract class Dron extends SuperAgent {
 
         String content = objetoJSON.toString();
         
-        System.out.println("pidiendo siguiente posicion" + nombreDron);
+        System.out.println("Pidiendo siguiente posicion " + nombreDron);
             
         mandaMensaje(nombreInterlocutor, ACLMessage.QUERY_REF, content);
     }

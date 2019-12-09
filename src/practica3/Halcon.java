@@ -106,7 +106,7 @@ public class Halcon extends Dron {
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == posInicioX) && (posActualY == posInicioY))){
                 pedirSiguientePosicion();
-                recibeMensaje("recibir siguiente posicion");
+                recibeMensaje("Recibir siguiente posicion");
                 
                 JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
                 nextPosX = objeto.get("irAX").asInt();

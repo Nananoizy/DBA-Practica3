@@ -183,13 +183,20 @@ public class Interlocutor extends SuperAgent {
                 
                 if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){
                     
+                    int veaX, veaY;
+                    String nombreDron;
+                    objeto = Json.parse(inbox.getContent()).asObject();
+                    nombreDron = objeto.get("dron").asString();
+                    veaX = objeto.get("posX").asInt();
+                    veaY = objeto.get("posY").asInt();
+
+                    respondeDireccion(veaX, veaY, nombreDron);
+                    online = false;
                 }
                 
                 //deberiamos discintiguir quien le estan enviando el mensaje e ir realizando las diferentes acciones.
-                online = false;
+                
             }
-            
-            
             
             cancelarPartida();
             
@@ -641,7 +648,8 @@ public class Interlocutor extends SuperAgent {
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   
             String mensaje = objetoJSON.toString();
-        
+            
+            System.out.println("Respondemos a halcon");
             mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, mensaje);
         }
         
