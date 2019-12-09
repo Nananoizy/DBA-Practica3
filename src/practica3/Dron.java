@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -90,6 +91,34 @@ public abstract class Dron extends SuperAgent {
     */
     BufferedImage mapa;
     
+    /**
+     * Nombre del interlocutor.
+     */
+    String nombreInterlocutor = "Grupoe";
+    
+    /**
+     * variable que indica que esta en funcionamiento.
+     */
+    boolean online;
+    
+    /**
+     * Posicion a la que tiene que ir.
+     */
+    int nextPosX,nextPosY;
+    
+    /**
+     *  PERCEPCIONES
+     */
+    JsonObject gps;
+    JsonArray infrared;
+    JsonArray awacs;
+    JsonObject gonio;
+    int fuel;
+    boolean goal;
+    String status; // Y ESTE STATUS?
+    int torescue; // ni idea de que es tamapoco
+    double energy; // ni idea
+    boolean cancel; // ni idea
     
     
     /**
@@ -187,12 +216,12 @@ public abstract class Dron extends SuperAgent {
      * @author Mariana Orihuela Cazorla
      */
     
-    public void recibeMensaje() {
+    public void recibeMensaje( String cadena) {
         try {
             inbox = receiveACLMessage();
         } catch (InterruptedException ex) {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("No se puede recibir el mensaje");
+            System.out.println("No se puede recibir el mensaje" + cadena);
         }
     }
     
@@ -219,6 +248,121 @@ public abstract class Dron extends SuperAgent {
         int altura = new Color(mapa.getRGB(x, y)).getBlue();
         return altura;
     }
+    
+    
+    /**
+     * Realiza las percepciones con el controlador
+     * 
+     * @author Adrian Ruiz Lopez
+     */
+    public void cargarPercepciones(){
+        mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
+        recibeMensaje("mensaje de pedirPercepciones");
+        
+        if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
+            JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+            JsonObject result =  objeto.get("result").asObject();
+            gps = result.get("gps").asObject();
+            infrared = result.get("infrared").asArray();
+            gonio = result.get("gonio").asObject();
+            fuel = result.get("fuel").asInt();
+            goal = result.get("goal").asBoolean();
+            status = result.get("status").asString();
+            awacs = result.get("awacs").asArray();
+            torescue = result.get("torescue").asInt();
+            energy = result.get("energy").asDouble();
+            cancel =result.get("cancel").asBoolean();
+            /*
+            System.out.println("GPS -> "+gps);
+            System.out.println("INFRAROJOS -> "+infrared);
+            System.out.println("GONIO -> "+ gonio);
+            System.out.println("FUEL -> "+ fuel);
+            System.out.println("GOAL -> "+ goal);
+            System.out.println("STATUS -> "+ status);
+            System.out.println("AWACS -> "+ awacs);
+            System.out.println("TORESCUE -> "+ torescue);
+            System.out.println("ENERGY -> "+ energy);
+            System.out.println("CANCEL -> "+ cancel);
+            */
+           // System.out.println("INFRAROJOS -> "+infrared);
+        }
+        
+    }
+    
+
+    /*
+    * Recorre el sensor de inflarojos y decuelve las posiciones de los alemanes
+    */
+    public void obtenerAlemanesInfrarojos(){
+        List<JsonValue> lista = infrared.values();       
+        List<Integer> posi = new ArrayList<Integer>();
+        System.out.println("N=" + range);
+        int anchura = range-1;
+        int radio = anchura/2;
+        
+        for( int y=0;y<range;y++){
+            for(int x=0;x<range;x++){
+                
+                if( lista.get((y*anchura)+x).asInt() == 1 ){
+                       posi.add(x);
+                       posi.add(y);
+                }
+                if ( y==radio && x== radio ) System.out.print("D ");
+                else System.out.print(lista.get((y*anchura)+x) + " ");
+            }
+            System.out.println("");
+        }
+        
+        System.out.println(gps);
+        System.out.println(posi);
+        
+        
+        for(int i=0; i<posi.size();i+=2){
+            int x = posi.get(i);
+            int y = posi.get(i+1);
+            
+            
+            if( x<radio && y<radio ){
+                x = gps.get("x").asInt() - Math.abs(x-radio);
+                y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+            }else if ( x>radio && y<radio){
+                x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+            }else if ( x<radio && y>radio ){
+                x = gps.get("x").asInt() -  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+            }else if ( x>radio && y>radio ){
+                x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+            }else if ( x==radio ){
+                x = gps.get("x").asInt();
+                if( y < radio ){
+                    y = gps.get("y").asInt() -  Math.abs(y-radio) ;
+                }else if ( y > radio ){
+                    y = gps.get("y").asInt() +  Math.abs(y-radio) ;
+                }else{
+                    y = gps.get("y").asInt();
+                }
+            }else if ( y==radio ){
+                y = gps.get("y").asInt();
+                if( x < radio ){
+                    x = gps.get("x").asInt() -  Math.abs(x-radio) ;
+                }else if ( x > radio ){
+                    x = gps.get("x").asInt() +  Math.abs(x-radio) ;
+                }else{
+                    x = gps.get("x").asInt();
+                }
+            }
+            
+            System.out.println("Aleman -> (" + x + "," + y + ")" );
+            
+        }
+
+    }// fin obetenerAlemanesInfrarojos
+    
+    
+    
+    
     
     
     /**

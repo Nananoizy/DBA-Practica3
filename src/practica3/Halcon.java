@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -62,7 +63,7 @@ public class Halcon extends Dron {
     @Override
     public void execute() {        
  
-        recibeMensaje();
+        recibeMensaje(" primer mensaje en levantar el halcon");
         
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
@@ -75,8 +76,45 @@ public class Halcon extends Dron {
             dimX = objeto.get("dimMaxX").asInt();
             dimY = objeto.get("dimMaxY").asInt();
             
-            mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
+            // Confirmamos al interlocutor que ha recibido la orden.
+            mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM , "");
             
+            // Mandamos el mesnaje al interlocutor y al controlador
+            checkIn(objeto);
+            online = true;
+            
+        }
+        
+        //La primera vez, pedimos percepciones por primera vez:
+        cargarPercepciones();
+        obtenerAlemanesInfrarojos();
+                
+        // Una vez se ha inicializado continuamos en el bucle:
+        while( online ){
+            
+            // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
+            // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
+                // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
+                    // SI TIENE ALEMANES, MANDA UN MENSAJE AL INTERLOCUTOR Y ESPERA A QUE LE CONTESTE
+                    // SI NO TIENE ALEMANES, AVANZA
+            online = false;
+        }       
+        
+        
+        
+        
+    }
+    
+    
+    
+    /**
+     * Manda el mensaje de check in al interlocutor y al controlador
+     * 
+     * @author Mariana Orihuela Cazorla
+     * @author Adrian Ruiz Lopez
+     */
+    public void checkIn( JsonObject objeto ){
+        
             // Check in
             JsonObject objetoJSON = new JsonObject();
             objetoJSON.add("command", "checkin");
@@ -86,37 +124,34 @@ public class Halcon extends Dron {
             objetoJSON.add("y", posInicioY);
             
             String content = objetoJSON.toString();
+            // Enviamos al controlador la peticion de check in
             mandaMensaje("Elnath", ACLMessage.REQUEST , content);
             
             // Respuesta al check in
-            recibeMensaje();
+            recibeMensaje("mensaje se checkIN de halcon");
             
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
                 objeto = Json.parse(inbox.getContent()).asObject();
-                //System.out.println("halcon: "+ objeto.get("result").asString());
                 
                 datosCheckin();
-                mandaMensaje("Grupoe", ACLMessage.CONFIRM, "halcon");
-                
-                //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
-                recibeMensaje();
-                
-                
+                //Enviamos al interlocutor que el check si ha sido correcto.
+                mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "halcon");
+                   
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 System.out.println("Error FAILURE\n");
-                mandaMensaje("Grupoe", ACLMessage.FAILURE, "halcon");
+                mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
                 System.out.println("Error REFUSE\n");
-                mandaMensaje("Grupoe", ACLMessage.REFUSE, "halcon");
+                mandaMensaje(nombreInterlocutor, ACLMessage.REFUSE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
                 System.out.println("Error NOT UNDERSTOOD\n");
-                mandaMensaje("Grupoe", ACLMessage.NOT_UNDERSTOOD, "halcon");
+                mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "halcon");
             }
-        }
     }
     
+
     
     
     /**
@@ -131,4 +166,9 @@ public class Halcon extends Dron {
  
     }
     
-}
+
+    
+    
+    
+    
+}// FIN CLASE HALCON

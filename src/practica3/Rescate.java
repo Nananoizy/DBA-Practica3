@@ -62,7 +62,7 @@ public class Rescate extends Dron {
     @Override
     public void execute() {        
  
-        recibeMensaje();
+        recibeMensaje("primer mensaje en levantar la mosca");
         
         //Si se ha recibido un mensaje con la performativa inform, actualizamos los valores de nuestras variables
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
@@ -88,7 +88,7 @@ public class Rescate extends Dron {
             mandaMensaje("Elnath", ACLMessage.REQUEST , content);
             
             // Respuesta al check in
-            recibeMensaje();
+            recibeMensaje("mensaje de check in de mosca");
             
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
