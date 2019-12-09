@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import org.codehaus.jettison.json.JSONArray;
 
@@ -129,6 +130,9 @@ public abstract class Dron extends SuperAgent {
     int torescue; // ni idea de que es tamapoco
     double energy; // ni idea
     boolean cancel; // ni idea
+    
+    
+     ArrayList<Pair<Integer,Integer>> coordAleman = new ArrayList<Pair<Integer,Integer>> ();
     
     
     /**
@@ -389,12 +393,48 @@ public abstract class Dron extends SuperAgent {
             
             System.out.println("Aleman -> (" + x + "," + y + ")" );
             
+            Pair<Integer,Integer> aleman = new Pair(x,y);
+            coordAleman.add(aleman);
+            
         }
+       /*
+        for(int i=0; i<coordAleman.size();i++){
+           int px=coordAleman.get(i).getKey();
+           int py=coordAleman.get(i).getValue();
+           System.out.println("Aleman " + i + " en la coordenada x= " + px + " , y = " + py);
+        }
+        */
+            
 
     }// fin obetenerAlemanesInfrarojos
     
     
-    
+    public void mandarCoordenadas(){
+        while(coordAleman.size()>0){
+            for(int i=0;i<coordAleman.size();i++){
+                int px=coordAleman.get(i).getKey();
+                int py=coordAleman.get(i).getValue();
+                
+                JsonObject objetoJSON = new JsonObject();
+                objetoJSON.add("comando", "aniadir");
+                objetoJSON.add("posicionx",px);
+                objetoJSON.add("posiciony",py);
+                
+                String content = objetoJSON.toString();
+                
+                mandaMensaje(nombreInterlocutor, ACLMessage.REQUEST , content);
+                 
+                System.out.println("voy a mandar las coordenadas al interlocutor");
+           
+                recibeMensaje("mensaje de mandar posiciones de almanes");
+            }
+            
+              //vaciamos el vector de alemanes
+              coordAleman.clear();
+        }
+        
+      
+    }    
     
     
     

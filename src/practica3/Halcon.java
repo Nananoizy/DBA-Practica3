@@ -97,7 +97,7 @@ public class Halcon extends Dron {
         if (online){
            //La primera vez, pedimos percepciones por primera vez:
             cargarPercepciones();
-            //obtenerAlemanesInfrarojos();
+            obtenerAlemanesInfrarojos();
         }
                 
         // Una vez se ha inicializado continuamos en el bucle:
@@ -114,6 +114,8 @@ public class Halcon extends Dron {
                 
                 System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }
+            
+            mandarCoordenadas();
             
             // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
