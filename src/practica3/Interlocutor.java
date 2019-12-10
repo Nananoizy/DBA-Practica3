@@ -675,7 +675,7 @@ public class Interlocutor extends SuperAgent {
         
         System.out.println(nombreDron);
         
-        if (nombreDron.equals( "halcon")){
+        if (nombreDron.equals( "halcon" )){
             irAX = dimX - 49;
             irAY = 49;
             
@@ -683,7 +683,7 @@ public class Interlocutor extends SuperAgent {
             objetoJSON.add("irAY",irAY);   
             String mensaje = objetoJSON.toString();
             
-            System.out.println("Respondemos a halcon");
+            //System.out.println("Respondemos a halcon");
             mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, mensaje);
         }
         

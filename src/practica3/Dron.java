@@ -95,7 +95,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupo_e";
+    String nombreInterlocutor = "Grupo__e";
     
     /**
      * Nombre del dron.
@@ -288,6 +288,54 @@ public abstract class Dron extends SuperAgent {
     
     
     /**
+    * Método que calcula la direccion en la que tiene que ir el dron dado un punto de destino
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public String calculaDireccion(){
+        
+        String direccion = "";
+        
+        ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
+        
+        // Si la y es mayor y la x es igual, va al Norte
+        if (posActualX == nextPosX && posActualY < nextPosY){
+            direccion = "moveN";
+        }
+        //Si la x de destino es mayor y la y es menor, va hacia el noreste
+        else if (posActualX < nextPosX && posActualY > nextPosY){
+            direccion = "moveNE";
+        }
+        //Si la x de destino es mayor y la y es igual, va hacia el este
+        else if (posActualX < nextPosX && posActualY == nextPosY){
+            direccion = "moveE";
+        }
+        //Si la x de destino es mayor y la y es mayor, va hacia el sureste
+        else if (posActualX < nextPosX && posActualY < nextPosY){
+            direccion = "moveSE";
+        }
+        //Si la y de destino es menor y la x es igual, va hacia el sur
+        else if (posActualX == nextPosX && posActualY > nextPosY){
+            direccion = "moveS";
+        }
+        //Si la x de destino es menor y la y es mayor, va hacia el suroeste
+        else if (posActualX > nextPosX && posActualY < nextPosY){
+            direccion = "moveSW";
+        }
+        //Si la x de destino es menor y la y es igual, va hacia el oeste
+        else if (posActualX > nextPosX && posActualY == nextPosY){
+            direccion = "moveW";
+        }
+        //Si la x de destino es menor y la y es menor, va hacia el noroeste
+        else if (posActualX > nextPosX && posActualY > nextPosY){
+            direccion = "moveNW";
+        }
+
+        return direccion;
+    }
+    
+    /**
      * Realiza las percepciones con el controlador
      * 
      * @author Adrian Ruiz Lopez
@@ -333,7 +381,7 @@ public abstract class Dron extends SuperAgent {
     public void obtenerAlemanesInfrarojos(){
         List<JsonValue> lista = infrared.values();       
         List<Integer> posi = new ArrayList<Integer>();
-        System.out.println("N=" + range);
+        //System.out.println("N=" + range);
         int anchura = range-1;
         int radio = anchura/2;
         
@@ -344,10 +392,10 @@ public abstract class Dron extends SuperAgent {
                        posi.add(x);
                        posi.add(y);
                 }
-                if ( y==radio && x== radio ) System.out.print("D ");
-                else System.out.print(lista.get((y*anchura)+x) + " ");
+                //if ( y==radio && x== radio ) System.out.print("D ");
+                //else System.out.print(lista.get((y*anchura)+x) + " ");
             }
-            System.out.println("");
+            //System.out.println("");
         }
         
         System.out.println(gps);

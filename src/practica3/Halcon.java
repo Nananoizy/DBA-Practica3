@@ -112,7 +112,31 @@ public class Halcon extends Dron {
                 nextPosX = objeto.get("irAX").asInt();
                 nextPosY = objeto.get("irAY").asInt();
                 
-                System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+            }
+            else{
+                String siguienteDireccion = "";
+                siguienteDireccion = calculaDireccion();
+                
+                JsonObject objeto = new JsonObject();
+          
+                objeto.add("command",siguienteDireccion);
+                String content = objeto.toString();
+                
+                System.out.println("Me quiero mover a: " + siguienteDireccion);
+                
+                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                
+                recibeMensaje("Efectua movimiento halcon");
+                if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                     System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
+                }
+                else{
+                     System.out.println("Soy el halcon y no me he podido mover");
+                }
+                online = false;
+                
+                
             }
             
             mandarCoordenadas();
@@ -121,7 +145,7 @@ public class Halcon extends Dron {
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
                     // SI TIENE ALEMANES, MANDA UN MENSAJE AL INTERLOCUTOR Y ESPERA A QUE LE CONTESTE
                     // SI NO TIENE ALEMANES, AVANZA
-            online = false;
+            
         }       
         
         
