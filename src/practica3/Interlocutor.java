@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import org.codehaus.jettison.json.JSONArray;
 
@@ -91,7 +92,9 @@ public class Interlocutor extends SuperAgent {
     
     
     
-    boolean online;
+    boolean online=true;
+   
+    ArrayList<Pair<Integer,Integer>> coordenadaAleman = new ArrayList<Pair<Integer,Integer>> ();
    
     
     /**
@@ -191,6 +194,18 @@ public class Interlocutor extends SuperAgent {
                     veaY = objeto.get("posY").asInt();
 
                     respondeDireccion(veaX, veaY, nombreDron);
+                    //online = false;
+                }
+                
+                recibeMensaje();
+                
+                 if (inbox.getPerformativeInt() == ACLMessage.REQUEST){
+                    
+                    objeto = Json.parse(inbox.getContent()).asObject();
+                    recibirCoordenadas(objeto);
+                    
+                    mandaMensaje("Grupoe_halcon",ACLMessage.CONFIRM,"");
+                    
                     online = false;
                 }
                 
@@ -205,6 +220,26 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nNo se ha podido hacer login con éxito");
         }
     }
+    
+    
+   public void recibirCoordenadas(JsonObject objeto){
+        
+       // JsonObject objeto = Json.parse(entrada.getContent()).asObject();
+        
+       // if(entrada.getPerformativeInt()==ACLMessage.REQUEST){
+            int posx=objeto.get("posicionx").asInt();
+            int posy=objeto.get("posiciony").asInt();
+            
+            Pair<Integer,Integer> coordenada = new Pair(posx,posy);
+            coordenadaAleman.add(coordenada);
+            System.out.println("aniadido posicion de aleman");
+        
+        
+         for(int i=0;i<coordenadaAleman.size();i++){
+                  System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
+         }
+    }
+    
     
     /**
      * Método que levanta a los drones
