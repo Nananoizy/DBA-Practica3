@@ -123,18 +123,23 @@ public class Halcon extends Dron {
                 objeto.add("command",siguienteDireccion);
                 String content = objeto.toString();
                 
-                System.out.println("Me quiero mover a: " + siguienteDireccion);
+                //System.out.println("Me quiero mover a: " + siguienteDireccion);
                 
                 mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                
+                //System.out.println(replyWth);
                 recibeMensaje("Efectua movimiento halcon");
+                this.replyWth = inbox.getReplyWith();
                 if(inbox.getPerformativeInt() == ACLMessage.INFORM){
                      System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
                 }
                 else{
-                     System.out.println("Soy el halcon y no me he podido mover");
+                    JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
+                    String resp = respuesta.get("result").asString();
+                    System.out.println("Soy el halcon y no me he podido mover");
+                    System.out.println(resp);
+                    online = false;
                 }
-                online = false;
+                
                 
                 
             }
@@ -181,6 +186,7 @@ public class Halcon extends Dron {
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
+                //System.out.println(replyWth);
                 objeto = Json.parse(inbox.getContent()).asObject();
                 System.out.println("Checkin halcon: " + objeto.get("result").asString());
                 posActualX = posInicioX;
@@ -191,12 +197,15 @@ public class Halcon extends Dron {
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 System.out.println("Error FAILURE\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
                 System.out.println("Error REFUSE\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.REFUSE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
                 System.out.println("Error NOT UNDERSTOOD\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "halcon");
             }
     }

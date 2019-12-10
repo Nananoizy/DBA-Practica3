@@ -343,7 +343,7 @@ public abstract class Dron extends SuperAgent {
     public void cargarPercepciones(){
         mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
         recibeMensaje("mensaje de pedir Percepciones");
-        
+        this.replyWth = inbox.getReplyWith();
         if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             JsonObject result =  objeto.get("result").asObject();
