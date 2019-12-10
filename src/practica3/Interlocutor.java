@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -678,6 +679,16 @@ public class Interlocutor extends SuperAgent {
         if (nombreDron.equals( "halcon" )){
             irAX = dimX - 49;
             irAY = 49;
+            
+            ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
+            /*if (x == irAX && y == irAY){
+                
+                //Random random = new Random();
+                
+                //irAX = random.nextInt(dimX);
+                //irAY = random.nextInt(dimY);
+                
+            }*/
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   

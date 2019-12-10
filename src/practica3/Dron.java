@@ -124,7 +124,7 @@ public abstract class Dron extends SuperAgent {
     JsonArray infrared;
     JsonArray awacs;
     JsonObject gonio;
-    int fuel;
+    float fuel;
     boolean goal;
     String status; // Y ESTE STATUS?
     int torescue; // ni idea de que es tamapoco
@@ -286,6 +286,46 @@ public abstract class Dron extends SuperAgent {
         return altura;
     }
     
+    /**
+    * Método que actualiza la posicion del dron una vez se ha movido con exito
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public void actualizaPosicion(String direccion){
+        
+        if (direccion.equals("moveN")){
+            posActualY = posActualY - 1;
+        }
+        else if (direccion.equals("moveNE")){
+            posActualX = posActualX + 1;
+            posActualY = posActualY - 1;
+        }
+        else if (direccion.equals("moveE")){
+            posActualX = posActualX + 1;
+        }
+        else if (direccion.equals("moveSE")){
+            posActualX = posActualX + 1;
+            posActualY = posActualY + 1;
+        }
+        else if (direccion.equals("moveS")){
+            posActualY = posActualY + 1;
+        }
+        else if (direccion.equals("moveSW")){
+            posActualX = posActualX - 1;
+            posActualY = posActualY - 1;
+        }
+        else if (direccion.equals("moveW")){
+            posActualX = posActualX - 1;
+        }
+        else if (direccion.equals("moveNW")){
+            posActualX = posActualX - 1;
+            posActualY = posActualY + 1;
+        }
+        
+        //System.out.println("Posicion actualizada: " + posActualX + " , " + posActualY);
+    }
+    
     
     /**
     * Método que calcula la direccion en la que tiene que ir el dron dado un punto de destino
@@ -350,7 +390,7 @@ public abstract class Dron extends SuperAgent {
             gps = result.get("gps").asObject();
             infrared = result.get("infrared").asArray();
             gonio = result.get("gonio").asObject();
-            fuel = result.get("fuel").asInt();
+            fuel = result.get("fuel").asFloat();
             goal = result.get("goal").asBoolean();
             status = result.get("status").asString();
             awacs = result.get("awacs").asArray();

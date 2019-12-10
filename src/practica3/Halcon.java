@@ -104,7 +104,7 @@ public class Halcon extends Dron {
         while( online ){
             
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
-            if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
+            if (((nextPosX == -1) || (nextPosY == -1))){
                 pedirSiguientePosicion();
                 recibeMensaje("Recibir siguiente posicion");
                 
@@ -114,30 +114,56 @@ public class Halcon extends Dron {
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }
+            // Si la posicion que tiene es su destino final, se espera
+            else if (((posActualX == nextPosX) && (posActualY == nextPosY))){
+                
+            }
             else{
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
                 
                 JsonObject objeto = new JsonObject();
-          
-                objeto.add("command",siguienteDireccion);
-                String content = objeto.toString();
                 
-                //System.out.println("Me quiero mover a: " + siguienteDireccion);
-                
-                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                //System.out.println(replyWth);
-                recibeMensaje("Efectua movimiento halcon");
-                this.replyWth = inbox.getReplyWith();
-                if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                     System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
+                ///Si no tengo fuel suficiente, reposto. Else me muevo     
+                if (fuel <= fuelrate + 2){
+                    objeto.add("command","refuel");
+                    String content = objeto.toString();
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    
+                    recibeMensaje("Efectua refuel halcon");
+                    this.replyWth = inbox.getReplyWith();
+                    
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         System.out.println("El halcon ha hecho refuel");
+                         cargarPercepciones();
+                    }
                 }
                 else{
-                    JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
-                    String resp = respuesta.get("result").asString();
-                    System.out.println("Soy el halcon y no me he podido mover");
-                    System.out.println(resp);
-                    online = false;
+                    
+                    objeto.add("command",siguienteDireccion);
+                    String content = objeto.toString();
+
+                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
+
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    //System.out.println(replyWth);
+                    recibeMensaje("Efectua movimiento halcon");
+                    this.replyWth = inbox.getReplyWith();
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
+                         //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
+                         fuel = fuel - fuelrate;
+                         
+                         //actualizamos la posicion localmente
+                         actualizaPosicion(siguienteDireccion);
+                    }
+                    else{
+                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
+                        String resp = respuesta.get("result").asString();
+                        System.out.println("Soy el halcon y no me he podido mover");
+                        System.out.println(resp);
+                        online = false;
+                    }
                 }
                 
                 
