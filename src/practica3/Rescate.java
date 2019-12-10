@@ -75,7 +75,7 @@ public class Rescate extends Dron {
             dimX = objeto.get("dimMaxX").asInt();
             dimY = objeto.get("dimMaxY").asInt();
             
-            mandaMensaje("Grupoe", ACLMessage.CONFIRM , "");
+            mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM , "");
             
             // Check in
             JsonObject objetoJSON = new JsonObject();
@@ -97,19 +97,19 @@ public class Rescate extends Dron {
                 //System.out.println("rescate: " + objeto.get("result").asString());
                 datosCheckin();
                 
-                mandaMensaje("Grupoe", ACLMessage.CONFIRM, "rescate");
+                mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "rescate");
                 online = true;
                 //Si todo ha ido bien, esperamos que el interlocutor nos diga hacia donde movernos
                 //recibeMensaje();
                   
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
-                mandaMensaje("Grupoe", ACLMessage.FAILURE, "rescate");
+                mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "rescate");
                 System.out.println("Error FAILURE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
-                mandaMensaje("Grupoe", ACLMessage.REFUSE, "rescate");
+                mandaMensaje(nombreInterlocutor, ACLMessage.REFUSE, "rescate");
                 System.out.println("Error REFUSE\n");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
-                mandaMensaje("Grupoe", ACLMessage.NOT_UNDERSTOOD, "rescate");
+                mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "rescate");
                 System.out.println("Error NOT UNDERSTOOD\n");
             }
         }

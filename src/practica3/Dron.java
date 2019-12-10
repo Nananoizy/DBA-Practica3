@@ -95,7 +95,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupoe";
+    String nombreInterlocutor = "Grupo_e";
     
     /**
      * Nombre del dron.

@@ -196,17 +196,14 @@ public class Interlocutor extends SuperAgent {
                     respondeDireccion(veaX, veaY, nombreDron);
                     //online = false;
                 }
-                
-                recibeMensaje();
-                
-                 if (inbox.getPerformativeInt() == ACLMessage.REQUEST){
+                else if (inbox.getPerformativeInt() == ACLMessage.REQUEST){
                     
                     objeto = Json.parse(inbox.getContent()).asObject();
                     recibirCoordenadas(objeto);
                     
-                    mandaMensaje("Grupoe_halcon",ACLMessage.CONFIRM,"");
+                    mandaMensaje("Grupoe__halcon",ACLMessage.CONFIRM,"");
                     
-                    online = false;
+                    //online = false;
                 }
                 
                 //deberiamos discintiguir quien le estan enviando el mensaje e ir realizando las diferentes acciones.
@@ -251,10 +248,10 @@ public class Interlocutor extends SuperAgent {
         
         System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
-        mosca = new Mosca(new AgentID("Grupoe_mosca"), true, nombreMapaActual+".png");
-        halcon = new Halcon(new AgentID("Grupoe_halcon"), true, nombreMapaActual+".png");
-        rescate1 = new Rescate(new AgentID("Grupoe_rescate1"), true, nombreMapaActual+".png");
-        rescate2 = new Rescate(new AgentID("Grupoe_rescate2"), true, nombreMapaActual+".png");
+        mosca = new Mosca(new AgentID("Grupoe__mosca"), true, nombreMapaActual+".png");
+        halcon = new Halcon(new AgentID("Grupoe__halcon"), true, nombreMapaActual+".png");
+        rescate1 = new Rescate(new AgentID("Grupoe__rescate1"), true, nombreMapaActual+".png");
+        rescate2 = new Rescate(new AgentID("Grupoe__rescate2"), true, nombreMapaActual+".png");
         
         // ELEMENTOS DE LA CONEXION
         
@@ -274,7 +271,7 @@ public class Interlocutor extends SuperAgent {
         
         mosca.start();
         
-        mandaMensaje("Grupoe_mosca", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__mosca", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -297,7 +294,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString();    
         
-        mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -320,7 +317,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe_rescate1", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate1", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -341,7 +338,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe_rescate2", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate2", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -369,10 +366,10 @@ public class Interlocutor extends SuperAgent {
         
         if (checked == 4){
             System.out.println ("Todos los drones operativos");
-            mandaMensaje("Grupoe_mosca", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe_halcon", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe_rescate1", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe_rescate2", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__mosca", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__halcon", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate1", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate2", ACLMessage.CONFIRM, "");
         }
        
         
@@ -676,7 +673,9 @@ public class Interlocutor extends SuperAgent {
         int irAY = -1;
         JsonObject objetoJSON = new JsonObject();
         
-        if (nombreDron == "halcon"){
+        System.out.println(nombreDron);
+        
+        if (nombreDron.equals( "halcon")){
             irAX = dimX - 49;
             irAY = 49;
             
@@ -685,7 +684,7 @@ public class Interlocutor extends SuperAgent {
             String mensaje = objetoJSON.toString();
             
             System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe_halcon", ACLMessage.INFORM, mensaje);
+            mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, mensaje);
         }
         
     }
