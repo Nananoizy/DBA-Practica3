@@ -101,7 +101,7 @@ public class Mosca extends Dron {
             
             
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
-            if (((nextPosX == -1) || (nextPosY == -1))){
+            if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
                 recibeMensaje("Recibir siguiente posicion");
                 
@@ -110,10 +110,6 @@ public class Mosca extends Dron {
                 nextPosY = objeto.get("irAY").asInt();
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
-            }
-            // Si la posicion que tiene es su destino final, se espera
-            else if (((posActualX == nextPosX) && (posActualY == nextPosY))){
-                
             }
             else{
                 String siguienteDireccion = "";
@@ -147,7 +143,7 @@ public class Mosca extends Dron {
                     recibeMensaje("Efectua movimiento mosca");
                     this.replyWth = inbox.getReplyWith();
                     if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         System.out.println("Soy la mosca y me he movido al: " + siguienteDireccion);
+                         //System.out.println("Soy la mosca y me he movido al: " + siguienteDireccion);
                          //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
                          fuel = fuel - fuelrate;
                          

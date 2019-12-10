@@ -91,7 +91,11 @@ public class Interlocutor extends SuperAgent {
     
     String sessionKey = "";
     
-    
+    /**
+     * Posiciones siguientes a las que tiene que ir cada dron.
+    */
+    Pair<Integer,Integer> siguientePosicionHalcon;
+    Pair<Integer,Integer> siguientePosicionMosca;
     
     boolean online=true;
    
@@ -168,6 +172,9 @@ public class Interlocutor extends SuperAgent {
             
             System.out.println("dimx: " + dimX + " dimy: " + dimY);
             
+            //INICIALIZAMOS LAS POSICIONES A LAS QUE VAN A TENER QUE IR LOS DRONES
+            siguientePosicionHalcon = new Pair(dimX - 49, 49);
+            siguientePosicionMosca = new Pair(dimX - 1, 9);
             
             try {   
                 // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
@@ -677,18 +684,23 @@ public class Interlocutor extends SuperAgent {
         System.out.println(nombreDron);
         
         if (nombreDron.equals( "halcon" )){
-            irAX = dimX - 49;
-            irAY = 49;
+            irAX = siguientePosicionHalcon.getKey();
+            irAY = siguientePosicionHalcon.getValue();
             
             ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
-            /*if (x == irAX && y == irAY){
+            if (x == irAX && y == irAY){
                 
-                //Random random = new Random();
+                Random random = new Random();
                 
-                //irAX = random.nextInt(dimX);
-                //irAY = random.nextInt(dimY);
+                siguientePosicionHalcon = new Pair(random.nextInt(dimX - 1), random.nextInt(dimY - 1));
                 
-            }*/
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
+                
+                System.out.println("Siguiente posicion del halcon: " + irAX + " , " + irAY);
+
+                
+            }
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   
@@ -699,18 +711,38 @@ public class Interlocutor extends SuperAgent {
         }
         
         if (nombreDron.equals( "mosca" )){
-            irAX = dimX - 1;
-            irAY = dimY -1;
+            
+            irAX = siguientePosicionMosca.getKey();
+            irAY = siguientePosicionMosca.getValue();
             
             ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
-            /*if (x == irAX && y == irAY){
+            
+            //SI NO ESTA TOCANDO NINGUNA ARISTA SE MOVERIA NW HASTA LA SIGUIENTE PARED
+            if ((x == irAX && y == irAY)){
                 
-                //Random random = new Random();
+                siguientePosicionMosca = new Pair(dimX - 1, y);
+                irAX = siguientePosicionMosca.getKey();
+                irAY = siguientePosicionMosca.getValue();
                 
-                //irAX = random.nextInt(dimX);
-                //irAY = random.nextInt(dimY);
+                System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
                 
-            }*/
+            }
+            //Si he llegado al limite horizontal, voy al otro lado
+            else if ((x == irAX && y == irAY) && (x == dimX - 1)){
+                
+                siguientePosicionMosca = new Pair(0, y + 9);
+                irAX = siguientePosicionMosca.getKey();
+                irAY = siguientePosicionMosca.getValue();
+                
+            }
+            //Si he llegado al 0, voy al otro lado
+            else if ((x == irAX && y == irAY) && (x == 0)){
+                
+                siguientePosicionMosca = new Pair(dimX - 1, y);
+                irAX = siguientePosicionMosca.getKey();
+                irAY = siguientePosicionMosca.getValue();
+                
+            }
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   
