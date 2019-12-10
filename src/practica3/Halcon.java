@@ -116,7 +116,9 @@ public class Halcon extends Dron {
             }
             // Si la posicion que tiene es su destino final, se espera
             else if (((posActualX == nextPosX) && (posActualY == nextPosY))){
+                /// pedir siguiente posicion
                 
+                online = false;
             }
             else{
                 String siguienteDireccion = "";

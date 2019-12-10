@@ -698,6 +698,28 @@ public class Interlocutor extends SuperAgent {
             mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, mensaje);
         }
         
+        if (nombreDron.equals( "mosca" )){
+            irAX = dimX - 1;
+            irAY = dimY -1;
+            
+            ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
+            /*if (x == irAX && y == irAY){
+                
+                //Random random = new Random();
+                
+                //irAX = random.nextInt(dimX);
+                //irAY = random.nextInt(dimY);
+                
+            }*/
+            
+            objetoJSON.add("irAX",irAX);
+            objetoJSON.add("irAY",irAY);   
+            String mensaje = objetoJSON.toString();
+            
+            //System.out.println("Respondemos a halcon");
+            mandaMensaje("Grupoe__mosca", ACLMessage.INFORM, mensaje);
+        }
+        
     }
     
     /**
