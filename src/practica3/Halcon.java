@@ -98,6 +98,9 @@ public class Halcon extends Dron {
            //La primera vez, pedimos percepciones por primera vez:
             cargarPercepciones();
             obtenerAlemanesInfrarojos();
+            mostrarArrayAlemanes();
+            obtenerAlemanGonio();
+            mostrarArrayAlemanes();
         }
                 
         // Una vez se ha inicializado continuamos en el bucle:

@@ -540,6 +540,73 @@ public abstract class Dron extends SuperAgent {
     }// fin obetenerAlemanesInfrarojos
     
     
+    
+    /**
+     * Percibe un alemán con el sensor gonio
+     * 
+     * @author David Infante Casas
+     */
+    public void obtenerAlemanGonio() {
+        double distancia = gonio.get("distance").asDouble();
+        double angulo = gonio.get("angle").asDouble();
+        int x_aleman = 0, y_aleman = 0;
+        int x_actual = gps.get("x").asInt();
+        int y_actual = gps.get("y").asInt();
+        
+        // Según el ángulo calculamos la posición
+        if (angulo >= 0 && angulo <= 90) { // N-E
+            x_aleman = (int) (x_actual + Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
+        } else if (angulo > 90 && angulo <= 180) { // E-S
+            x_aleman = (int) (x_actual + Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual + Math.sin(angulo) * distancia);
+        } else if (angulo > 180 && angulo <= 270) { // S-W
+            x_aleman = (int) (x_actual - Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual + Math.sin(angulo) * distancia);
+        } else if (angulo > 270 && angulo <= 360) { // W-N
+            x_aleman = (int) (x_actual - Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
+        }
+        
+        Pair<Integer,Integer> aleman = new Pair(x_aleman, y_aleman);
+        if (!comprobarAlemanRepetido(aleman)) coordAleman.add(aleman);
+        else System.out.println("Alemán repetido detectado con infrarrojos");
+    }
+    
+    /**
+     * Comprueba que el alemán pasado como parámetro
+     * no esté presente ya en el array
+     * 
+     * @param aleman Aleman para comprobar si está ya en el array
+     * 
+     * @return true si ya está, false si no está en el array
+     * 
+     * @author David Infante Casas
+     */
+    public boolean comprobarAlemanRepetido(Pair<Integer,Integer> aleman) {
+        for (Pair<Integer,Integer> alem : coordAleman) {
+            if (alem.getKey() == aleman.getKey() && alem.getValue() == aleman.getValue()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    
+    /**
+     * Muestra la lista de alemanes por pantalla
+
+     * @author David Infante Casas
+     */
+    public void mostrarArrayAlemanes() {
+        for (Pair<Integer,Integer> alem : coordAleman) {
+            System.out.println(alem.getKey() + ", " + alem.getValue() + "\n");
+        }
+    }    
+    
+    
+    
     public void mandarCoordenadas(){
         while(coordAleman.size()>0){
             for(int i=0;i<coordAleman.size();i++){
