@@ -202,7 +202,7 @@ public class Mosca extends Dron {
                 posActualX = posInicioX;
                 posActualY = posInicioY;
                 System.out.println("Checkin mosca: " + objeto.get("result").asString());
-                
+                posActualZ = consultaAltura(posActualX,posActualY);
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "mosca");

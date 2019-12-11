@@ -110,7 +110,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Posicion a la que tiene que ir.
      */
-    int posActualX,posActualY;
+    int posActualX,posActualY,posActualZ;
     
     /**
      * Posicion a la que tiene que ir.
@@ -313,14 +313,20 @@ public abstract class Dron extends SuperAgent {
         }
         else if (direccion.equals("moveSW")){
             posActualX = posActualX - 1;
-            posActualY = posActualY - 1;
+            posActualY = posActualY + 1;
         }
         else if (direccion.equals("moveW")){
             posActualX = posActualX - 1;
         }
         else if (direccion.equals("moveNW")){
             posActualX = posActualX - 1;
-            posActualY = posActualY + 1;
+            posActualY = posActualY - 1;
+        }
+        else if (direccion.equals("moveUP")){
+            posActualZ = posActualZ + 1;
+        }
+        else if (direccion.equals("moveDW")){
+            posActualZ = posActualZ - 1;
         }
         
         //System.out.println("Posicion actualizada: " + posActualX + " , " + posActualY);
@@ -338,38 +344,75 @@ public abstract class Dron extends SuperAgent {
         String direccion = "";
         
         ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
-        
+        //System.out.println("x: " + posActualX + " , " + nextPosX + " y " + posActualY + " , " + nextPosY);
         // Si la y es mayor y la x es igual, va al Norte
-        if (posActualX == nextPosX && posActualY < nextPosY){
-            direccion = "moveN";
+        if (posActualX == nextPosX && posActualY > nextPosY){
+            //si tengo un muro delante y no he subido al nivel maximo, asciendo
+            if (consultaAltura(posActualX , posActualY - 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            
+            ///SI NO PUEDEN ASCENDER MAS Y TIENEN UN OBJETO DELANTE, HACER MANO DERECHA...
+            else{
+                direccion = "moveN";
+            }
+            
         }
         //Si la x de destino es mayor y la y es menor, va hacia el noreste
         else if (posActualX < nextPosX && posActualY > nextPosY){
-            direccion = "moveNE";
+            if (consultaAltura(posActualX + 1, posActualY - 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveNE";
         }
         //Si la x de destino es mayor y la y es igual, va hacia el este
         else if (posActualX < nextPosX && posActualY == nextPosY){
-            direccion = "moveE";
+            if (consultaAltura(posActualX + 1, posActualY) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveE";
         }
         //Si la x de destino es mayor y la y es mayor, va hacia el sureste
         else if (posActualX < nextPosX && posActualY < nextPosY){
-            direccion = "moveSE";
+            if (consultaAltura(posActualX + 1, posActualY + 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveSE";
         }
         //Si la y de destino es menor y la x es igual, va hacia el sur
-        else if (posActualX == nextPosX && posActualY > nextPosY){
-            direccion = "moveS";
+        else if (posActualX == nextPosX && posActualY < nextPosY){
+            if (consultaAltura(posActualX, posActualY + 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveS";
         }
         //Si la x de destino es menor y la y es mayor, va hacia el suroeste
         else if (posActualX > nextPosX && posActualY < nextPosY){
-            direccion = "moveSW";
+            if (consultaAltura(posActualX - 1, posActualY + 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveSW";
         }
         //Si la x de destino es menor y la y es igual, va hacia el oeste
         else if (posActualX > nextPosX && posActualY == nextPosY){
-            direccion = "moveW";
+            if (consultaAltura(posActualX - 1, posActualY) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveW";
         }
         //Si la x de destino es menor y la y es menor, va hacia el noroeste
         else if (posActualX > nextPosX && posActualY > nextPosY){
-            direccion = "moveNW";
+            if (consultaAltura(posActualX - 1, posActualY - 1) > posActualZ && maxlevel > posActualZ){
+                direccion = "moveUP";
+            }
+            else
+                direccion = "moveNW";
         }
 
         return direccion;
@@ -438,8 +481,8 @@ public abstract class Dron extends SuperAgent {
             //System.out.println("");
         }
         
-        System.out.println(gps);
-        System.out.println(posi);
+        //System.out.println(gps);
+        //System.out.println(posi);
         
         
         for(int i=0; i<posi.size();i+=2){
@@ -479,7 +522,7 @@ public abstract class Dron extends SuperAgent {
                 }
             }
             
-            System.out.println("Aleman -> (" + x + "," + y + ")" );
+            //System.out.println("Aleman -> (" + x + "," + y + ")" );
             
             Pair<Integer,Integer> aleman = new Pair(x,y);
             coordAleman.add(aleman);
@@ -512,7 +555,7 @@ public abstract class Dron extends SuperAgent {
                 
                 mandaMensaje(nombreInterlocutor, ACLMessage.REQUEST , content);
                  
-                System.out.println("voy a mandar las coordenadas al interlocutor");
+                //System.out.println("voy a mandar las coordenadas al interlocutor");
            
                 recibeMensaje("mensaje de mandar posiciones de almanes");
             }

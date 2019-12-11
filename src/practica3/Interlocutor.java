@@ -152,7 +152,7 @@ public class Interlocutor extends SuperAgent {
         
         // SI HE CONSEGUIDO SUSCRIBIRME A UN MUNDO
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-            System.out.println("\nSe ha podido hacer login con éxito");
+            //System.out.println("\nSe ha podido hacer login con éxito");
             
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();  
             cId = inbox.getConversationId();
@@ -170,7 +170,7 @@ public class Interlocutor extends SuperAgent {
             dimY = objeto.get("dimy").asInt();
             
             
-            System.out.println("dimx: " + dimX + " dimy: " + dimY);
+            //System.out.println("dimx: " + dimX + " dimy: " + dimY);
             
             //INICIALIZAMOS LAS POSICIONES A LAS QUE VAN A TENER QUE IR LOS DRONES
             siguientePosicionHalcon = new Pair(dimX - 49, 49);
@@ -237,11 +237,11 @@ public class Interlocutor extends SuperAgent {
             
             Pair<Integer,Integer> coordenada = new Pair(posx,posy);
             coordenadaAleman.add(coordenada);
-            System.out.println("aniadido posicion de aleman");
+            //System.out.println("aniadido posicion de aleman");
         
         
          for(int i=0;i<coordenadaAleman.size();i++){
-                  System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
+                  //System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
          }
     }
     
@@ -254,7 +254,7 @@ public class Interlocutor extends SuperAgent {
      */
     public void levantarDrones() throws Exception{
         
-        System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
+        //System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
         mosca = new Mosca(new AgentID("Grupoe__mosca"), true, nombreMapaActual+".png");
         halcon = new Halcon(new AgentID("Grupoe__halcon"), true, nombreMapaActual+".png");
@@ -363,7 +363,7 @@ public class Interlocutor extends SuperAgent {
         for (int i = 0; i < 4; i++){
             recibeMensaje();  
             if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-                System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
+                //System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
                 checked++;
             }
             else{
@@ -687,18 +687,24 @@ public class Interlocutor extends SuperAgent {
             irAX = siguientePosicionHalcon.getKey();
             irAY = siguientePosicionHalcon.getValue();
             
-            ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
-            if (x == irAX && y == irAY){
-                
-                Random random = new Random();
-                
-                siguientePosicionHalcon = new Pair(random.nextInt(dimX - 1), random.nextInt(dimY - 1));
+            ///si he llegado a la esquina superior derecha, bajo abajo del todo
+            if ((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
+
+                siguientePosicionHalcon = new Pair(dimX - 49, dimY - 49);
                 
                 irAX = siguientePosicionHalcon.getKey();
                 irAY = siguientePosicionHalcon.getValue();
                 
-                System.out.println("Siguiente posicion del halcon: " + irAX + " , " + irAY);
-
+                //System.out.println("Siguiente posicion del halcon: " + irAX + " , " + irAY);
+   
+            }
+            //si ya he llegado a la esquina de abajo, vuelvo a base
+            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
+                
+                siguientePosicionHalcon = new Pair(49, dimY - 49);
+                
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
                 
             }
             
@@ -720,27 +726,23 @@ public class Interlocutor extends SuperAgent {
             //SI NO ESTA TOCANDO NINGUNA ARISTA SE MOVERIA NW HASTA LA SIGUIENTE PARED
             if ((x == irAX && y == irAY)){
                 
-                siguientePosicionMosca = new Pair(dimX - 1, y);
-                irAX = siguientePosicionMosca.getKey();
-                irAY = siguientePosicionMosca.getValue();
+                if ((x == dimX - 1)){
+                    siguientePosicionMosca = new Pair(0, y + 9);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
+                else if((x == 0)){
+                    siguientePosicionMosca = new Pair(dimX - 1, y + 9);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
+                else{
+                    siguientePosicionMosca = new Pair(dimX - 1, y);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
                 
                 System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
-                
-            }
-            //Si he llegado al limite horizontal, voy al otro lado
-            else if ((x == irAX && y == irAY) && (x == dimX - 1)){
-                
-                siguientePosicionMosca = new Pair(0, y + 9);
-                irAX = siguientePosicionMosca.getKey();
-                irAY = siguientePosicionMosca.getValue();
-                
-            }
-            //Si he llegado al 0, voy al otro lado
-            else if ((x == irAX && y == irAY) && (x == 0)){
-                
-                siguientePosicionMosca = new Pair(dimX - 1, y);
-                irAX = siguientePosicionMosca.getKey();
-                irAY = siguientePosicionMosca.getValue();
                 
             }
             
