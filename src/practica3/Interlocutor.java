@@ -209,7 +209,7 @@ public class Interlocutor extends SuperAgent {
                     objeto = Json.parse(inbox.getContent()).asObject();
                     recibirCoordenadas(objeto);
                     
-                    mandaMensaje("Grupoe__halcon",ACLMessage.CONFIRM,"");
+                    mandaMensaje("Grupoe__halcon  ",ACLMessage.CONFIRM,"");
                     
                     //online = false;
                 }
@@ -226,7 +226,11 @@ public class Interlocutor extends SuperAgent {
         }
     }
     
-    
+    /**
+     * Recibir coordenadas de los alemanes enviados por drones y guardarlo en el array
+     * 
+     * @author Yang Chen
+     */
    public void recibirCoordenadas(JsonObject objeto){
         
        // JsonObject objeto = Json.parse(entrada.getContent()).asObject();
@@ -244,6 +248,27 @@ public class Interlocutor extends SuperAgent {
                   //System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
          }
     }
+   
+   public void mandarCoordenadasArescate( String receptor){
+        while(coordenadaAleman.size()>0){
+       
+                int px=coordenadaAleman.get(0).getKey();
+                int py=coordenadaAleman.get(0).getValue();
+                
+                JsonObject objetoJSON = new JsonObject();
+                objetoJSON.add("comando", "aniadir");
+                objetoJSON.add("posicionx",px);
+                objetoJSON.add("posiciony",py);
+                
+                String content = objetoJSON.toString();
+                
+                mandaMensaje(receptor, ACLMessage.INFORM , content);
+                 
+                //System.out.println("voy a mandar las coordenadas al interlocutor");
+           
+                recibeMensaje();
+        }
+   }
     
     
     /**
@@ -256,10 +281,10 @@ public class Interlocutor extends SuperAgent {
         
         //System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
-        mosca = new Mosca(new AgentID("Grupoe__mosca"), true, nombreMapaActual+".png");
-        halcon = new Halcon(new AgentID("Grupoe__halcon"), true, nombreMapaActual+".png");
-        rescate1 = new Rescate(new AgentID("Grupoe__rescate1"), true, nombreMapaActual+".png");
-        rescate2 = new Rescate(new AgentID("Grupoe__rescate2"), true, nombreMapaActual+".png");
+        mosca = new Mosca(new AgentID("Grupoe__mosca  "), true, nombreMapaActual+".png");
+        halcon = new Halcon(new AgentID("Grupoe__halcon  "), true, nombreMapaActual+".png");
+        rescate1 = new Rescate(new AgentID("Grupoe__rescate1  "), true, nombreMapaActual+".png");
+        rescate2 = new Rescate(new AgentID("Grupoe__rescate2  "), true, nombreMapaActual+".png");
         
         // ELEMENTOS DE LA CONEXION
         
@@ -279,7 +304,7 @@ public class Interlocutor extends SuperAgent {
         
         mosca.start();
         
-        mandaMensaje("Grupoe__mosca", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__mosca  ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -302,7 +327,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString();    
         
-        mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__halcon  ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -325,7 +350,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate1", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate1  ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -346,7 +371,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate2", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate2  ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -374,10 +399,10 @@ public class Interlocutor extends SuperAgent {
         
         if (checked == 4){
             System.out.println ("Todos los drones operativos");
-            mandaMensaje("Grupoe__mosca", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__halcon", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate1", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate2", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__mosca  ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__halcon  ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate1  ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate2  ", ACLMessage.CONFIRM, "");
         }
        
         
@@ -713,7 +738,7 @@ public class Interlocutor extends SuperAgent {
             String mensaje = objetoJSON.toString();
             
             //System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, mensaje);
+            mandaMensaje("Grupoe__halcon  ", ACLMessage.INFORM, mensaje);
         }
         
         if (nombreDron.equals( "mosca" )){
@@ -751,7 +776,7 @@ public class Interlocutor extends SuperAgent {
             String mensaje = objetoJSON.toString();
             
             //System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe__mosca", ACLMessage.INFORM, mensaje);
+            mandaMensaje("Grupoe__mosca  ", ACLMessage.INFORM, mensaje);
         }
         
     }

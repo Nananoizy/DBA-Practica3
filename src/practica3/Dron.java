@@ -95,7 +95,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupo__e";
+    String nombreInterlocutor = "Grupo___e";
     
     /**
      * Nombre del dron.
@@ -425,8 +425,10 @@ public abstract class Dron extends SuperAgent {
      */
     public void cargarPercepciones(){
         mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
+       // System.out.println("performativa enviado es " + outbox.getPerformative().toString());
         recibeMensaje("mensaje de pedir Percepciones");
         this.replyWth = inbox.getReplyWith();
+       // System.out.println(" performativa recibido es " + inbox.getPerformative().toString());
         if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             JsonObject result =  objeto.get("result").asObject();
@@ -606,7 +608,12 @@ public abstract class Dron extends SuperAgent {
     }    
     
     
-    
+    /**
+     * Mandar coordenadas de alemanes al interlocutor
+     * 
+     * 
+     * @author Yang Chen
+     */
     public void mandarCoordenadas(){
         while(coordAleman.size()>0){
             for(int i=0;i<coordAleman.size();i++){

@@ -105,7 +105,7 @@ public class Halcon extends Dron {
                 
         // Una vez se ha inicializado continuamos en el bucle:
         while( online ){
-            
+           /* 
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -167,7 +167,7 @@ public class Halcon extends Dron {
                 
                 
                 
-            }
+            }*/
             
             mandarCoordenadas();
             
