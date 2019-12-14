@@ -34,7 +34,7 @@ public class Practica3 {
         Interlocutor agente;
         
         try {
-            agente = new Interlocutor(new AgentID("Grupo___e"), "playground", true);
+            agente = new Interlocutor(new AgentID("Grupo___e "), "playground", true);
         } catch (Exception ex) {
             System.out.println("Error el agente ya existe en la plataforma");
             return;

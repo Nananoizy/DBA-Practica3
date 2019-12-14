@@ -1,6 +1,7 @@
 package practica3;
 
 import DBA.SuperAgent;
+import DBAMap.DBAMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -90,12 +91,13 @@ public abstract class Dron extends SuperAgent {
     /**
      * Mapa Completo.
     */
+    //DBAMap mapa;
     BufferedImage mapa;
     
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupo___e";
+    String nombreInterlocutor = "Grupo___e ";
     
     /**
      * Nombre del dron.
@@ -272,6 +274,8 @@ public abstract class Dron extends SuperAgent {
     */
     public void cargarMapa( String urlArchivo ) throws IOException{
         mapa = ImageIO.read( new File(urlArchivo) );
+       // mapa.load(urlArchivo+".png");
+        
     }
     
      
@@ -460,14 +464,17 @@ public abstract class Dron extends SuperAgent {
     }
     
 
-    /*
+    /**
     * Recorre el sensor de inflarojos y decuelve las posiciones de los alemanes
+    *
+    * @author Adrian Ruiz Lopez
+    * @author Yang Chen
     */
     public void obtenerAlemanesInfrarojos(){
         List<JsonValue> lista = infrared.values();       
         List<Integer> posi = new ArrayList<Integer>();
         //System.out.println("N=" + range);
-        int anchura = range-1;
+        int anchura = range;
         int radio = anchura/2;
         
         for( int y=0;y<range;y++){
@@ -554,9 +561,9 @@ public abstract class Dron extends SuperAgent {
         int x_aleman = 0, y_aleman = 0;
         int x_actual = gps.get("x").asInt();
         int y_actual = gps.get("y").asInt();
-        
+              
         // Según el ángulo calculamos la posición
-        if (angulo >= 0 && angulo <= 90) { // N-E
+       if (angulo >= 0 && angulo <= 90) { // N-E
             x_aleman = (int) (x_actual + Math.cos(angulo) * distancia);
             y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
         } else if (angulo > 90 && angulo <= 180) { // E-S
@@ -569,7 +576,7 @@ public abstract class Dron extends SuperAgent {
             x_aleman = (int) (x_actual - Math.cos(angulo) * distancia);
             y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
         }
-        
+              
         Pair<Integer,Integer> aleman = new Pair(x_aleman, y_aleman);
         if (!comprobarAlemanRepetido(aleman)) coordAleman.add(aleman);
         else System.out.println("Alemán repetido detectado con infrarrojos");

@@ -1,6 +1,7 @@
 package practica3;
 
 import DBA.SuperAgent;
+import DBAMap.DBAMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -39,7 +40,8 @@ public class Interlocutor extends SuperAgent {
     
     Halcon halcon;
     Mosca mosca;
-    Rescate rescate1, rescate2;
+    Rescate rescate1;
+    Rescate2 rescate2;
     /**
      * Estado actual del agente.
      */
@@ -47,7 +49,7 @@ public class Interlocutor extends SuperAgent {
     /**
      * Mapa que recorre el agente.
      */
-    BufferedImage mapaActual;   
+    DBAMap mapaActual = new DBAMap();
     String nombreMapaActual;
     /**
      * Clave de sesión para hacer login y logout.
@@ -209,7 +211,7 @@ public class Interlocutor extends SuperAgent {
                     objeto = Json.parse(inbox.getContent()).asObject();
                     recibirCoordenadas(objeto);
                     
-                    mandaMensaje("Grupoe__halcon  ",ACLMessage.CONFIRM,"");
+                    mandaMensaje("Grupoe__halcon   ",ACLMessage.CONFIRM,"");
                     
                     //online = false;
                 }
@@ -281,10 +283,10 @@ public class Interlocutor extends SuperAgent {
         
         //System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
-        mosca = new Mosca(new AgentID("Grupoe__mosca  "), true, nombreMapaActual+".png");
-        halcon = new Halcon(new AgentID("Grupoe__halcon  "), true, nombreMapaActual+".png");
-        rescate1 = new Rescate(new AgentID("Grupoe__rescate1  "), true, nombreMapaActual+".png");
-        rescate2 = new Rescate(new AgentID("Grupoe__rescate2  "), true, nombreMapaActual+".png");
+        mosca = new Mosca(new AgentID("Grupoe__mosca   "), true, nombreMapaActual + ".png");
+        halcon = new Halcon(new AgentID("Grupoe__halcon   "), true, nombreMapaActual + ".png");
+        rescate1 = new Rescate(new AgentID("Grupoe__rescate1   "), true, nombreMapaActual + ".png");
+        rescate2 = new Rescate2(new AgentID("Grupoe__rescate2   "), true, nombreMapaActual + ".png");
         
         // ELEMENTOS DE LA CONEXION
         
@@ -304,7 +306,7 @@ public class Interlocutor extends SuperAgent {
         
         mosca.start();
         
-        mandaMensaje("Grupoe__mosca  ", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__mosca   ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -327,7 +329,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString();    
         
-        mandaMensaje("Grupoe__halcon  ", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__halcon   ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -350,7 +352,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate1  ", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate1   ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -371,7 +373,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate2  ", ACLMessage.INFORM, content);
+        mandaMensaje("Grupoe__rescate2   ", ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -399,10 +401,10 @@ public class Interlocutor extends SuperAgent {
         
         if (checked == 4){
             System.out.println ("Todos los drones operativos");
-            mandaMensaje("Grupoe__mosca  ", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__halcon  ", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate1  ", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate2  ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__mosca   ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__halcon   ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate1   ", ACLMessage.CONFIRM, "");
+            mandaMensaje("Grupoe__rescate2   ", ACLMessage.CONFIRM, "");
         }
        
         
@@ -554,7 +556,8 @@ public class Interlocutor extends SuperAgent {
         boolean sePuedeSpawnear = true;
         
         // Suponemos que x, y, dimX y dimY empiezan en 0
-        alturaCasilla = consultaAltura(x, y);
+       // alturaCasilla = consultaAltura(x, y);
+        alturaCasilla = mapaActual.getLevel(x, y);
         
         if (alturaCasilla > alturaMax){
             sePuedeSpawnear = false;
@@ -674,7 +677,7 @@ public class Interlocutor extends SuperAgent {
      * 
      * @author Mariana Orihuela Cazorla
      */
-    public void extraerTraza() throws FileNotFoundException, IOException {
+   /* public void extraerTraza() throws FileNotFoundException, IOException {
         
             JsonObject injson = Json.parse(inbox.getContent()).asObject();
             JsonArray ja = injson.get("map").asArray();
@@ -688,6 +691,29 @@ public class Interlocutor extends SuperAgent {
             System.out.println("Traza guardada");
             
             mapaActual = ImageIO.read(new File(nombreMapaActual+".png")); /// mapaActual YA es la matriz
+    }*/
+    
+        public void extraerTraza() throws FileNotFoundException, IOException {
+        
+            JsonObject injson = Json.parse(inbox.getContent()).asObject();
+            JsonArray img = injson.get("map").asArray();
+            /*
+            byte data[] = new byte [ja.size()];
+            for (int i = 0; i < data.length; i++){
+                data[i] = (byte) ja.get(i).asInt();
+            }
+            FileOutputStream fos = new FileOutputStream(nombreMapaActual+".png");
+            fos.write(data);
+            fos.close();
+            System.out.println("Traza guardada");*/
+            
+            
+            mapaActual.fromJson(img);
+            
+            System.out.println("Saving file ./maps/"+ nombreMapaActual +".png");
+            mapaActual.save("./"+nombreMapaActual+".png");
+            
+           
     }
     
     
@@ -738,7 +764,7 @@ public class Interlocutor extends SuperAgent {
             String mensaje = objetoJSON.toString();
             
             //System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe__halcon  ", ACLMessage.INFORM, mensaje);
+            mandaMensaje("Grupoe__halcon   ", ACLMessage.INFORM, mensaje);
         }
         
         if (nombreDron.equals( "mosca" )){
@@ -776,7 +802,7 @@ public class Interlocutor extends SuperAgent {
             String mensaje = objetoJSON.toString();
             
             //System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe__mosca  ", ACLMessage.INFORM, mensaje);
+            mandaMensaje("Grupoe__mosca   ", ACLMessage.INFORM, mensaje);
         }
         
     }
@@ -786,11 +812,11 @@ public class Interlocutor extends SuperAgent {
      * 
      * @author Mariana Orihuela Cazorla
      */
-    
+    /*
     public int consultaAltura(int x, int y){
         int altura = new Color(mapaActual.getRGB(x, y)).getBlue();
         return altura;
-    }
+    }*/
     
     /**
      * Finalización del agente y llamada al método que extrae la traza de ejecución
