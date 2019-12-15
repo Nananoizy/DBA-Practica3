@@ -169,7 +169,7 @@ public class Halcon extends Dron {
                 
             }*/
             
-            mandarCoordenadas();
+            mandarInformacionPercepciones();
             
             // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR

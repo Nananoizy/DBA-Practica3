@@ -12,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -27,15 +29,13 @@ import org.codehaus.jettison.json.JSONArray;
  */
 public class Rescate extends Dron {
     
-    boolean tengoObjetivo=false;
-    
-     ArrayList<Pair<Integer,Integer>> coordenadaAleman = new ArrayList<Pair<Integer,Integer>> ();
+    boolean tengoObjetivo;
+    Queue<Pair<Integer,Integer>> AlemanesPendientes = new LinkedList<Pair<Integer,Integer>> ();
+    Pair<Integer,Integer> objetivoActual;
      
-     Pair<Integer,Integer> objetivo;
+    int miX, miY, miZ;
      
-     int miX, miY, miZ;
-     
-     boolean rescatado=false;
+    boolean rescatado=false;
    
     
     /**
@@ -49,6 +49,7 @@ public class Rescate extends Dron {
     public Rescate(AgentID aid, boolean host, String nombreArchivo) throws Exception {
         super(aid, host,nombreArchivo);
         rol = "rescue";
+        tengoObjetivo = false;
     }
     
     
@@ -95,18 +96,54 @@ public class Rescate extends Dron {
         
         recibeMensaje("todos los drones levantados");
        
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
         
         while(online){
             
+            recibeMensaje("recibiendo un mensaje");
+
+            //Obtenemos quien es el SENDER:
+            String sender = inbox.getSender().name;
             
-            Pair<Integer,Integer> aux=new Pair(60,45);
-            objetivo=aux;
+            // SI RECIVE UN ALEMAN, LO PONE EN SU LISTA
+            if( sender.equals(nombreInterlocutor)  ){
+                // Obtenemos las coordenadas y lo metemos en la cola del rescate:
+                JsonObject aleman = Json.parse(inbox.getContent()).asObject();
+                Pair<Integer,Integer> nuevoAleman = new Pair(aleman.get("alemanX").asInt(),aleman.get("alemanY").asInt());
+                AlemanesPendientes.add(nuevoAleman);
+                
+            }else if( sender.equals("Elnath")){
+                // DISTINGUIR SI LA RESPUESTA RECIBIDA ES DE UN MOVIMIENTO O DE EXITO DE RESCATE:
+                if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
+                    
+                
+                
+
+                    if( tengoObjetivo ){
+                        // MOVIMIENTO Y COMUNICACION CON EL CONTROLADOR PERO EL ULTIMO RECIBE MENSAJE NO SE HACE! ( YA QUE SE VOLVERA A HACER EN EL INICIO DEL BUCLE )
+                        // CUANDO RESCATE A UN ALEMAN, PONER LA VARIABLE TENGOOBJETIVO A FALSE.
+                        /*
+                            1º deicidirMovimiento / accion rescatar
+                            2º EnviarMov al controlador ( o mensaje de rescate ) 
+                        */
+                        mandar
+                        
+                    }else if( !tengoObjetivo && AlemanesPendientes.size()>0 ){
+                        // ASIGNA EL NUEVO OBJETIVO
+                        objetivoActual = AlemanesPendientes.poll();
+                        // MOVERSE:
+
+
+
+                    }
+                    
+                }// FIN IF SI ES UNA RESPUESTA DE UN MOV.
+            }
+                
+            /*********************************************************************/
+            objetivoActual=aux;
             tengoObjetivo=true;
             
             while(tengoObjetivo){
@@ -119,7 +156,7 @@ public class Rescate extends Dron {
                 JsonObject objeto = new JsonObject();
                 
                 //Si estoy en la casilla de aleman
-                if(miX==objetivo.getKey() && miY==objetivo.getValue()){
+                if(miX==objetivoActual.getKey() && miY==objetivoActual.getValue()){
                     //si estoy en el suelo y el aleman no ha sido rescatado, rescato
                     if(miZ==5 && !rescatado){
                          objeto.add("command","rescue");
@@ -147,7 +184,7 @@ public class Rescate extends Dron {
                         
                         //si ha sido rescatado el leman, tengo que volver, asgno la coordenada inicial como mi objetivo
                           if(rescatado){
-                              objetivo=new Pair(posInicioX ,posInicioY);
+                              objetivoActual=new Pair(posInicioX ,posInicioY);
                            }
                     }
                     // si no estoy en el suelo, bajo
@@ -233,15 +270,17 @@ public class Rescate extends Dron {
                 }
                 
                 System.out.println("rescate : estoy en X= " + miX + " y= " + miY + " mi altura es " + miZ);
-                System.out.println("rescate : y aleman esta en X= " + objetivo.getKey() + " y= " + objetivo.getValue());
+                System.out.println("rescate : y aleman esta en X= " + objetivoActual.getKey() + " y= " + objetivoActual.getValue());
                 
              // actualizaPos(siguientePos);
                 
             }//Fin de while (tengo objetivo)
            
             
-        }
+        } // FIN DEL WHILE ONLINE
     }
+    
+
     
     public void checkIn(JsonObject objeto){
         // Check in
@@ -369,15 +408,15 @@ public class Rescate extends Dron {
     public String siguientePosicion(){
         String pos="";
         
-        if(miX==objetivo.getKey()){  
-            if(miY<objetivo.getValue()){
+        if(miX==objetivoActual.getKey()){  
+            if(miY<objetivoActual.getValue()){
                 pos="moveS";
             }
-            else if(miY>objetivo.getValue()){
+            else if(miY>objetivoActual.getValue()){
                 pos="moveN";
             }
         }
-        else if(miX<objetivo.getKey()){
+        else if(miX<objetivoActual.getKey()){
             pos="moveE";
         }
         else{

@@ -31,6 +31,11 @@ import org.codehaus.jettison.json.JSONArray;
 public abstract class Dron extends SuperAgent {
     
     /**
+     * Nombre del interlocutor.
+     */
+    String nombreInterlocutor = "Grupoe";
+    
+    /**
      * Estado actual del agente.
      */
     Estados estado;
@@ -94,10 +99,6 @@ public abstract class Dron extends SuperAgent {
     //DBAMap mapa;
     BufferedImage mapa;
     
-    /**
-     * Nombre del interlocutor.
-     */
-    String nombreInterlocutor = "Grupo___e ";
     
     /**
      * Nombre del dron.
@@ -235,16 +236,10 @@ public abstract class Dron extends SuperAgent {
      */
     
     public void pedirSiguientePosicion() {
-
         JsonObject objetoJSON = new JsonObject();
-        objetoJSON.add("dron", nombreDron);
         objetoJSON.add("posX", posActualX);
         objetoJSON.add("posY", posActualY);
-
-        String content = objetoJSON.toString();
-        
-        //System.out.println("Pidiendo siguiente posicion " + nombreDron);
-            
+        String content = objetoJSON.toString();            
         mandaMensaje(nombreInterlocutor, ACLMessage.QUERY_REF, content);
     }
     
@@ -429,10 +424,8 @@ public abstract class Dron extends SuperAgent {
      */
     public void cargarPercepciones(){
         mandaMensaje("Elnath", ACLMessage.QUERY_REF ,"");
-       // System.out.println("performativa enviado es " + outbox.getPerformative().toString());
         recibeMensaje("mensaje de pedir Percepciones");
         this.replyWth = inbox.getReplyWith();
-       // System.out.println(" performativa recibido es " + inbox.getPerformative().toString());
         if(inbox.getPerformativeInt() == ACLMessage.INFORM ){
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();
             JsonObject result =  objeto.get("result").asObject();
@@ -446,19 +439,6 @@ public abstract class Dron extends SuperAgent {
             torescue = result.get("torescue").asInt();
             energy = result.get("energy").asDouble();
             cancel =result.get("cancel").asBoolean();
-            /*
-            System.out.println("GPS -> "+gps);
-            System.out.println("INFRAROJOS -> "+infrared);
-            System.out.println("GONIO -> "+ gonio);
-            System.out.println("FUEL -> "+ fuel);
-            System.out.println("GOAL -> "+ goal);
-            System.out.println("STATUS -> "+ status);
-            System.out.println("AWACS -> "+ awacs);
-            System.out.println("TORESCUE -> "+ torescue);
-            System.out.println("ENERGY -> "+ energy);
-            System.out.println("CANCEL -> "+ cancel);
-            */
-           // System.out.println("INFRAROJOS -> "+infrared);
         }
         
     }
@@ -477,23 +457,17 @@ public abstract class Dron extends SuperAgent {
         int anchura = range;
         int radio = anchura/2;
         
+        // Obtenemos las posiciones relativas de los alemanes en el infrarojos.
         for( int y=0;y<range;y++){
             for(int x=0;x<range;x++){
-                
                 if( lista.get((y*anchura)+x).asInt() == 1 ){
                        posi.add(x);
                        posi.add(y);
                 }
-                //if ( y==radio && x== radio ) System.out.print("D ");
-                //else System.out.print(lista.get((y*anchura)+x) + " ");
             }
-            //System.out.println("");
         }
         
-        //System.out.println(gps);
-        //System.out.println(posi);
-        
-        
+        // convertimos dichas posiciones relativas en posiciones en el mundo.
         for(int i=0; i<posi.size();i+=2){
             int x = posi.get(i);
             int y = posi.get(i+1);
@@ -530,21 +504,12 @@ public abstract class Dron extends SuperAgent {
                     x = gps.get("x").asInt();
                 }
             }
-            
-            //System.out.println("Aleman -> (" + x + "," + y + ")" );
-            
+            // añadimos las posciones en el mundo al array:
             Pair<Integer,Integer> aleman = new Pair(x,y);
             coordAleman.add(aleman);
             
         }
-       /*
-        for(int i=0; i<coordAleman.size();i++){
-           int px=coordAleman.get(i).getKey();
-           int py=coordAleman.get(i).getValue();
-           System.out.println("Aleman " + i + " en la coordenada x= " + px + " , y = " + py);
-        }
-        */
-            
+          
 
     }// fin obetenerAlemanesInfrarojos
     
@@ -620,73 +585,37 @@ public abstract class Dron extends SuperAgent {
      * 
      * 
      * @author Yang Chen
+     * @author Adrian Ruiz Lopez
      */
-    public void mandarCoordenadas(){
-        while(coordAleman.size()>0){
-            for(int i=0;i<coordAleman.size();i++){
-                int px=coordAleman.get(i).getKey();
-                int py=coordAleman.get(i).getValue();
-                
-                JsonObject objetoJSON = new JsonObject();
-                objetoJSON.add("comando", "aniadir");
-                objetoJSON.add("posicionx",px);
-                objetoJSON.add("posiciony",py);
-                
-                String content = objetoJSON.toString();
-                
-                mandaMensaje(nombreInterlocutor, ACLMessage.REQUEST , content);
-                 
-                //System.out.println("voy a mandar las coordenadas al interlocutor");
-           
-                recibeMensaje("mensaje de mandar posiciones de almanes");
-            }
-            
-              //vaciamos el vector de alemanes
-              coordAleman.clear();
+    public void mandarInformacionPercepciones(){
+        JsonObject informacion = new JsonObject();
+        JsonArray alemanes = new JsonArray();
+        
+        
+        for(int i=0;i<coordAleman.size();i++){
+            int px=coordAleman.get(i).getKey();
+            int py=coordAleman.get(i).getValue();
+            JsonObject aleman = new JsonObject();
+            aleman.add("alemanX",px);
+            aleman.add("alemanY",py);
+            alemanes.add(aleman);
         }
         
+        // AQui podiramos añadir mas info que le pasa el dron al interlocutor
+        informacion.add("alemanes",alemanes);
+
+                
+        String content = informacion.toString();
+        mandaMensaje(nombreInterlocutor, ACLMessage.INFORM , content);
+            
+        //vaciamos el vector de alemanes
+        coordAleman.clear();
       
     }    
     
     
     
-    /**
-    * Método DE EJEMPLO QUE NOS SERVIRÁ DESPUES (SI NO BORRAR)
-    * 
-    * 
-    * @author Adrián Ruiz Lopez
-    */
-    public void metodo( String dir ){
-        
-        switch(dir){
-            case "N":
-                
-                break;
-            case "NW":
-                
-                break;
-            case "W":
-                
-                break;
-            case "S":
-                
-                break;
-            case "SE":
-                
-                break;
-            case "E":
-                
-                break;
-            case "NE":
-                
-                break;
-            case "SW":
-                
-                break;
-        }
-        
-        
-    }
+
     
     
     
