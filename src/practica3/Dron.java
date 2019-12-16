@@ -99,7 +99,6 @@ public abstract class Dron extends SuperAgent {
     //DBAMap mapa;
     BufferedImage mapa;
     
-    
     /**
      * Nombre del dron.
      */
@@ -341,7 +340,6 @@ public abstract class Dron extends SuperAgent {
     public String calculaDireccion(){
         
         String direccion = "";
-        
         ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
         //System.out.println("x: " + posActualX + " , " + nextPosX + " y " + posActualY + " , " + nextPosY);
         // Si la y es mayor y la x es igual, va al Norte

@@ -221,6 +221,7 @@ public class Interlocutor extends SuperAgent {
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
                     // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
+
                 }
                 
                 
@@ -290,6 +291,7 @@ public class Interlocutor extends SuperAgent {
         halcon = new Halcon(new AgentID(nombreHalcon), true, nombreMapaActual + ".png");
         rescate1 = new Rescate(new AgentID(nombreRescate1), true, nombreMapaActual + ".png");
         rescate2 = new Rescate2(new AgentID(nombreRescate2), true, nombreMapaActual + ".png");
+
         
         // ELEMENTOS DE LA CONEXION
         
@@ -310,6 +312,7 @@ public class Interlocutor extends SuperAgent {
         mosca.start();
         
         mandaMensaje(nombreMosca, ACLMessage.INFORM, content);
+
         recibeMensaje();
 
         if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
@@ -332,6 +335,7 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString();    
         
         mandaMensaje(nombreHalcon, ACLMessage.INFORM, content);
+
         
         recibeMensaje();
         
@@ -355,6 +359,7 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString(); 
         
         mandaMensaje(nombreRescate1, ACLMessage.INFORM, content);
+
         
         recibeMensaje();
         
@@ -376,6 +381,7 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString(); 
         
         mandaMensaje(nombreRescate2, ACLMessage.INFORM, content);
+
         
         recibeMensaje();
         
@@ -407,6 +413,7 @@ public class Interlocutor extends SuperAgent {
             mandaMensaje(nombreHalcon, ACLMessage.CONFIRM, "");
             mandaMensaje(nombreRescate1, ACLMessage.CONFIRM, "");
             mandaMensaje(nombreRescate2, ACLMessage.CONFIRM, "");
+
         }
        
         
@@ -737,6 +744,7 @@ public class Interlocutor extends SuperAgent {
             
             //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
+
         }
         
         if (nombreDron.equals( nombreMosca )){
@@ -775,6 +783,7 @@ public class Interlocutor extends SuperAgent {
             
             //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreMosca, ACLMessage.INFORM, mensaje);
+
         }
         
     }
