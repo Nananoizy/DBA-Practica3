@@ -613,8 +613,102 @@ public abstract class Dron extends SuperAgent {
     
     
     
+    /**
+     * Realiza la función de refuel
+     * Baja al suelo si fuese necesario, refuel y vuelve a subir
+     * 
+     * @param siguienteDireccion dirección a la que nos hemos movido
+     * @param numero_pasos_bajar cantidad de movimientos que necesitamos para bajar al
+     * suelo desde la posición inicial, si > 0, necesitamos bajar
+     * 
+     * @author David Infante Casas
+     */
+    public void refuel(String siguienteDireccion, int numero_pasos_bajar){
+        JsonObject objeto = new JsonObject();
+        String content = "";
+        JsonObject respuesta;
+        String resp = "";
+        int i = numero_pasos_bajar;
 
-    
+        // Si estoy en el aire, bajo al suelo
+        if (numero_pasos_bajar > 0) {
+            // Hago un bucle con el número de pasos hasta llegar al suelo
+            objeto.add("command", "moveDW");
+            content = objeto.toString();
+
+            // Bajo al suelo
+            while (i > 0) {
+                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                recibeMensaje("Efectua movimiento mosca");
+                this.replyWth = inbox.getReplyWith();
+                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
+                     fuel = fuel - fuelrate;
+                     //actualizamos la posicion localmente
+                     actualizaPosicion(siguienteDireccion);
+                }
+                else{
+                    respuesta = Json.parse(inbox.getContent()).asObject();            
+                    resp = respuesta.get("result").asString();
+                    System.out.println("Soy la mosca y no me he podido mover");
+                    System.out.println(resp);
+                    online = false;
+                }
+
+                --i;
+            }
+
+            // Si he tenido que bajar, borro el comando de bajar
+            objeto.remove("command");
+            cargarPercepciones();
+        }
+
+        // Reposto
+        objeto.add("command","refuel");
+        content = objeto.toString();
+        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+
+        recibeMensaje("Efectua refuel mosca");
+        this.replyWth = inbox.getReplyWith();
+
+        if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+             System.out.println("La mosca ha hecho refuel");
+             cargarPercepciones();
+        } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE || inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD){
+            respuesta = Json.parse(inbox.getContent()).asObject();            
+            resp = respuesta.get("result").asString();
+            System.out.println(resp);
+            online = false;
+        }
+
+        if (numero_pasos_bajar > 0) {
+            // Borramos el comando refuel para volver a subir
+            objeto.remove("command");
+            objeto.add("command", "moveUP");
+            content = objeto.toString();
+            //Subo a la altura anterior
+            i = numero_pasos_bajar;
+            while (i > 0) {
+                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                recibeMensaje("Efectua movimiento mosca");
+                this.replyWth = inbox.getReplyWith();
+                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
+                     fuel = fuel - fuelrate;
+                     //actualizamos la posicion localmente
+                     actualizaPosicion(siguienteDireccion);
+                }
+                else{
+                    respuesta = Json.parse(inbox.getContent()).asObject();            
+                    resp = respuesta.get("result").asString();
+                    System.out.println("Soy la mosca y no me he podido mover");
+                    System.out.println(resp);
+                    online = false;
+                }
+
+                --i;
+            }
+            cargarPercepciones();
+        }
+    }
     
     
 }

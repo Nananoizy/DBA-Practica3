@@ -200,25 +200,25 @@ public class Interlocutor extends SuperAgent {
                 String sender = inbox.getSender().name;
                 
                 if( sender.equals(nombreHalcon)  ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreHalcon);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if ( sender.equals(nombreMosca) ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreMosca);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if( sender.equals(nombreRescate1)){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
                     // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
                     // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
 
