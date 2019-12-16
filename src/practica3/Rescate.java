@@ -128,7 +128,6 @@ public class Rescate extends Dron {
                             1º deicidirMovimiento / accion rescatar
                             2º EnviarMov al controlador ( o mensaje de rescate ) 
                         */
-                        mandar
                         
                     }else if( !tengoObjetivo && AlemanesPendientes.size()>0 ){
                         // ASIGNA EL NUEVO OBJETIVO
@@ -142,8 +141,8 @@ public class Rescate extends Dron {
                 }// FIN IF SI ES UNA RESPUESTA DE UN MOV.
             }
                 
-            /*********************************************************************/
-            objetivoActual=aux;
+            /********************************************************************
+            //objetivoActual=aux;
             tengoObjetivo=true;
             
             while(tengoObjetivo){
@@ -238,7 +237,7 @@ public class Rescate extends Dron {
                     
                         recibeMensaje("Efectua movimiento el dron rescate");
                         this.replyWth = inbox.getReplyWith();
-                    }*/
+                    }
                 }
                 else{
                     siguientePos=siguientePosicion();
@@ -276,8 +275,8 @@ public class Rescate extends Dron {
                 
             }//Fin de while (tengo objetivo)
            
-            
-        } // FIN DEL WHILE ONLINE
+            */
+        } // FIN DEL WHILE ONLINE 
     }
     
 

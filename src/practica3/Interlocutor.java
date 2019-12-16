@@ -48,7 +48,7 @@ public class Interlocutor extends SuperAgent {
     Halcon halcon;
     Mosca mosca;
     Rescate rescate1;
-    Rescate2 rescate2;
+    Rescate rescate2;
     
     /**
      * Estado actual del agente.
@@ -290,7 +290,7 @@ public class Interlocutor extends SuperAgent {
         mosca = new Mosca(new AgentID(nombreMosca), true, nombreMapaActual + ".png");
         halcon = new Halcon(new AgentID(nombreHalcon), true, nombreMapaActual + ".png");
         rescate1 = new Rescate(new AgentID(nombreRescate1), true, nombreMapaActual + ".png");
-        rescate2 = new Rescate2(new AgentID(nombreRescate2), true, nombreMapaActual + ".png");
+        rescate2 = new Rescate(new AgentID(nombreRescate2), true, nombreMapaActual + ".png");
 
         
         // ELEMENTOS DE LA CONEXION
