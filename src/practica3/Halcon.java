@@ -216,6 +216,7 @@ public class Halcon extends Dron {
                 System.out.println("Checkin halcon: " + objeto.get("result").asString());
                 posActualX = posInicioX;
                 posActualY = posInicioY;
+                posActualZ=consultaAltura(posActualX,posActualY);
                 
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
