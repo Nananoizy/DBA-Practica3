@@ -32,7 +32,7 @@ public class Practica3 {
         );
         
         Interlocutor agente;
-        String nombreInterlocutor = "Grupoe";
+        String nombreInterlocutor = "Grupoe_";
         try {
             agente = new Interlocutor(new AgentID(nombreInterlocutor), "playground", true);
 

@@ -96,6 +96,7 @@ public class Mosca extends Dron {
         }
         
         while(online) {
+            
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -107,6 +108,9 @@ public class Mosca extends Dron {
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }else{
+                //primero carga las percepciones para saber si va a poder moverse
+                cargarPercepciones();
+                
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
                 

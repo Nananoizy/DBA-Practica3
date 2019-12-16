@@ -36,11 +36,11 @@ public class Interlocutor extends SuperAgent {
     /**
      * Nombres de los drones:
      */
-     String nombreInterlocutor = "Grupoe";
-     String nombreHalcon = "Grupoe_halcon";
-     String nombreMosca = "Grupoe_mosca";
-     String nombreRescate1 = "Grupoe_rescate1";
-     String nombreRescate2 = "Grupoe_rescate2";
+     String nombreInterlocutor = "Grupoe_";
+     String nombreHalcon = "Grupoe__halcon";
+     String nombreMosca = "Grupoe__mosca";
+     String nombreRescate1 = "Grupoe__rescate1";
+     String nombreRescate2 = "Grupoe__rescate2";
     
     /**
      * Drones de la práctica.
@@ -653,6 +653,7 @@ public class Interlocutor extends SuperAgent {
         outbox.setPerformative(ACLMessage.SUBSCRIBE);
         outbox.setContent(mensaje);
         this.send(outbox);
+        
     }
     
     /**
