@@ -83,24 +83,20 @@ public class Mosca extends Dron {
             
         }
         
-        //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
+        // ESPERAMOS A QUE EL INTERLOCUTOR NOS COONFIRME QUE TODOS LOS DRONES SE LEVANTARON BIEN.
         recibeMensaje("todos los drones levantados");
         
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        // SI TODO FUE CORRECTO ENTRAMOS EN MODO RESCATE.
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
         // cargamos las percepciones
-        
         if (online){
             cargarPercepciones();
         }
         
         while(online){
-            
-            
+                        
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -111,8 +107,7 @@ public class Mosca extends Dron {
                 nextPosY = objeto.get("irAY").asInt();
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
-            }
-            else{
+            }else{
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
                 
@@ -205,9 +200,9 @@ public class Mosca extends Dron {
                         }
                         cargarPercepciones();
                     }
-                    
-                }
-                else{
+
+                }else{
+
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
@@ -237,13 +232,9 @@ public class Mosca extends Dron {
                 
                 
                 
-            }
+            }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
             
-            ///////////////////////////////////////////
-                
-            // COMPORTAMIENTO EN TIMEPO DE RESCATE.            
-            
-            /////////////////////////////////////////////
+
         }
         
         

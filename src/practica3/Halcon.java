@@ -106,8 +106,9 @@ public class Halcon extends Dron {
                 
         // Una vez se ha inicializado continuamos en el bucle:
         while( online ){
-            //System.out.println("fuel: " + fuel + " posX: " + posActualX + " posY: " + posActualY + " posZ: " + posActualZ);
-            
+
+           /* 
+
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -243,9 +244,9 @@ public class Halcon extends Dron {
                 
                 
                 
-            }
+            }*/
             
-            mandarCoordenadas();
+            mandarInformacionPercepciones();
             
             // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
@@ -292,6 +293,7 @@ public class Halcon extends Dron {
                 System.out.println("Checkin halcon: " + objeto.get("result").asString());
                 posActualX = posInicioX;
                 posActualY = posInicioY;
+                posActualZ=consultaAltura(posActualX,posActualY);
                 
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
