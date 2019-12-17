@@ -36,11 +36,13 @@ public class Interlocutor extends SuperAgent {
     /**
      * Nombres de los drones:
      */
+  
      String nombreInterlocutor = "Grupoe_prueba  ";
      String nombreHalcon = "Grupoe_halcon_prueba  ";
      String nombreMosca = "Grupoe_mosca_prueba  ";
      String nombreRescate1 = "Grupoe_rescate1_prueba  ";
      String nombreRescate2 = "Grupoe_rescate2_prueba  ";
+
     
     /**
      * Drones de la práctica.
@@ -730,14 +732,25 @@ public class Interlocutor extends SuperAgent {
    
             }
             //si ya he llegado a la esquina de abajo, vuelvo a base
-            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
+            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == dimY - 49)){
                 
-                siguientePosicionHalcon = new Pair(49, dimY - 49);
+                siguientePosicionHalcon = new Pair(spawns.get(2), spawns.get(3));
                 
                 irAX = siguientePosicionHalcon.getKey();
                 irAY = siguientePosicionHalcon.getValue();
                 
             }
+            
+            //si ya estoy en base, paro
+            else if((x == irAX && y == irAY) && (x == spawns.get(2) && y == spawns.get(3))){
+                
+                siguientePosicionHalcon = new Pair(-1,-1);
+                
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
+                
+            }
+            
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   

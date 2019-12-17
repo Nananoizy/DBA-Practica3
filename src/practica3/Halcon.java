@@ -113,9 +113,17 @@ public class Halcon extends Dron {
                 pedirSiguientePosicion();
                 recibeMensaje("Recibir siguiente posicion");
                 
-                JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
-                nextPosX = objeto.get("irAX").asInt();
-                nextPosY = objeto.get("irAY").asInt();
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+                
+                // si los dos son -1, es la señal de stop
+                if (objeto.get("irAX").asInt() == -1 && objeto.get("irAY").asInt() == -1){
+                    //System.out.println("El halcón va a detenerse");
+                    pideParar();
+                }
+                else{
+                    nextPosX = objeto.get("irAX").asInt();
+                    nextPosY = objeto.get("irAY").asInt();
+                }
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }

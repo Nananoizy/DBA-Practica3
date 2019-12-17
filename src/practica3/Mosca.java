@@ -142,6 +142,7 @@ public class Mosca extends Dron {
                          fuel = fuel - fuelrate;
                          
                          //actualizamos la posicion localmente
+                         System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
                          actualizaPosicion(siguienteDireccion);
                     }
                     else{

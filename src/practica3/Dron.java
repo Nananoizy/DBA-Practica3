@@ -290,6 +290,326 @@ public abstract class Dron extends SuperAgent {
     }
     
     /**
+
+    * Método que manda un mensaje al controlador para parar a un dron
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public void pideParar(){
+      JsonObject objetoJSON = new JsonObject();
+        objetoJSON.add("command", "stop");
+        String content = objetoJSON.toString();            
+        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+    }
+    
+    /**
+    * Método que consulta si el dron actual va a colisionar en la casilla objetivo
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public int[] casillaFuturaDron(String otrodrondireccion, int x, int y, int z){
+        
+        switch(otrodrondireccion){
+            case "moveUP":
+                z = z + 1;
+            break;
+            
+            case "moveDW":
+                z = z-1;
+            break;
+            
+            case "moveN":
+                y = y -1;
+            break;
+            
+            case "moveNW":
+                y = y -1;
+                x = x - 1;
+            break;
+            
+            case "moveW":
+                x = x -1;
+            break;
+            
+            case "moveSW":
+                y = y +1;
+                x = x -1;
+            break;
+            
+            case "moveS":
+                y = y +1;
+            break;
+            
+            case "moveSE":
+                y = y +1;
+                x = x +1;
+            break;
+            
+            case "moveE":
+                x = x +1;
+            break;
+            
+            case "moveNE":
+                y = y -1;
+                x = x +1;
+            break;
+            
+                
+        }
+        
+        int[] posicionesDron = {x, y, z};
+        
+        return posicionesDron;
+        
+    }
+    
+    
+    /**
+    * Método que consulta si el dron actual va a colisionar en la casilla objetivo
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public String compruebaAwacs(String direccion){
+        
+        
+        for (int i = 0; i < awacs.size(); i++){
+            
+            JsonObject dron = awacs.get(i).asObject();
+            
+            int otroposx = dron.get("x").asInt();
+            int otroposy = dron.get("y").asInt();
+            int otroposz = dron.get("z").asInt();
+            String otrodirection = dron.get("direction").asString();
+            int [] posicionFuturaDron;
+            
+            //Si voy a moverme en una direccion concreta compruebo si hay drones ahi o si los va a haber
+            
+            switch(direccion){
+                //SI ME VOY A MOVER HACIA ARRIBA, TENGO QUE COMPROBAR QUE NO HAYA YA ENCIMA MIO O QUE NO VAYAN A MOVERSE A ENCIMA MIO
+                case "moveUP":
+                    
+                    // SI ESTÁ EN NUESTRA MISMA CASILLA
+                    if (otroposx == posActualX && otroposy == posActualY){
+                        
+                        //Si está por encima nuestra justo una casilla o dos
+                        if (otroposz == posActualZ + 1 || otroposz == posActualZ + 2){
+                            //si no tiene planeado moverse o si quiere bajar, nos apartamos a un lado
+                            if((otrodirection.equals("") || otrodirection.equals("moveDW")) && otroposz == posActualZ + 1){
+                                nextPosY = posActualY + 1;
+                            }
+                            else{  //dejamos que pase por encima nuestra
+                                direccion = "";
+                            }
+                        }
+
+                    }
+                    // SI NO ESTÁ EN NUESTRA MISMA CASILLA
+                    else{
+                        // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                        
+                        posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+                        
+                        //si voy a colisionar cuando me mueva, me quedo en el sitio
+                        if (posicionFuturaDron[0] == posActualX && posicionFuturaDron[1] == posActualY && posicionFuturaDron[2] == posActualZ + 1){
+                            direccion = "";
+                        }
+                        
+                    }
+                break;
+                
+                //SI ME VOY A MOVER HACIA ABAJO, TENGO QUE COMPROBAR QUE NO HAYA YA DEBAJO MIO O QUE NO VAYAN A MOVERSE A DEBAJO MIO
+                case "moveDW":
+                    
+                    // SI ESTÁ EN NUESTRA MISMA CASILLA
+                    if (otroposx == posActualX && otroposy == posActualY){
+                        
+                        //Si está por encima nuestra justo una casilla o dos
+                        if (otroposz == posActualZ - 1 || otroposz == posActualZ - 2){
+                            //si no tiene planeado moverse o si quiere bajar, nos apartamos a un lado
+                            if((otrodirection.equals("") || otrodirection.equals("moveUP")) && otroposz == posActualZ - 1){
+                                //doy nueva posicion ??? o simplemente cambio direccion ???
+                                nextPosY = posActualY + 1;
+                            }
+                            else{  //dejamos que pase por encima nuestra
+                                direccion = "";
+                            }
+                        }
+
+                    }
+                    // SI NO ESTÁ EN NUESTRA MISMA CASILLA
+                    else{
+                        // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                        
+                        posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+                        
+                        //si voy a colisionar cuando me mueva, me quedo en el sitio
+                        if (posicionFuturaDron[0] == posActualX && posicionFuturaDron[1] == posActualY && posicionFuturaDron[2] == posActualZ - 1){
+                            direccion = "";
+                        }
+                        
+                    }
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL NORTE
+                case "moveN":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    //si voy a colisionar cuando me mueva, me quedo en el sitio
+                    if (posicionFuturaDron[0] == posActualX && posicionFuturaDron[1] == posActualY - 1 && posicionFuturaDron[2] == posActualZ){
+                        
+                        //si el otro dron no se va a mover y voy a colisionar, lo sobrepaso
+                        //OJO!!!!! CAMBIAR PARA QUE NO SUPERE LIMITES DEL ALTURA MAXIMA, CAMBIAR POR MANO DERECHA
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL NOROESTE
+                case "moveNW":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    //si voy a colisionar cuando me mueva, me quedo en el sitio
+                    if (posicionFuturaDron[0] == posActualX -1 && posicionFuturaDron[1] == posActualY - 1 && posicionFuturaDron[2] == posActualZ){
+                        
+                        //si el otro dron no se va a mover y voy a colisionar, lo sobrepaso
+                        //OJO!!!!! CAMBIAR PARA QUE NO SUPERE LIMITES DEL ALTURA MAXIMA, CAMBIAR POR MANO DERECHA
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL NOROESTE
+                case "moveW":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    //si voy a colisionar cuando me mueva, me quedo en el sitio
+                    if (posicionFuturaDron[0] == posActualX -1 && posicionFuturaDron[1] == posActualY && posicionFuturaDron[2] == posActualZ){
+                        
+                        //si el otro dron no se va a mover y voy a colisionar, lo sobrepaso
+                        //OJO!!!!! CAMBIAR PARA QUE NO SUPERE LIMITES DEL ALTURA MAXIMA, CAMBIAR POR MANO DERECHA
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL SUROESTE
+                case "moveSW":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    //si voy a colisionar cuando me mueva, me quedo en el sitio
+                    if (posicionFuturaDron[0] == posActualX -1 && posicionFuturaDron[1] == posActualY + 1 && posicionFuturaDron[2] == posActualZ){
+                        
+                        //si el otro dron no se va a mover y voy a colisionar, lo sobrepaso
+                        //OJO!!!!! CAMBIAR PARA QUE NO SUPERE LIMITES DEL ALTURA MAXIMA, CAMBIAR POR MANO DERECHA
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL NOROESTE
+                case "moveS":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    if (posicionFuturaDron[0] == posActualX && posicionFuturaDron[1] == posActualY + 1 && posicionFuturaDron[2] == posActualZ){
+ 
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL SURESTE
+                case "moveSE":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    if (posicionFuturaDron[0] == posActualX +1 && posicionFuturaDron[1] == posActualY + 1 && posicionFuturaDron[2] == posActualZ){
+ 
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL este
+                case "moveE":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    if (posicionFuturaDron[0] == posActualX +1 && posicionFuturaDron[1] == posActualY && posicionFuturaDron[2] == posActualZ){
+ 
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+                //SI ME VOY A MOVER HACIA EL NORESTE
+                case "moveNE":
+                    
+                    // tengo que comprobar que no va a haber ningun dron que se vaya a mover a la casilla en la que voy a estar
+                    posicionFuturaDron = casillaFuturaDron(otrodirection, otroposx, otroposy, otroposz);
+
+                    if (posicionFuturaDron[0] == posActualX +1 && posicionFuturaDron[1] == posActualY - 1 && posicionFuturaDron[2] == posActualZ){
+ 
+                        if (otrodirection.equals("")){
+                            direccion = "moveUP";
+                        }
+                        else
+                            direccion = "";
+                    }
+
+                break;
+                
+            }
+            
+        }
+        
+        return direccion;
+    }
+    
+    
+    /**
     * Método que actualiza la posicion del dron una vez se ha movido con exito
     * 
     * 
