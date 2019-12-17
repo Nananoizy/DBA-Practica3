@@ -218,13 +218,13 @@ public class Interlocutor extends SuperAgent {
                 }else if( sender.equals(nombreRescate1)){ // AQUI PODEMOS PONER UN OR!!!! -> AUNQUE POR AHORA LO DEJAMOS PARA DIFERENCIARLO BIEN
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
                     if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
-                        informarHalcon();
+                        recibirAleman();
                     }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
                     if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
-                        informarHalcon();
+                        recibirAleman();
                     }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }
@@ -242,9 +242,22 @@ public class Interlocutor extends SuperAgent {
         }
     }
     
-    
-    
-    
+     /**
+     * Conjuntos de Tareas que realiza al recibir un aleman
+     * 
+     * @author Adrian Ruiz Lopez
+     */  
+    public void recibirAleman(){
+        JsonObject alemanJSON = Json.parse(inbox.getContent()).asObject();
+        // Informamos al halcon:
+        informarHalcon(alemanJSON);
+        // Quitamos al aleman de la cola de rescate en la que estaba
+        int posx= alemanJSON.get("posX").asInt();
+        int posy= alemanJSON.get("posY").asInt();
+        Pair<Integer,Integer> aleman = new Pair<Integer,Integer>(posx,posy);
+        if( ArrayRescate1.contains(aleman) ) ArrayRescate1.remove(aleman);
+        //if( ArrayRescate2.contains(aleman) ) ArrayRescate2.remove(aleman);
+    }
     
     
     /**
@@ -252,9 +265,8 @@ public class Interlocutor extends SuperAgent {
      * 
      * @author Adrian Ruiz Lopez
      */
-    public void informarHalcon(){
-        JsonObject objeto = Json.parse(inbox.getContent()).asObject(); 
-        String mensaje = objeto.toString();
+    public void informarHalcon( JsonObject aleman ){
+        String mensaje = aleman.toString();
         mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
     }
     
