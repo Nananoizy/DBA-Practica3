@@ -33,8 +33,6 @@ public class Rescate extends Dron {
     Queue<Pair<Integer,Integer>> AlemanesPendientes = new LinkedList<Pair<Integer,Integer>> ();
     Pair<Integer,Integer> objetivoActual;
      
-    int miX, miY, miZ;
-     
     boolean rescatado=false;
     
     String comando="";
@@ -89,6 +87,10 @@ public class Rescate extends Dron {
             posInicioY = objeto.get("posInicioY").asInt();
             dimX = objeto.get("dimMaxX").asInt();
             dimY = objeto.get("dimMaxY").asInt();
+            posActualX = posInicioX;
+            posActualY = posInicioY;
+            posActualZ = consultaAltura(posActualX,posActualY);
+            
             
             mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM , "");
             
@@ -102,10 +104,13 @@ public class Rescate extends Dron {
         else online = false;
         
         
+        //cargarPercepciones();
+       // posActualZ = gps.get("z").asInt();
+        
         while(online){
             
             recibeMensaje("recibiendo un mensaje");
-            this.replyWth = inbox.getReplyWith();
+           // this.replyWth = inbox.getReplyWith();
 
             //Obtenemos quien es el SENDER:
             String sender = inbox.getSender().name;
@@ -127,6 +132,7 @@ public class Rescate extends Dron {
                 
                 
             }else if( sender.equals("Elnath")){
+                this.replyWth = inbox.getReplyWith();
                 // DISTINGUIR SI LA RESPUESTA RECIBIDA ES DE UN MOVIMIENTO O DE EXITO DE RESCATE:
                 if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
                     System.out.println("Soy el " + nombreDron + " y me he movido al: " + comando);
@@ -172,13 +178,16 @@ public class Rescate extends Dron {
                 else{
                      JsonObject respuesta = Json.parse(inbox.getContent()).asObject();
                      String resp = respuesta.get("result").asString();
-                     System.out.println("Soy el rescate2 y no me he podido mover");
+                     System.out.println("Soy el " + nombreDron + " y no me he podido mover");
                      System.out.println(resp);
                      
                      online = false;
                      tengoObjetivo = false;
                 }
             }
+            
+            System.out.println(nombreDron + " : Estoy en la posicion x = " + posActualX + " , y = " +posActualY + " , mi altura es " + posActualZ);
+            System.out.println("Y el aleman a rescatar esta en  x = " + objetivoActual.getKey() + " , y = " + objetivoActual.getValue() );
                               
         } // FIN DEL WHILE ONLINE
     }
@@ -192,6 +201,8 @@ public class Rescate extends Dron {
         String content = objeto.toString();
         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
         System.out.println(nombreDron+ " : voy a hacer: " + comando);
+        
+        actualizaPosicion(comando);
     }
     
     public void checkIn(JsonObject objeto){
@@ -242,7 +253,7 @@ public class Rescate extends Dron {
          direccion=obtenerDireccion(angulo);
          
           if (direccion.equals("N")){
-            if(miZ>=consultaAltura(miX,miY-1)){
+            if(posActualZ>=consultaAltura(posActualX,posActualY-1)){
                 siguientePos="moveN";
             }
             else{
@@ -250,7 +261,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("NE")){
-            if(miZ>=consultaAltura(miX+1,miY-1)){
+            if(posActualZ>=consultaAltura(posActualX+1,posActualY-1)){
                 siguientePos="moveNE";
             }
             else{
@@ -258,7 +269,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("E")){
-            if(miZ>=consultaAltura(miX+1,miY)){
+            if(posActualZ>=consultaAltura(posActualX+1,posActualY)){
                 siguientePos="moveE";
             }
             else{
@@ -266,7 +277,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("SE")){
-            if(miZ>=consultaAltura(miX+1,miY+1)){
+            if(posActualZ>=consultaAltura(posActualX+1,posActualY+1)){
                 siguientePos="moveSE";
             }
             else{
@@ -274,7 +285,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("S")){
-            if(miZ>=consultaAltura(miX,miY+1)){
+            if(posActualZ>=consultaAltura(posActualX,posActualY+1)){
                 siguientePos="moveS";
             }
             else{
@@ -282,7 +293,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("SW")){
-            if(miZ>=consultaAltura(miX-1,miY+1)){
+            if(posActualZ>=consultaAltura(posActualX-1,posActualY+1)){
                 siguientePos="moveSW";
             }
             else{
@@ -290,7 +301,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("W")){
-            if(miZ>=consultaAltura(miX-1,miY)){
+            if(posActualZ>=consultaAltura(posActualX-1,posActualY)){
                 siguientePos="moveW";
             }
             else{
@@ -298,7 +309,7 @@ public class Rescate extends Dron {
             }
         }
         else if (direccion.equals("NW")){
-            if(miZ>=consultaAltura(miX-1,miY-1)){
+            if(posActualZ>=consultaAltura(posActualX-1,posActualY-1)){
                 siguientePos="moveNW";
             }
             else{
@@ -320,15 +331,15 @@ public class Rescate extends Dron {
     public String siguientePosicion(){
         String pos="";
         
-        if(miX==objetivoActual.getKey()){  
-            if(miY<objetivoActual.getValue()){
+        if(posActualX==objetivoActual.getKey()){  
+            if(posActualY<objetivoActual.getValue()){
                 pos="moveS";
             }
-            else if(miY>objetivoActual.getValue()){
+            else if(posActualY>objetivoActual.getValue()){
                 pos="moveN";
             }
         }
-        else if(miX<objetivoActual.getKey()){
+        else if(posActualX<objetivoActual.getKey()){
             pos="moveE";
         }
         else{
@@ -369,15 +380,15 @@ public class Rescate extends Dron {
      public String obtenerComando(){
          
           //actualizamos la posicion que estamos
-         cargarPercepciones();
-         miX = gps.get("x").asInt();
-         miY = gps.get("y").asInt();
-         miZ = gps.get("z").asInt();
+       /*  cargarPercepciones();
+         posActualX = gps.get("x").asInt();
+         posActualY = gps.get("y").asInt();
+         posActualZ = gps.get("z").asInt();*/
                  
          //si estamos en la casilla de aleman
-         if(miX == objetivoActual.getKey() && miY == objetivoActual.getValue()){
+         if(posActualX == objetivoActual.getKey() && posActualY == objetivoActual.getValue()){
              //si estamos en el suelo y el aleman no ha sido rescatado, hacemos rescate
-             if(miZ == consultaAltura(miX,miY) && !rescatado){
+             if(posActualZ == consultaAltura(posActualX,posActualY) && !rescatado){
                comando="rescue";   
             }
             
@@ -387,9 +398,9 @@ public class Rescate extends Dron {
              } 
          }
          //si ya hemos rescatado los alemanes y estamos en la posicion inicial
-         else if(miX == posInicioX && miY == posInicioY && rescatado){
+         else if(posActualX == posInicioX && posActualY == posInicioY && rescatado){
              //si estamos en el suelo y rescatado, hacemos stop
-             if(miZ == consultaAltura(miX,miY)){
+             if(posActualZ == consultaAltura(posActualX,posActualY)){
                  comando="stop";
              }
              //no estamos en el suelo, bajamos
@@ -413,7 +424,7 @@ public class Rescate extends Dron {
      */
     public double obtenerAngulo(int objetivoX, int objetivoY){
           double angulo = 0.0;
-          angulo=(double) Math.toDegrees(Math.atan2(objetivoY-miX, objetivoX-miY));
+          angulo=(double) Math.toDegrees(Math.atan2(objetivoY-posActualX, objetivoX-posActualY));
           
           if(angulo<0){
               angulo+=360;
@@ -426,41 +437,41 @@ public class Rescate extends Dron {
      public void actualizaPos(String direccion){
         
         if (direccion.equals("moveN")){
-            miY = miY - 1;
+            posActualY = posActualY - 1;
         }
         else if (direccion.equals("moveNE")){
-            miX = miX + 1;
-            miY = miY - 1;
+            posActualX = posActualX + 1;
+            posActualY = posActualY - 1;
         }
         else if (direccion.equals("moveE")){
-            miX = miX + 1;
+            posActualX = posActualX + 1;
         }
         else if (direccion.equals("moveSE")){
-            miX = miX + 1;
-            miY = miY + 1;
+            posActualX = posActualX + 1;
+            posActualY = posActualY + 1;
         }
         else if (direccion.equals("moveS")){
-            miY = miY + 1;
+            posActualY = posActualY + 1;
         }
         else if (direccion.equals("moveSW")){
-            miX = miX - 1;
-            miY = miY + 1;
+            posActualX = posActualX - 1;
+            posActualY = posActualY + 1;
         }
         else if (direccion.equals("moveW")){
-            miX = miX - 1;
+            posActualX = posActualX - 1;
         }
         else if (direccion.equals("moveNW")){
-            miX = miX - 1;
-            miY = miY - 1;
+            posActualX = posActualX - 1;
+            posActualY = posActualY - 1;
         }
         else if (direccion.equals("moveUP")){
-            miZ = miZ + 1;
+            posActualZ = posActualZ + 1;
         }
         else if (direccion.equals("moveDW")){
-            miZ = miZ - 1;
+            posActualZ = posActualZ - 1;
         }
         
-        //System.out.println("Posicion actualizada: " + miX + " , " + miY);
+        //System.out.println("Posicion actualizada: " + posActualX + " , " + posActualY);
     }
     
     */

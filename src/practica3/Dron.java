@@ -226,6 +226,7 @@ public abstract class Dron extends SuperAgent {
         
         outbox.setContent(content);
         this.send(outbox);
+        System.out.println("El reply mandado es " + replyWth);
     }
     
     /**
@@ -257,6 +258,9 @@ public abstract class Dron extends SuperAgent {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("No se puede recibir el mensaje" + cadena);
         }
+        
+        System.out.println("El reply recibido es " + inbox.getReplyWith().toString());
+        System.out.println("mi reply actual es " + replyWth);
     }
     
     
