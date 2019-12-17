@@ -33,7 +33,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupoe";
+    String nombreInterlocutor = "Grupoe_prueba  ";
     
     /**
      * Estado actual del agente.
@@ -98,6 +98,7 @@ public abstract class Dron extends SuperAgent {
     */
     //DBAMap mapa;
     BufferedImage mapa;
+    
     
     /**
      * Nombre del dron.
@@ -225,6 +226,7 @@ public abstract class Dron extends SuperAgent {
         
         outbox.setContent(content);
         this.send(outbox);
+        System.out.println("El reply mandado es " + replyWth);
     }
     
     /**
@@ -256,6 +258,9 @@ public abstract class Dron extends SuperAgent {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("No se puede recibir el mensaje" + cadena);
         }
+        
+        System.out.println("El reply recibido es " + inbox.getReplyWith().toString());
+        System.out.println("mi reply actual es " + replyWth);
     }
     
     
@@ -285,6 +290,7 @@ public abstract class Dron extends SuperAgent {
     }
     
     /**
+
     * Método que manda un mensaje al controlador para parar a un dron
     * 
     * 
@@ -660,9 +666,6 @@ public abstract class Dron extends SuperAgent {
         
         String direccion = "";
         
-        //Comprobamos si en nextPosX va a haber o hay algun obstaculo y si es asi lo esquivamos por encima
-                
-        
         ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
         //System.out.println("x: " + posActualX + " , " + nextPosX + " y " + posActualY + " , " + nextPosY);
         // Si la y es mayor y la x es igual, va al Norte
@@ -734,9 +737,7 @@ public abstract class Dron extends SuperAgent {
             else
                 direccion = "moveNW";
         }
-        
-        direccion = compruebaAwacs(direccion);
-        
+
         return direccion;
     }
     
@@ -847,24 +848,24 @@ public abstract class Dron extends SuperAgent {
         double distancia = gonio.get("distance").asDouble();
         double angulo = gonio.get("angle").asDouble();
         int x_aleman = 0, y_aleman = 0;
-        
-        System.out.println("distancia: " + distancia + " angulo: "+ angulo);
-        
+        int x_actual = gps.get("x").asInt();
+        int y_actual = gps.get("y").asInt();
+              
         // Según el ángulo calculamos la posición
-        if (angulo >= 0 && angulo <= 90) { // N-E
-            x_aleman = (int) (posActualX - Math.sin(Math.toRadians(angulo)) * distancia);
-            y_aleman = (int) (posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
+       if (angulo >= 0 && angulo <= 90) { // N-E
+            x_aleman = (int) (x_actual + Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
         } else if (angulo > 90 && angulo <= 180) { // E-S
-            x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
-            y_aleman = (int) (posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
+            x_aleman = (int) (x_actual + Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual + Math.sin(angulo) * distancia);
         } else if (angulo > 180 && angulo <= 270) { // S-W
-            x_aleman = (int) (posActualX - Math.sin(Math.toRadians(angulo)) * distancia);
-            y_aleman = (int) (posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
+            x_aleman = (int) (x_actual - Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual + Math.sin(angulo) * distancia);
         } else if (angulo > 270 && angulo <= 360) { // W-N
-            x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
-            y_aleman = (int) (posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
+            x_aleman = (int) (x_actual - Math.cos(angulo) * distancia);
+            y_aleman = (int) (y_actual - Math.sin(angulo) * distancia);
         }
-        
+              
         Pair<Integer,Integer> aleman = new Pair(x_aleman, y_aleman);
         if (!comprobarAlemanRepetido(aleman)) coordAleman.add(aleman);
         else System.out.println("Alemán repetido detectado con infrarrojos");
@@ -938,102 +939,8 @@ public abstract class Dron extends SuperAgent {
     
     
     
-    /**
-     * Realiza la función de refuel
-     * Baja al suelo si fuese necesario, refuel y vuelve a subir
-     * 
-     * @param siguienteDireccion dirección a la que nos hemos movido
-     * @param numero_pasos_bajar cantidad de movimientos que necesitamos para bajar al
-     * suelo desde la posición inicial, si > 0, necesitamos bajar
-     * 
-     * @author David Infante Casas
-     */
-    public void refuel(String siguienteDireccion, int numero_pasos_bajar){
-        JsonObject objeto = new JsonObject();
-        String content = "";
-        JsonObject respuesta;
-        String resp = "";
-        int i = numero_pasos_bajar;
 
-        // Si estoy en el aire, bajo al suelo
-        if (numero_pasos_bajar > 0) {
-            // Hago un bucle con el número de pasos hasta llegar al suelo
-            objeto.add("command", "moveDW");
-            content = objeto.toString();
-
-            // Bajo al suelo
-            while (i > 0) {
-                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                recibeMensaje("Efectua movimiento mosca");
-                this.replyWth = inbox.getReplyWith();
-                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
-                     fuel = fuel - fuelrate;
-                     //actualizamos la posicion localmente
-                     actualizaPosicion(siguienteDireccion);
-                }
-                else{
-                    respuesta = Json.parse(inbox.getContent()).asObject();            
-                    resp = respuesta.get("result").asString();
-                    System.out.println("Soy la mosca y no me he podido mover");
-                    System.out.println(resp);
-                    online = false;
-                }
-
-                --i;
-            }
-
-            // Si he tenido que bajar, borro el comando de bajar
-            objeto.remove("command");
-            cargarPercepciones();
-        }
-
-        // Reposto
-        objeto.add("command","refuel");
-        content = objeto.toString();
-        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-
-        recibeMensaje("Efectua refuel mosca");
-        this.replyWth = inbox.getReplyWith();
-
-        if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-             System.out.println("La mosca ha hecho refuel");
-             cargarPercepciones();
-        } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE || inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD){
-            respuesta = Json.parse(inbox.getContent()).asObject();            
-            resp = respuesta.get("result").asString();
-            System.out.println(resp);
-            online = false;
-        }
-
-        if (numero_pasos_bajar > 0) {
-            // Borramos el comando refuel para volver a subir
-            objeto.remove("command");
-            objeto.add("command", "moveUP");
-            content = objeto.toString();
-            //Subo a la altura anterior
-            i = numero_pasos_bajar;
-            while (i > 0) {
-                mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                recibeMensaje("Efectua movimiento mosca");
-                this.replyWth = inbox.getReplyWith();
-                if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
-                     fuel = fuel - fuelrate;
-                     //actualizamos la posicion localmente
-                     actualizaPosicion(siguienteDireccion);
-                }
-                else{
-                    respuesta = Json.parse(inbox.getContent()).asObject();            
-                    resp = respuesta.get("result").asString();
-                    System.out.println("Soy la mosca y no me he podido mover");
-                    System.out.println(resp);
-                    online = false;
-                }
-
-                --i;
-            }
-            cargarPercepciones();
-        }
-    }
+    
     
     
 }
