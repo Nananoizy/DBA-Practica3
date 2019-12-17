@@ -59,7 +59,6 @@ public class Mosca extends Dron {
      * Comportamiento del agente
      * 
      * @author Mariana Orihuela Cazorla
-     * @author David Infante Casas
      */
     @Override
     public void execute() {        
@@ -95,8 +94,8 @@ public class Mosca extends Dron {
             cargarPercepciones();
         }
         
-        while(online) {
-            
+        while(online){  /*
+                        
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -108,22 +107,25 @@ public class Mosca extends Dron {
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }else{
-                //primero carga las percepciones para saber si va a poder moverse
-                cargarPercepciones();
-                
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
                 
                 JsonObject objeto = new JsonObject();
                 
-                ///Si no tengo fuel suficiente, reposto. Else me muevo
-                // Calculamos el número de pasos que necesitamos para bajar al suelo
-                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
-                // Hacemos refuel
-                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
-                    this.refuel(siguienteDireccion, numero_pasos_bajar);
+                ///Si no tengo fuel suficiente, reposto. Else me muevo     
+                if (fuel <= fuelrate + 2){
+                    objeto.add("command","refuel");
+                    String content = objeto.toString();
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    
+                    recibeMensaje("Efectua refuel mosca");
+                    this.replyWth = inbox.getReplyWith();
+                    
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         System.out.println("La mosca ha hecho refuel");
+                         cargarPercepciones();
+                    }
                 }else{
-
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
@@ -155,7 +157,7 @@ public class Mosca extends Dron {
                 
             }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
             
-
+*/
         }
         
         

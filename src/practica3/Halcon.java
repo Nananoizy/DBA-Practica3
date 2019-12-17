@@ -60,7 +60,6 @@ public class Halcon extends Dron {
      * Comportamiento del agente
      * 
      * @author Mariana Orihuela Cazorla
-     * @author David Infante Casas
      */
     @Override
     public void execute() {        
@@ -102,10 +101,13 @@ public class Halcon extends Dron {
             mostrarArrayAlemanes();
             obtenerAlemanGonio();
             mostrarArrayAlemanes();
+            
+            mandarInformacionPercepciones();
         }
                 
         // Una vez se ha inicializado continuamos en el bucle:
-        while( online ) {
+        while( online ){
+           /* 
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -117,19 +119,27 @@ public class Halcon extends Dron {
                 
                 //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }
-            else {
+            else{
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
                 
                 JsonObject objeto = new JsonObject();
                 
-                ///Si no tengo fuel suficiente, reposto. Else me muevo
-                // Calculamos el número de pasos que necesitamos para bajar al suelo
-                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
-                // Hacemos refuel
-                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
-                    this.refuel(siguienteDireccion, numero_pasos_bajar);
-                }else{
+                ///Si no tengo fuel suficiente, reposto. Else me muevo     
+                if (fuel <= fuelrate + 2){
+                    objeto.add("command","refuel");
+                    String content = objeto.toString();
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    
+                    recibeMensaje("Efectua refuel halcon");
+                    this.replyWth = inbox.getReplyWith();
+                    
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         System.out.println("El halcon ha hecho refuel");
+                         cargarPercepciones();
+                    }
+                }
+                else{
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
@@ -156,10 +166,12 @@ public class Halcon extends Dron {
                         online = false;
                     }
                 }
-   
-            }
+                
+                
+                
+            }*/
             
-            mandarInformacionPercepciones();
+            //mandarInformacionPercepciones();
             
             // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
                 // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR

@@ -36,11 +36,11 @@ public class Interlocutor extends SuperAgent {
     /**
      * Nombres de los drones:
      */
-     String nombreInterlocutor = "Grupoe_";
-     String nombreHalcon = "Grupoe__halcon";
-     String nombreMosca = "Grupoe__mosca";
-     String nombreRescate1 = "Grupoe__rescate1";
-     String nombreRescate2 = "Grupoe__rescate2";
+     String nombreInterlocutor = "Grupoe_prueba  ";
+     String nombreHalcon = "Grupoe_halcon_prueba  ";
+     String nombreMosca = "Grupoe_mosca_prueba  ";
+     String nombreRescate1 = "Grupoe_rescate1_prueba  ";
+     String nombreRescate2 = "Grupoe_rescate2_prueba  ";
     
     /**
      * Drones de la práctica.
@@ -200,28 +200,27 @@ public class Interlocutor extends SuperAgent {
                 String sender = inbox.getSender().name;
                 
                 if( sender.equals(nombreHalcon)  ){
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
+                    System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreHalcon);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if ( sender.equals(nombreMosca) ){
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
+                    System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreMosca);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if( sender.equals(nombreRescate1)){
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
+                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
                     // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
+                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
                     // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
-
                 }
                 
                 
@@ -291,7 +290,6 @@ public class Interlocutor extends SuperAgent {
         halcon = new Halcon(new AgentID(nombreHalcon), true, nombreMapaActual + ".png");
         rescate1 = new Rescate(new AgentID(nombreRescate1), true, nombreMapaActual + ".png");
         rescate2 = new Rescate(new AgentID(nombreRescate2), true, nombreMapaActual + ".png");
-
         
         // ELEMENTOS DE LA CONEXION
         
@@ -312,7 +310,6 @@ public class Interlocutor extends SuperAgent {
         mosca.start();
         
         mandaMensaje(nombreMosca, ACLMessage.INFORM, content);
-
         recibeMensaje();
 
         if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
@@ -335,7 +332,6 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString();    
         
         mandaMensaje(nombreHalcon, ACLMessage.INFORM, content);
-
         
         recibeMensaje();
         
@@ -359,7 +355,6 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString(); 
         
         mandaMensaje(nombreRescate1, ACLMessage.INFORM, content);
-
         
         recibeMensaje();
         
@@ -381,7 +376,6 @@ public class Interlocutor extends SuperAgent {
         content = objetoJSONInicio.toString(); 
         
         mandaMensaje(nombreRescate2, ACLMessage.INFORM, content);
-
         
         recibeMensaje();
         
@@ -413,7 +407,6 @@ public class Interlocutor extends SuperAgent {
             mandaMensaje(nombreHalcon, ACLMessage.CONFIRM, "");
             mandaMensaje(nombreRescate1, ACLMessage.CONFIRM, "");
             mandaMensaje(nombreRescate2, ACLMessage.CONFIRM, "");
-
         }
        
         
@@ -653,7 +646,6 @@ public class Interlocutor extends SuperAgent {
         outbox.setPerformative(ACLMessage.SUBSCRIBE);
         outbox.setContent(mensaje);
         this.send(outbox);
-        
     }
     
     /**
@@ -745,7 +737,6 @@ public class Interlocutor extends SuperAgent {
             
             //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
-
         }
         
         if (nombreDron.equals( nombreMosca )){
@@ -784,7 +775,6 @@ public class Interlocutor extends SuperAgent {
             
             //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreMosca, ACLMessage.INFORM, mensaje);
-
         }
         
     }

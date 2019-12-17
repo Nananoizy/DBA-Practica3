@@ -37,6 +37,7 @@ public class Rescate extends Dron {
      
     boolean rescatado=false;
     
+    String comando="";
    
     
     /**
@@ -104,6 +105,7 @@ public class Rescate extends Dron {
         while(online){
             
             recibeMensaje("recibiendo un mensaje");
+            this.replyWth = inbox.getReplyWith();
 
             //Obtenemos quien es el SENDER:
             String sender = inbox.getSender().name;
@@ -114,11 +116,20 @@ public class Rescate extends Dron {
                 JsonObject aleman = Json.parse(inbox.getContent()).asObject();
                 Pair<Integer,Integer> nuevoAleman = new Pair(aleman.get("alemanX").asInt(),aleman.get("alemanY").asInt());
                 AlemanesPendientes.add(nuevoAleman);
+  
+                objetivoActual = AlemanesPendientes.poll();
+                if(!tengoObjetivo) tengoObjetivo=true;
+                
+                comando = obtenerComando();
+                realizarMovimiento(comando);
+                
+              //  recibeMensaje("Efectua movimiento " + nombreDron);
+                
                 
             }else if( sender.equals("Elnath")){
                 // DISTINGUIR SI LA RESPUESTA RECIBIDA ES DE UN MOVIMIENTO O DE EXITO DE RESCATE:
                 if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
-                    
+                    System.out.println("Soy el " + nombreDron + " y me he movido al: " + comando);
                 
                 
 
@@ -129,158 +140,59 @@ public class Rescate extends Dron {
                             1º deicidirMovimiento / accion rescatar
                             2º EnviarMov al controlador ( o mensaje de rescate ) 
                         */
+                      comando=obtenerComando();
+                      realizarMovimiento(comando);
+                      
+                      if(comando.equals("rescue")){
+                          rescatado = true;
+                          tengoObjetivo = false;
+                      }
+                      else if(comando.equals("stop")){
+                          tengoObjetivo = false;
+                      }
                         
-                    }else if( !tengoObjetivo && AlemanesPendientes.size()>0 ){
+                    }else if( !tengoObjetivo && rescatado && AlemanesPendientes.size()>0 ){
                         // ASIGNA EL NUEVO OBJETIVO
                         objetivoActual = AlemanesPendientes.poll();
+                        tengoObjetivo = true;
                         // MOVERSE:
-
-
-
+                        comando = obtenerComando();
+                        realizarMovimiento(comando);
+                    }
+                    else if(!tengoObjetivo && rescatado && AlemanesPendientes.isEmpty()){
+                        // ASIGNA EL PUNTO DE INICIO COMO OBJETIVO
+                        objetivoActual = new Pair(posInicioX,posInicioY);
+                        tengoObjetivo = true;
+                        //MOVERSE
+                        comando=obtenerComando();
+                        realizarMovimiento(comando);
                     }
                     
                 }// FIN IF SI ES UNA RESPUESTA DE UN MOV.
-            }
-                
-            /********************************************************************
-            //objetivoActual=aux;
-            tengoObjetivo=true;
-            
-            while(tengoObjetivo){
-                cargarPercepciones();
-                miX=gps.get("x").asInt();
-                miY=gps.get("y").asInt();
-                miZ=gps.get("z").asInt();
-                String siguientePos = "";
-                
-                JsonObject objeto = new JsonObject();
-                
-                //Si estoy en la casilla de aleman
-                if(miX==objetivoActual.getKey() && miY==objetivoActual.getValue()){
-                    //si estoy en el suelo y el aleman no ha sido rescatado, rescato
-                    if(miZ==5 && !rescatado){
-                         objeto.add("command","rescue");
-                         String content = objeto.toString();
-                         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                         System.out.println("performativa enviado es " + outbox.getPerformative().toString());
-                         
-                        recibeMensaje("Efectua rescue el dron rescate");
-                        this.replyWth = inbox.getReplyWith();
-                         System.out.println("performativa recibido es " + inbox.getPerformative().toString());
-                         
-                        if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                             objeto = Json.parse(inbox.getContent()).asObject();
-                             System.out.println("El aleman " + objeto.get("id").asString() + " ha sido rescatado.");
-                             rescatado=true;
-                          }
-                        else{
-                            JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
-                        String resp = respuesta.get("result").asString();
-                        System.out.println("Soy el rescate y no me he podido hacer rescue");
-                        System.out.println(resp);
-                        online = false;
-                        tengoObjetivo=false;
-                        }
-                        
-                        //si ha sido rescatado el leman, tengo que volver, asgno la coordenada inicial como mi objetivo
-                          if(rescatado){
-                              objetivoActual=new Pair(posInicioX ,posInicioY);
-                           }
-                    }
-                    // si no estoy en el suelo, bajo
-                    else{
-                        siguientePos="moveDW";
-                        objeto.add("command",siguientePos);
-                        String content = objeto.toString();
-                        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    
-                         System.out.println("rescate: Me quiero mover a: " + siguientePos);
-                    
-                         recibeMensaje("Efectua movimiento rescate");
-                         this.replyWth = inbox.getReplyWith();
-                         
-                         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         System.out.println("Soy el rescate y me he movido al: " + siguientePos);
-                         
-                        
-                        
-
-                    }
-                    else{
-                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
-                        String resp = respuesta.get("result").asString();
-                        System.out.println("Soy el rescate y no me he podido mover");
-                        System.out.println(resp);
-                        online = false;
-                        tengoObjetivo=false;
-                    }
-                         
-                    }
-                }
-                //si estoy en la posicion inicial
-                else if(miX==posInicioX&&miY==posInicioY && rescatado){
-                    //si estoy en el suelo y rescatado, hago stop
-                    if(miZ==consultaAltura(miX,miY) ){
-                         objeto.add("command","stop");
-                         String content = objeto.toString();
-                         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    
-                        recibeMensaje("Efectua stop el dron rescate");
-                      //  this.replyWth = inbox.getReplyWith();
-                        
-                        tengoObjetivo=false;
-                        System.out.println("rescate: ya he rescatado el aleman y he hecho el stop.");
-                    }
-                    /*else{
-                        objeto.add("command","moveDW");
-                         String content = objeto.toString();
-                         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    
-                        recibeMensaje("Efectua movimiento el dron rescate");
-                        this.replyWth = inbox.getReplyWith();
-                    }
-                }
                 else{
-                    siguientePos=siguientePosicion();
-                     objeto.add("command",siguientePos);
-                    String content = objeto.toString();
-                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    System.out.println("el cid es " + outbox.getConversationId().toString());
-                    
-                    System.out.println("rescate: Me quiero mover a: " + siguientePos);
-                    
-                    recibeMensaje("Efectua movimiento rescate");
-                    this.replyWth = inbox.getReplyWith();
-                    
-                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         System.out.println("Soy el rescate y me he movido al: " + siguientePos);
-                         
-                        
-                        
-
-                    }
-                    else{
-                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
-                        String resp = respuesta.get("result").asString();
-                        System.out.println("Soy el rescate y no me he podido mover");
-                        System.out.println(resp);
-                        online = false;
-                    }
-                    
+                     JsonObject respuesta = Json.parse(inbox.getContent()).asObject();
+                     String resp = respuesta.get("result").asString();
+                     System.out.println("Soy el rescate2 y no me he podido mover");
+                     System.out.println(resp);
+                     
+                     online = false;
+                     tengoObjetivo = false;
                 }
-                
-                System.out.println("rescate : estoy en X= " + miX + " y= " + miY + " mi altura es " + miZ);
-                System.out.println("rescate : y aleman esta en X= " + objetivoActual.getKey() + " y= " + objetivoActual.getValue());
-                
-             // actualizaPos(siguientePos);
-                
-            }//Fin de while (tengo objetivo)
-           
-            */
-        } // FIN DEL WHILE ONLINE 
+            }
+                              
+        } // FIN DEL WHILE ONLINE
     }
     
-
+    
+    
+    public void realizarMovimiento(String comando){
+        JsonObject objeto = new JsonObject();
+                      
+        objeto.add("command", comando);
+        String content = objeto.toString();
+        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+        System.out.println(nombreDron+ " : voy a hacer: " + comando);
+    }
     
     public void checkIn(JsonObject objeto){
         // Check in
@@ -446,7 +358,52 @@ public class Rescate extends Dron {
               
          return direccion;
      }
-    
+     
+     
+     /**
+     * El comportamiento del dron rescate
+     * 
+     * 
+     * @author Yang Chen
+     */
+     public String obtenerComando(){
+         
+          //actualizamos la posicion que estamos
+         cargarPercepciones();
+         miX = gps.get("x").asInt();
+         miY = gps.get("y").asInt();
+         miZ = gps.get("z").asInt();
+                 
+         //si estamos en la casilla de aleman
+         if(miX == objetivoActual.getKey() && miY == objetivoActual.getValue()){
+             //si estamos en el suelo y el aleman no ha sido rescatado, hacemos rescate
+             if(miZ == consultaAltura(miX,miY) && !rescatado){
+               comando="rescue";   
+            }
+            
+            //si no estamos en el suelo, bajamos
+             else if(!rescatado){
+                 comando = "moveDW";
+             } 
+         }
+         //si ya hemos rescatado los alemanes y estamos en la posicion inicial
+         else if(miX == posInicioX && miY == posInicioY && rescatado){
+             //si estamos en el suelo y rescatado, hacemos stop
+             if(miZ == consultaAltura(miX,miY)){
+                 comando="stop";
+             }
+             //no estamos en el suelo, bajamos
+             else{
+                 comando="moveDW";
+             }
+         }
+         //hacemos movimiento normal
+         else{
+             comando=siguientePosicion();
+             }
+         return comando;
+     }
+         
     
     /**
      * obtener angulo a partir de la posicion de un aleman
