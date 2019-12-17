@@ -285,6 +285,19 @@ public abstract class Dron extends SuperAgent {
     }
     
     /**
+    * Método que manda un mensaje al controlador para parar a un dron
+    * 
+    * 
+    * @author Mariana Orihuela Cazorla
+    */
+    public void pideParar(){
+      JsonObject objetoJSON = new JsonObject();
+        objetoJSON.add("command", "stop");
+        String content = objetoJSON.toString();            
+        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+    }
+    
+    /**
     * Método que consulta si el dron actual va a colisionar en la casilla objetivo
     * 
     * 
