@@ -152,6 +152,17 @@ public class Rescate extends Dron {
                       if(comando.equals("rescue")){
                           rescatado = true;
                           tengoObjetivo = false;
+                          
+                          /*
+                          //Mandamos las coordenadas del aleman rescatado al interlocutor para que lo elimine del array
+                          JsonObject aleman = new JsonObject();
+                          int x=objetivoActual.getKey();
+                          int y=objetivoActual.getValue();
+                          aleman.add("alemanX", x);
+                          aleman.add("alemanY", y);
+                          String content = aleman.toString();
+                          mandaMensaje(nombreInterlocutor, ACLMessage.INFORM,content);
+                          */
                       }
                       else if(comando.equals("stop")){
                           tengoObjetivo = false;
