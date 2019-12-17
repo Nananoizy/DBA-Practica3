@@ -202,14 +202,14 @@ public class Interlocutor extends SuperAgent {
                 String sender = inbox.getSender().name;
                 
                 if( sender.equals(nombreHalcon)  ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreHalcon);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if ( sender.equals(nombreMosca) ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreMosca);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
@@ -217,19 +217,29 @@ public class Interlocutor extends SuperAgent {
                     }
                 }else if( sender.equals(nombreRescate1)){
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
-                    // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
+                    if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de que se ha rescatado un aleman
+                        notificarAlemanRescatado(); 
+                    }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
-                    // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
+                    if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de que se ha rescatado un aleman
+                        notificarAlemanRescatado(); 
+                    }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }
-                
-                
+                else if (inbox.getPerformativeInt() == ACLMessage.REQUEST){
+                    
+                    objeto = Json.parse(inbox.getContent()).asObject();
+                    recibirCoordenadas(objeto);
+                    
+                    mandaMensaje("Grupoe__halcon",ACLMessage.CONFIRM,"");
+                    
+                    //online = false;
 
-                
+
             } // Fin bucle while de MODO RESCATE
-            
+
             cancelarPartida();
             
         }
@@ -238,6 +248,23 @@ public class Interlocutor extends SuperAgent {
         }
     }
     
+
+    /**
+     * Enviar el aleman que ha sido rescatado al halcon para que cuando no 
+     * detecte alemanes se ponga a moverse
+     * 
+     * @author Adrian Ruiz Lopez
+     */
+    public void notificarAlemanRescatado(){
+        
+        //obtenemos el aleman que se acaba de rescatar y se lo enviamos a el halcon
+        JsonObject aleman = Json.parse(inbox.getContent()).asObject();
+        String mensaje = aleman.toString();     
+        mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
+    }
+    
+    
+
     /**
      * Recibir coordenadas de los alemanes enviados por drones y guardarlo en el array
      * 
@@ -260,11 +287,12 @@ public class Interlocutor extends SuperAgent {
                     // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
                     ArrayRescate1.add(coordenada);
                     String content = aleman.toString();
-                    //mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
+                    mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
                 }
                                
             }
         }
+
         
         JsonObject aleman = new JsonObject();
         int x=ArrayRescate1.get(0).getKey();

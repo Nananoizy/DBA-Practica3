@@ -94,7 +94,7 @@ public class Mosca extends Dron {
             cargarPercepciones();
         }
         
-        while(online){  /*
+        while(online){  
                         
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
@@ -105,26 +105,12 @@ public class Mosca extends Dron {
                 nextPosX = objeto.get("irAX").asInt();
                 nextPosY = objeto.get("irAY").asInt();
                 
-                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
-            }else{
-                String siguienteDireccion = "";
-                siguienteDireccion = calculaDireccion();
-                
-                JsonObject objeto = new JsonObject();
-                
-                ///Si no tengo fuel suficiente, reposto. Else me muevo     
-                if (fuel <= fuelrate + 2){
-                    objeto.add("command","refuel");
-                    String content = objeto.toString();
-                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    
-                    recibeMensaje("Efectua refuel mosca");
-                    this.replyWth = inbox.getReplyWith();
-                    
-                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         System.out.println("La mosca ha hecho refuel");
-                         cargarPercepciones();
-                    }
+                ///Si no tengo fuel suficiente, reposto. Else me muevo
+                // Calculamos el número de pasos que necesitamos para bajar al suelo
+                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                // Hacemos refuel
+                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                    this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }else{
                     
                     objeto.add("command",siguienteDireccion);
@@ -142,7 +128,8 @@ public class Mosca extends Dron {
                          fuel = fuel - fuelrate;
                          
                          //actualizamos la posicion localmente
-                         System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
+
+                         System.out.println("Mosca: Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
                          actualizaPosicion(siguienteDireccion);
                     }
                     else{
@@ -157,8 +144,9 @@ public class Mosca extends Dron {
                 
                 
             }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
+
             
-*/
+
         }
         
         
