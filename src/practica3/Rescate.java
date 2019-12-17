@@ -32,9 +32,7 @@ public class Rescate extends Dron {
     boolean tengoObjetivo;
     Queue<Pair<Integer,Integer>> AlemanesPendientes = new LinkedList<Pair<Integer,Integer>> ();
     Pair<Integer,Integer> objetivoActual;
-     
-    boolean rescatado=false;
-    
+         
     String comando="";
    
     
@@ -50,6 +48,7 @@ public class Rescate extends Dron {
         super(aid, host,nombreArchivo);
         rol = "rescue";
         tengoObjetivo = false;
+        nombreDron = "rescate";
     }
     
     
@@ -109,6 +108,7 @@ public class Rescate extends Dron {
         
         while(online){
             
+            
             recibeMensaje("recibiendo un mensaje");
            // this.replyWth = inbox.getReplyWith();
 
@@ -121,12 +121,17 @@ public class Rescate extends Dron {
                 JsonObject aleman = Json.parse(inbox.getContent()).asObject();
                 Pair<Integer,Integer> nuevoAleman = new Pair(aleman.get("alemanX").asInt(),aleman.get("alemanY").asInt());
                 AlemanesPendientes.add(nuevoAleman);
-  
-                objetivoActual = AlemanesPendientes.poll();
-                if(!tengoObjetivo) tengoObjetivo=true;
                 
-                comando = obtenerComando();
-                realizarMovimiento(comando);
+                System.out.println("Aniadido: ");
+                System.out.println("Alemanes pendientes: " + AlemanesPendientes);
+
+                   
+                if(!tengoObjetivo){
+                    objetivoActual = AlemanesPendientes.poll();  
+                    tengoObjetivo=true;
+                    comando = obtenerComando();
+                    realizarMovimiento(comando);
+                }              
                 
               //  recibeMensaje("Efectua movimiento " + nombreDron);
                 
@@ -150,7 +155,6 @@ public class Rescate extends Dron {
                       realizarMovimiento(comando);
                       
                       if(comando.equals("rescue")){
-                          rescatado = true;
                           tengoObjetivo = false;
                           notificarInterlocutor();
                       }
@@ -158,22 +162,26 @@ public class Rescate extends Dron {
                           tengoObjetivo = false;
                       }
                         
-                    }else if( !tengoObjetivo && rescatado && AlemanesPendientes.size()>0 ){
+                    }else if( !tengoObjetivo && AlemanesPendientes.size() > 0 ){
                         // ASIGNA EL NUEVO OBJETIVO
                         objetivoActual = AlemanesPendientes.poll();
+                        
+                        System.out.println("Eliminado: ");
+                        System.out.println("Alemanes pendientes: " + AlemanesPendientes);
+                        
                         tengoObjetivo = true;
                         // MOVERSE:
                         comando = obtenerComando();
                         realizarMovimiento(comando);
                     }
-                    else if(!tengoObjetivo && rescatado && AlemanesPendientes.isEmpty()){
-                        // ASIGNA EL PUNTO DE INICIO COMO OBJETIVO
+                    /*else if(!tengoObjetivo && AlemanesPendientes.size() == 0){
+                        // ESPERAR HASTA QUE EL INTERLOCUTOR NOS DIGA QUE NO HAY ALEMANES EN EL MAPA Y VOLVEMOS A BASE ENTONCES
                         objetivoActual = new Pair(posInicioX,posInicioY);
                         tengoObjetivo = true;
                         //MOVERSE
                         comando=obtenerComando();
                         realizarMovimiento(comando);
-                    }
+                    }*/
                     
                 }// FIN IF SI ES UNA RESPUESTA DE UN MOV.
                 else{
@@ -267,83 +275,7 @@ public class Rescate extends Dron {
             }
     }
     
-   /*  public String siguientePosicion(){
-         String siguientePos="";
-         
-         String direccion = "";
-         
-         double angulo=obtenerAngulo(objetivo.getKey(),objetivo.getValue());
-         direccion=obtenerDireccion(angulo);
-         
-          if (direccion.equals("N")){
-            if(posActualZ>=consultaAltura(posActualX,posActualY-1)){
-                siguientePos="moveN";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("NE")){
-            if(posActualZ>=consultaAltura(posActualX+1,posActualY-1)){
-                siguientePos="moveNE";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("E")){
-            if(posActualZ>=consultaAltura(posActualX+1,posActualY)){
-                siguientePos="moveE";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("SE")){
-            if(posActualZ>=consultaAltura(posActualX+1,posActualY+1)){
-                siguientePos="moveSE";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("S")){
-            if(posActualZ>=consultaAltura(posActualX,posActualY+1)){
-                siguientePos="moveS";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("SW")){
-            if(posActualZ>=consultaAltura(posActualX-1,posActualY+1)){
-                siguientePos="moveSW";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("W")){
-            if(posActualZ>=consultaAltura(posActualX-1,posActualY)){
-                siguientePos="moveW";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
-        else if (direccion.equals("NW")){
-            if(posActualZ>=consultaAltura(posActualX-1,posActualY-1)){
-                siguientePos="moveNW";
-            }
-            else{
-                siguientePos="moveUP";
-            }
-        }
    
-         
-            
-         return siguientePos;
-     }*/
     
     /**
      * calcula la siguiente posicion a mover
@@ -407,21 +339,24 @@ public class Rescate extends Dron {
          posActualX = gps.get("x").asInt();
          posActualY = gps.get("y").asInt();
          posActualZ = gps.get("z").asInt();*/
+       
+        nextPosX = objetivoActual.getKey();
+        nextPosY = objetivoActual.getValue();
                  
          //si estamos en la casilla de aleman
-         if(posActualX == objetivoActual.getKey() && posActualY == objetivoActual.getValue()){
+         if(posActualX == objetivoActual.getKey() && posActualY == objetivoActual.getValue() && tengoObjetivo){
              //si estamos en el suelo y el aleman no ha sido rescatado, hacemos rescate
-             if(posActualZ == consultaAltura(posActualX,posActualY) && !rescatado){
+             if(posActualZ == consultaAltura(posActualX,posActualY)){
                comando="rescue";   
             }
             
             //si no estamos en el suelo, bajamos
-             else if(!rescatado){
+             else{
                  comando = "moveDW";
              } 
          }
          //si ya hemos rescatado los alemanes y estamos en la posicion inicial
-         else if(posActualX == posInicioX && posActualY == posInicioY && rescatado){
+         else if(posActualX == posInicioX && posActualY == posInicioY && !tengoObjetivo){
              //si estamos en el suelo y rescatado, hacemos stop
              if(posActualZ == consultaAltura(posActualX,posActualY)){
                  comando="stop";
@@ -433,7 +368,7 @@ public class Rescate extends Dron {
          }
          //hacemos movimiento normal
          else{
-             comando=siguientePosicion();
+             comando=calculaDireccion();
              }
          return comando;
      }

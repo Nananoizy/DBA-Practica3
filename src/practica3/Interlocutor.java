@@ -202,36 +202,27 @@ public class Interlocutor extends SuperAgent {
                 String sender = inbox.getSender().name;
                 
                 if( sender.equals(nombreHalcon)  ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreHalcon);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
                 }else if ( sender.equals(nombreMosca) ){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreMosca);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
-                }else if( sender.equals(nombreRescate1)){ // AQUI PODEMOS PONER UN OR!!!! -> AUNQUE POR AHORA LO DEJAMOS PARA DIFERENCIARLO BIEN
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
-                    if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
-                        recibirAleman();
-                    }
-                    // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
-                }else if( sender.equals(nombreRescate2)){
-                    System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
+                }else if( sender.equals(nombreRescate1) || sender.equals(nombreRescate2)){ 
+                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de " + sender);
                     if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
                         recibirAleman();
                     }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }
                 
-                
-
-                
+                                
             } // Fin bucle while de modo rescate
             
             cancelarPartida();
@@ -283,38 +274,40 @@ public class Interlocutor extends SuperAgent {
        JsonObject objeto = Json.parse(inbox.getContent()).asObject();
        JsonArray alemanes = objeto.get("alemanes").asArray();
        
-        if( alemanes.size() > 0){
-            for( int i=0; i<alemanes.size(); i++){
-                JsonObject aleman = alemanes.get(i).asObject();
-                int posx= aleman.get("alemanX").asInt();
-                int posy= aleman.get("alemanY").asInt();
-                Pair<Integer,Integer> coordenada = new Pair(posx,posy);
-                // si este aleman no habia sido informado por ningun otro:
-                if( !alemanesTotalesDetectados.contains(coordenada) ){
-                    alemanesTotalesDetectados.add(coordenada);
-                    // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
-                    ArrayRescate1.add(coordenada);
-                    String content = aleman.toString();
-                    mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
-                }
-                               
+        for( int i=0; i<alemanes.size(); i++){
+            JsonObject aleman = alemanes.get(i).asObject();
+            int posx= aleman.get("alemanX").asInt();
+            int posy= aleman.get("alemanY").asInt();
+            Pair<Integer,Integer> coordenada = new Pair(posx,posy);
+            // si este aleman no habia sido informado por ningun otro:
+            if( !alemanesTotalesDetectados.contains(coordenada) ){
+                System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
+                alemanesTotalesDetectados.add(coordenada);
+                // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
+                decidirRescate(coordenada, aleman);
             }
-        }
-        
 
-        
+        }
+  
         // PODRIAMOS SEGUIR ANALIZANDO LA INFO OBTENIDA:
-        
-        for(int i=0;i<alemanesTotalesDetectados.size();i++){
-                 //System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
-        }
-        
-
         
     }
    
-
+   
+    /**
+     * Decidir a qué dron de rescate se le va a asignar
+     * 
+     * @author Mariana Orihuela Cazorla
+     * @author Adrian Ruiz Lopez
+     */
+   public void decidirRescate(Pair<Integer,Integer> coordenada, JsonObject aleman){
+       
+       ArrayRescate1.add(coordenada);
+       String content = aleman.toString();
+       mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
     
+   }
+                   
     /**
      * Método que levanta a los drones
      * 
@@ -799,7 +792,11 @@ public class Interlocutor extends SuperAgent {
             //SI NO ESTA TOCANDO NINGUNA ARISTA SE MOVERIA NW HASTA LA SIGUIENTE PARED
             if ((x == irAX && y == irAY)){
                 
-                if ((x == dimX - 1)){
+                siguientePosicionMosca = new Pair(30, 30);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                    
+                /*if ((x == dimX - 1)){
                     siguientePosicionMosca = new Pair(0, y + 9);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
@@ -813,7 +810,7 @@ public class Interlocutor extends SuperAgent {
                     siguientePosicionMosca = new Pair(dimX - 1, y);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
-                }
+                }*/
                 
                 System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
                 
