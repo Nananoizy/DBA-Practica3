@@ -89,12 +89,13 @@ public class Mosca extends Dron {
         if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
         else online = false;
         
-        // cargamos las percepciones
-        if (online){
-            cargarPercepciones();
-        }
         
-        while(online){  /*
+        while(online){  
+            
+            cargarPercepciones();
+            
+            System.out.println(infrared);
+            obtenerAlemanesInfrarojos();
                         
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
@@ -142,7 +143,7 @@ public class Mosca extends Dron {
                          fuel = fuel - fuelrate;
                          
                          //actualizamos la posicion localmente
-                         System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
+                         //System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
                          actualizaPosicion(siguienteDireccion);
                     }
                     else{
@@ -154,11 +155,10 @@ public class Mosca extends Dron {
                     }
                 }
                 
-                
+                mandarInformacionPercepciones();
                 
             }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
             
-*/
         }
         
         
