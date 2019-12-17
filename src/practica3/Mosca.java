@@ -100,7 +100,49 @@ public class Mosca extends Dron {
         while(online){
             ///////////////////////////////////////////
                 
+<<<<<<< Updated upstream
             // COMPORTAMIENTO EN TIMEPO DE RESCATE.            
+=======
+                ///Si no tengo fuel suficiente, reposto. Else me muevo
+                // Calculamos el número de pasos que necesitamos para bajar al suelo
+                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                // Hacemos refuel
+                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                    this.refuel(siguienteDireccion, numero_pasos_bajar);
+                }else{
+
+                    
+                    objeto.add("command",siguienteDireccion);
+                    String content = objeto.toString();
+
+                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
+
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    //System.out.println(replyWth);
+                    recibeMensaje("Efectua movimiento mosca");
+                    this.replyWth = inbox.getReplyWith();
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         //System.out.println("Soy la mosca y me he movido al: " + siguienteDireccion);
+                         //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
+                         fuel = fuel - fuelrate;
+                         
+                         //actualizamos la posicion localmente
+                         System.out.println("Mosca: Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
+                         actualizaPosicion(siguienteDireccion);
+                    }
+                    else{
+                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
+                        String resp = respuesta.get("result").asString();
+                        System.out.println("Soy la mosca y no me he podido mover");
+                        System.out.println(resp);
+                        online = false;
+                    }
+                }
+                
+                
+                
+            }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
+>>>>>>> Stashed changes
             
             /////////////////////////////////////////////
             online = false;

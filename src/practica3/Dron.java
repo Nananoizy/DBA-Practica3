@@ -433,6 +433,17 @@ public abstract class Dron extends SuperAgent {
               coordAleman.clear();
         }
         
+<<<<<<< Updated upstream
+=======
+        // AQui podiramos añadir mas info que le pasa el dron al interlocutor
+        informacion.add("alemanes",alemanes);
+
+                
+        String content = informacion.toString();
+        mandaMensaje(nombreInterlocutor, ACLMessage.INFORM , content);
+            
+
+>>>>>>> Stashed changes
       
     }    
     
