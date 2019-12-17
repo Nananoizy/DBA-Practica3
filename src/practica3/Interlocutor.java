@@ -242,11 +242,11 @@ public class Interlocutor extends SuperAgent {
         }
     }
     
-     /**
-     * Conjuntos de Tareas que realiza al recibir un aleman
-     * 
-     * @author Adrian Ruiz Lopez
-     */  
+    /**
+    * Conjuntos de Tareas que realiza al recibir un aleman
+    * 
+    * @author Adrian Ruiz Lopez
+    */  
     public void recibirAleman(){
         JsonObject alemanJSON = Json.parse(inbox.getContent()).asObject();
         // Informamos al halcon:
@@ -295,19 +295,13 @@ public class Interlocutor extends SuperAgent {
                     // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
                     ArrayRescate1.add(coordenada);
                     String content = aleman.toString();
-                    //mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
+                    mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
                 }
                                
             }
         }
         
-        JsonObject aleman = new JsonObject();
-        int x=ArrayRescate1.get(0).getKey();
-        int y=ArrayRescate1.get(0).getValue();
-        aleman.add("alemanX", x);
-        aleman.add("alemanY", y);
-        String content = aleman.toString();
-        mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
+
         
         // PODRIAMOS SEGUIR ANALIZANDO LA INFO OBTENIDA:
         

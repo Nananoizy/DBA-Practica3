@@ -152,6 +152,7 @@ public class Rescate extends Dron {
                       if(comando.equals("rescue")){
                           rescatado = true;
                           tengoObjetivo = false;
+                          notificarInterlocutor();
                       }
                       else if(comando.equals("stop")){
                           tengoObjetivo = false;
@@ -193,7 +194,24 @@ public class Rescate extends Dron {
     }
     
     
+    /**
+    * 
+    * 
+    * @author Adrian Ruiz Lopez
+    */  
+    public void notificarInterlocutor(){
+        JsonObject objeto = new JsonObject();
+        objeto.add("posX", objetivoActual.getKey());
+        objeto.add("posY", objetivoActual.getValue());
+        String content = objeto.toString();
+        mandaMensaje(nombreInterlocutor, ACLMessage.INFORM, content);
+    }
     
+    /**
+    * 
+    * 
+    * @author Y
+    */  
     public void realizarMovimiento(String comando){
         JsonObject objeto = new JsonObject();
                       
@@ -205,6 +223,11 @@ public class Rescate extends Dron {
         actualizaPosicion(comando);
     }
     
+    /**
+    * 
+    * 
+    * @author Y
+    */  
     public void checkIn(JsonObject objeto){
         // Check in
             JsonObject objetoJSON = new JsonObject();
