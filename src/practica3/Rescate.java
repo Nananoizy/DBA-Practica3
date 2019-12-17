@@ -36,6 +36,7 @@ public class Rescate extends Dron {
     int miX, miY, miZ;
      
     boolean rescatado=false;
+    
    
     
     /**
