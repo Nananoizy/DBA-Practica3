@@ -1,6 +1,7 @@
 package practica3;
 
 import DBA.SuperAgent;
+import DBAMap.DBAMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -16,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -31,27 +33,41 @@ import org.codehaus.jettison.json.JSONArray;
  * @author Yang Chen
  */
 public class Interlocutor extends SuperAgent {
+    /**
+     * Nombres de los drones:
+     */
+  
+     String nombreInterlocutor = "Grupoe_prueba  ";
+     String nombreHalcon = "Grupoe_halcon_prueba  ";
+     String nombreMosca = "Grupoe_mosca_prueba  ";
+     String nombreRescate1 = "Grupoe_rescate1_prueba  ";
+     String nombreRescate2 = "Grupoe_rescate2_prueba  ";
+
     
     /**
      * Drones de la práctica.
      */
-    
     Halcon halcon;
     Mosca mosca;
-    Rescate rescate1, rescate2;
+    Rescate rescate1;
+    Rescate rescate2;
+    
     /**
      * Estado actual del agente.
      */
     Estados estado;
+    
     /**
      * Mapa que recorre el agente.
      */
-    BufferedImage mapaActual;   
+    DBAMap mapaActual = new DBAMap();
     String nombreMapaActual;
+    
     /**
      * Clave de sesión para hacer login y logout.
      */
     String key;
+    
     /**
      * Dimensiones y alturas del mapa.
      */
@@ -90,11 +106,16 @@ public class Interlocutor extends SuperAgent {
     
     String sessionKey = "";
     
-    
+    /**
+     * Posiciones siguientes a las que tiene que ir cada dron.
+    */
+    Pair<Integer,Integer> siguientePosicionHalcon;
+    Pair<Integer,Integer> siguientePosicionMosca;
     
     boolean online=true;
    
-    ArrayList<Pair<Integer,Integer>> coordenadaAleman = new ArrayList<Pair<Integer,Integer>> ();
+    ArrayList<Pair<Integer,Integer>> alemanesTotalesDetectados = new ArrayList<Pair<Integer,Integer>> ();
+    ArrayList<Pair<Integer,Integer>> ArrayRescate1 = new ArrayList<Pair<Integer,Integer>> ();
    
     
     /**
@@ -136,64 +157,47 @@ public class Interlocutor extends SuperAgent {
     @Override
     public void execute() {        
  
-        //bandejas de entrada y salida
-
-        
-        //if hosteo..
-        //intentamos suscribirnos al mundo
+        // REALIZAMOS EL LOGIN EN EL MUNDO
         login();
-        
+        // RECIBIMOS MENSAJE DE CONFIRMACIÓN DE LOGIN
         recibeMensaje();
         
         // SI HE CONSEGUIDO SUSCRIBIRME A UN MUNDO
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-            System.out.println("\nSe ha podido hacer login con éxito");
-            
+                        
             JsonObject objeto = Json.parse(inbox.getContent()).asObject();  
             cId = inbox.getConversationId();
             sessionKey = objeto.get("session").asString();
             
+            ///EXTRAER MAPA
             try {         
-                ///EXTRAER MAPA
                 extraerTraza();
             } catch (IOException ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            //DIMENSIONES DEL MAPA
+            // OBTENEMOS DIMENSIONES DEL MAPA
             dimX = objeto.get("dimx").asInt();
             dimY = objeto.get("dimy").asInt();
             
             
-            System.out.println("dimx: " + dimX + " dimy: " + dimY);
+            //INICIALIZAMOS LAS POSICIONES A LAS QUE VAN A TENER QUE IR LOS DRONES
+            siguientePosicionHalcon = new Pair(dimX - 49, 49);
+            siguientePosicionMosca = new Pair(dimX - 1, 9);
             
-            
-            try {   
-                // Una vez hemos conseguido los datos que nos interesan, informamos a los distintos drones
-
+            // UNA VEZ OBTENIDOS LOS DATOS, CALCULAMOS POSICIONES
+            // Y LEVANTAMOS LOS DRONES:
+            try {
                 calculaSpawn();
-                levantarDrones();
-                
-                
+                levantarDrones();                
             } catch (Exception ex) {
                 Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            // BUCLE CORRESPONDIENE A LA PARTE DE RESCATE:
+            // UNA VEZ LEVANTAMOS LOS DRONES, PODEMOS INICIAR EL PROCESO DE RESCATE:
             while ( online ){
                 recibeMensaje();
-                //AgentID receptor = inbox.getReceiver();
                 
-<<<<<<< Updated upstream
-                if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){
-                    
-                    int veaX, veaY;
-                    String nombreDron;
-                    objeto = Json.parse(inbox.getContent()).asObject();
-                    nombreDron = objeto.get("dron").asString();
-                    veaX = objeto.get("posX").asInt();
-                    veaY = objeto.get("posY").asInt();
-=======
                 //Obtenemos quien es el SENDER:
                 String sender = inbox.getSender().name;
                 
@@ -216,7 +220,6 @@ public class Interlocutor extends SuperAgent {
                     if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de que se ha rescatado un aleman
                         notificarAlemanRescatado(); 
                     }
-                    
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
@@ -224,10 +227,6 @@ public class Interlocutor extends SuperAgent {
                         notificarAlemanRescatado(); 
                     }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
->>>>>>> Stashed changes
-
-                    respondeDireccion(veaX, veaY, nombreDron);
-                    //online = false;
                 }
                 else if (inbox.getPerformativeInt() == ACLMessage.REQUEST){
                     
@@ -237,17 +236,10 @@ public class Interlocutor extends SuperAgent {
                     mandaMensaje("Grupoe__halcon",ACLMessage.CONFIRM,"");
                     
                     //online = false;
-                }
-<<<<<<< Updated upstream
-                
-                //deberiamos discintiguir quien le estan enviando el mensaje e ir realizando las diferentes acciones.
-                
-            }
-=======
+
 
             } // Fin bucle while de MODO RESCATE
->>>>>>> Stashed changes
-            
+
             cancelarPartida();
             
         }
@@ -256,10 +248,7 @@ public class Interlocutor extends SuperAgent {
         }
     }
     
-<<<<<<< Updated upstream
-    
-   public void recibirCoordenadas(JsonObject objeto){
-=======
+
     /**
      * Enviar el aleman que ha sido rescatado al halcon para que cuando no 
      * detecte alemanes se ponga a moverse
@@ -275,6 +264,7 @@ public class Interlocutor extends SuperAgent {
     }
     
     
+
     /**
      * Recibir coordenadas de los alemanes enviados por drones y guardarlo en el array
      * 
@@ -303,25 +293,26 @@ public class Interlocutor extends SuperAgent {
             }
         }
 
+        
+        JsonObject aleman = new JsonObject();
+        int x=ArrayRescate1.get(0).getKey();
+        int y=ArrayRescate1.get(0).getValue();
+        aleman.add("alemanX", x);
+        aleman.add("alemanY", y);
+        String content = aleman.toString();
+        mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
+        
         // PODRIAMOS SEGUIR ANALIZANDO LA INFO OBTENIDA:
->>>>>>> Stashed changes
         
-       // JsonObject objeto = Json.parse(entrada.getContent()).asObject();
+        for(int i=0;i<alemanesTotalesDetectados.size();i++){
+                 //System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
+        }
         
-       // if(entrada.getPerformativeInt()==ACLMessage.REQUEST){
-            int posx=objeto.get("posicionx").asInt();
-            int posy=objeto.get("posiciony").asInt();
-            
-            Pair<Integer,Integer> coordenada = new Pair(posx,posy);
-            coordenadaAleman.add(coordenada);
-            System.out.println("aniadido posicion de aleman");
+
         
-        
-         for(int i=0;i<coordenadaAleman.size();i++){
-                  System.out.println("aleman " + i + " se encuentra en la coordenada: x = " + coordenadaAleman.get(i).getKey() + " , y = " + coordenadaAleman.get(i).getValue());
-         }
     }
-    
+   
+
     
     /**
      * Método que levanta a los drones
@@ -331,12 +322,12 @@ public class Interlocutor extends SuperAgent {
      */
     public void levantarDrones() throws Exception{
         
-        System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
+        //System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
-        mosca = new Mosca(new AgentID("Grupoe__mosca"), true, nombreMapaActual+".png");
-        halcon = new Halcon(new AgentID("Grupoe__halcon"), true, nombreMapaActual+".png");
-        rescate1 = new Rescate(new AgentID("Grupoe__rescate1"), true, nombreMapaActual+".png");
-        rescate2 = new Rescate(new AgentID("Grupoe__rescate2"), true, nombreMapaActual+".png");
+        mosca = new Mosca(new AgentID(nombreMosca), true, nombreMapaActual + ".png");
+        halcon = new Halcon(new AgentID(nombreHalcon), true, nombreMapaActual + ".png");
+        rescate1 = new Rescate(new AgentID(nombreRescate1), true, nombreMapaActual + ".png");
+        rescate2 = new Rescate(new AgentID(nombreRescate2), true, nombreMapaActual + ".png");
         
         // ELEMENTOS DE LA CONEXION
         
@@ -356,10 +347,9 @@ public class Interlocutor extends SuperAgent {
         
         mosca.start();
         
-        mandaMensaje("Grupoe__mosca", ACLMessage.INFORM, content);
-        
+        mandaMensaje(nombreMosca, ACLMessage.INFORM, content);
         recibeMensaje();
-        
+
         if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
             System.out.println("\nSe ha levantado la mosca"); 
         }
@@ -379,7 +369,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString();    
         
-        mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, content);
+        mandaMensaje(nombreHalcon, ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -402,7 +392,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate1", ACLMessage.INFORM, content);
+        mandaMensaje(nombreRescate1, ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -423,7 +413,7 @@ public class Interlocutor extends SuperAgent {
             
         content = objetoJSONInicio.toString(); 
         
-        mandaMensaje("Grupoe__rescate2", ACLMessage.INFORM, content);
+        mandaMensaje(nombreRescate2, ACLMessage.INFORM, content);
         
         recibeMensaje();
         
@@ -440,7 +430,7 @@ public class Interlocutor extends SuperAgent {
         for (int i = 0; i < 4; i++){
             recibeMensaje();  
             if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-                System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
+                //System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
                 checked++;
             }
             else{
@@ -451,10 +441,10 @@ public class Interlocutor extends SuperAgent {
         
         if (checked == 4){
             System.out.println ("Todos los drones operativos");
-            mandaMensaje("Grupoe__mosca", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__halcon", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate1", ACLMessage.CONFIRM, "");
-            mandaMensaje("Grupoe__rescate2", ACLMessage.CONFIRM, "");
+            mandaMensaje(nombreMosca, ACLMessage.CONFIRM, "");
+            mandaMensaje(nombreHalcon, ACLMessage.CONFIRM, "");
+            mandaMensaje(nombreRescate1, ACLMessage.CONFIRM, "");
+            mandaMensaje(nombreRescate2, ACLMessage.CONFIRM, "");
         }
        
         
@@ -606,7 +596,8 @@ public class Interlocutor extends SuperAgent {
         boolean sePuedeSpawnear = true;
         
         // Suponemos que x, y, dimX y dimY empiezan en 0
-        alturaCasilla = consultaAltura(x, y);
+       // alturaCasilla = consultaAltura(x, y);
+        alturaCasilla = mapaActual.getLevel(x, y);
         
         if (alturaCasilla > alturaMax){
             sePuedeSpawnear = false;
@@ -727,19 +718,11 @@ public class Interlocutor extends SuperAgent {
      * @author Mariana Orihuela Cazorla
      */
     public void extraerTraza() throws FileNotFoundException, IOException {
-        
-            JsonObject injson = Json.parse(inbox.getContent()).asObject();
-            JsonArray ja = injson.get("map").asArray();
-            byte data[] = new byte [ja.size()];
-            for (int i = 0; i < data.length; i++){
-                data[i] = (byte) ja.get(i).asInt();
-            }
-            FileOutputStream fos = new FileOutputStream(nombreMapaActual+".png");
-            fos.write(data);
-            fos.close();
-            System.out.println("Traza guardada");
-            
-            mapaActual = ImageIO.read(new File(nombreMapaActual+".png")); /// mapaActual YA es la matriz
+        JsonObject injson = Json.parse(inbox.getContent()).asObject();
+        JsonArray img = injson.get("map").asArray();
+        mapaActual.fromJson(img);
+        System.out.println("Saving file ./maps/"+ nombreMapaActual +".png");
+        mapaActual.save("./"+nombreMapaActual+".png"); 
     }
     
     
@@ -751,39 +734,101 @@ public class Interlocutor extends SuperAgent {
      * @param y: posicion actual y del dron
      * @param nombreDron: nombre del dron que pide dirección
      */
-    public void respondeDireccion(int x, int y, String nombreDron){
-        // calcula dependiendo de dónde están los demás drones, a dónde tiene que ir el dron actual
+    public void respondeDireccion(String nombreDron){
+        JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+        int x = objeto.get("posX").asInt();
+        int y = objeto.get("posY").asInt();
         
+        // calcula dependiendo de dónde están los demás drones, a dónde tiene que ir el dron actual
         int irAX = -1;
         int irAY = -1;
         JsonObject objetoJSON = new JsonObject();
-        
-        System.out.println(nombreDron);
-        
-        if (nombreDron.equals( "halcon")){
-            irAX = dimX - 49;
-            irAY = 49;
+                
+        if (nombreDron.equals( nombreHalcon )){
+            irAX = siguientePosicionHalcon.getKey();
+            irAY = siguientePosicionHalcon.getValue();
+            
+            ///si he llegado a la esquina superior derecha, bajo abajo del todo
+            if ((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
+
+                siguientePosicionHalcon = new Pair(dimX - 49, dimY - 49);
+                
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
+                
+                //System.out.println("Siguiente posicion del halcon: " + irAX + " , " + irAY);
+   
+            }
+            //si ya he llegado a la esquina de abajo, vuelvo a base
+            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == dimY - 49)){
+                
+                siguientePosicionHalcon = new Pair(spawns.get(2), spawns.get(3));
+                
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
+                
+            }
+            
+            //si ya estoy en base, paro
+            else if((x == irAX && y == irAY) && (x == spawns.get(2) && y == spawns.get(3))){
+                
+                siguientePosicionHalcon = new Pair(-1,-1);
+                
+                irAX = siguientePosicionHalcon.getKey();
+                irAY = siguientePosicionHalcon.getValue();
+                
+            }
+            
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   
             String mensaje = objetoJSON.toString();
             
-            System.out.println("Respondemos a halcon");
-            mandaMensaje("Grupoe__halcon", ACLMessage.INFORM, mensaje);
+            //System.out.println("Respondemos a halcon");
+            mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
+        }
+        
+        if (nombreDron.equals( nombreMosca )){
+            
+            irAX = siguientePosicionMosca.getKey();
+            irAY = siguientePosicionMosca.getValue();
+            
+            ///para que no se quede pidiendo en el sitio y se mueva a un sitio aleatorio
+            
+            //SI NO ESTA TOCANDO NINGUNA ARISTA SE MOVERIA NW HASTA LA SIGUIENTE PARED
+            if ((x == irAX && y == irAY)){
+                
+                if ((x == dimX - 1)){
+                    siguientePosicionMosca = new Pair(0, y + 9);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
+                else if((x == 0)){
+                    siguientePosicionMosca = new Pair(dimX - 1, y + 9);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
+                else{
+                    siguientePosicionMosca = new Pair(dimX - 1, y);
+                    irAX = siguientePosicionMosca.getKey();
+                    irAY = siguientePosicionMosca.getValue();
+                }
+                
+                System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
+                
+            }
+            
+            objetoJSON.add("irAX",irAX);
+            objetoJSON.add("irAY",irAY);   
+            String mensaje = objetoJSON.toString();
+            
+            //System.out.println("Respondemos a halcon");
+            mandaMensaje(nombreMosca, ACLMessage.INFORM, mensaje);
         }
         
     }
     
-    /**
-     * Método que nos devuelve la altura de una determinada casilla del mapa
-     * 
-     * @author Mariana Orihuela Cazorla
-     */
-    
-    public int consultaAltura(int x, int y){
-        int altura = new Color(mapaActual.getRGB(x, y)).getBlue();
-        return altura;
-    }
+
     
     /**
      * Finalización del agente y llamada al método que extrae la traza de ejecución
@@ -797,7 +842,48 @@ public class Interlocutor extends SuperAgent {
  
     }
     
-        
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 }

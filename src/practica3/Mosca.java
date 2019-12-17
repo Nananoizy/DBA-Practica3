@@ -82,27 +82,29 @@ public class Mosca extends Dron {
             
         }
         
-        //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
+        // ESPERAMOS A QUE EL INTERLOCUTOR NOS COONFIRME QUE TODOS LOS DRONES SE LEVANTARON BIEN.
         recibeMensaje("todos los drones levantados");
         
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        // SI TODO FUE CORRECTO ENTRAMOS EN MODO RESCATE.
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
         // cargamos las percepciones
-        
         if (online){
             cargarPercepciones();
         }
         
-        while(online){
-            ///////////////////////////////////////////
+        while(online){  
+                        
+            // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
+            if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
+                pedirSiguientePosicion();
+                recibeMensaje("Recibir siguiente posicion");
                 
-<<<<<<< Updated upstream
-            // COMPORTAMIENTO EN TIMEPO DE RESCATE.            
-=======
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
+                nextPosX = objeto.get("irAX").asInt();
+                nextPosY = objeto.get("irAY").asInt();
+                
                 ///Si no tengo fuel suficiente, reposto. Else me muevo
                 // Calculamos el número de pasos que necesitamos para bajar al suelo
                 int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
@@ -110,7 +112,6 @@ public class Mosca extends Dron {
                 if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
                     this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }else{
-
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
@@ -127,6 +128,7 @@ public class Mosca extends Dron {
                          fuel = fuel - fuelrate;
                          
                          //actualizamos la posicion localmente
+
                          System.out.println("Mosca: Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
                          actualizaPosicion(siguienteDireccion);
                     }
@@ -142,10 +144,9 @@ public class Mosca extends Dron {
                 
                 
             }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
->>>>>>> Stashed changes
+
             
-            /////////////////////////////////////////////
-            online = false;
+
         }
         
         
@@ -180,7 +181,7 @@ public class Mosca extends Dron {
                 posActualX = posInicioX;
                 posActualY = posInicioY;
                 System.out.println("Checkin mosca: " + objeto.get("result").asString());
-                
+                posActualZ = consultaAltura(posActualX,posActualY);
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "mosca");
