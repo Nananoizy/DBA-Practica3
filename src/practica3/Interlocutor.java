@@ -215,20 +215,24 @@ public class Interlocutor extends SuperAgent {
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
-                }else if( sender.equals(nombreRescate1)){
+                }else if( sender.equals(nombreRescate1)){ // AQUI PODEMOS PONER UN OR!!!! -> AUNQUE POR AHORA LO DEJAMOS PARA DIFERENCIARLO BIEN
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ1");
-                    // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
+                    if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
+                        informarHalcon();
+                    }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }else if( sender.equals(nombreRescate2)){
                     System.out.println("INTERLOCUTOR: he recibo un mensaje de RESQ2");
-                    // LE PUEDE LLEGAR EL OK DE QUE HA OBTENIDO EL NUEVO OBJETIVO
+                    if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
+                        informarHalcon();
+                    }
                     // LE PUEDE LLEGAR LAS PERCEPCIONES DEL RESCATE
                 }
                 
                 
 
                 
-            } // Fin bucle while de MODO RESCATE
+            } // Fin bucle while de modo rescate
             
             cancelarPartida();
             
@@ -237,6 +241,25 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nNo se ha podido hacer login con éxito");
         }
     }
+    
+    
+    
+    
+    
+    
+    /**
+     * Reenvia el mensaje de que se ha rescatado a un aleman al halcon
+     * 
+     * @author Adrian Ruiz Lopez
+     */
+    public void informarHalcon(){
+        JsonObject objeto = Json.parse(inbox.getContent()).asObject(); 
+        String mensaje = objeto.toString();
+        mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
+    }
+    
+    
+    
     
     /**
      * Recibir coordenadas de los alemanes enviados por drones y guardarlo en el array

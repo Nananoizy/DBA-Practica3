@@ -135,7 +135,7 @@ public abstract class Dron extends SuperAgent {
     boolean cancel; // ni idea
     
     
-     ArrayList<Pair<Integer,Integer>> coordAleman = new ArrayList<Pair<Integer,Integer>> ();
+    ArrayList<Pair<Integer,Integer>> coordAleman = new ArrayList<Pair<Integer,Integer>> ();
     
     
     /**
@@ -931,9 +931,6 @@ public abstract class Dron extends SuperAgent {
                 
         String content = informacion.toString();
         mandaMensaje(nombreInterlocutor, ACLMessage.INFORM , content);
-            
-        //vaciamos el vector de alemanes
-        coordAleman.clear();
       
     }    
     

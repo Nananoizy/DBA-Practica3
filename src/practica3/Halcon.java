@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import org.codehaus.jettison.json.JSONArray;
 
 /**
@@ -88,26 +89,15 @@ public class Halcon extends Dron {
         //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
         recibeMensaje("todos los drones levantados");
         
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
-        if (online){
-           //La primera vez, pedimos percepciones por primera vez:
-            cargarPercepciones();
-            obtenerAlemanesInfrarojos();
-            mostrarArrayAlemanes();
-            obtenerAlemanGonio();
-            mostrarArrayAlemanes();
-            
-            mandarInformacionPercepciones();
-        }
-                
         // Una vez se ha inicializado continuamos en el bucle:
         while( online ){
-           /* 
+            cargarPercepciones();
+            obtenerAlemanesInfrarojos();
+            if( coordAleman.size() == 0 ) obtenerAlemanGonio();
+
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
@@ -177,14 +167,21 @@ public class Halcon extends Dron {
                 
                 
                 
-            }*/
+            }
             
-            //mandarInformacionPercepciones();
+            mandarInformacionPercepciones();
             
-            // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
-                // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
-                    // SI TIENE ALEMANES, MANDA UN MENSAJE AL INTERLOCUTOR Y ESPERA A QUE LE CONTESTE
-                    // SI NO TIENE ALEMANES, AVANZA
+            // este while va a estar recibiendo mensajes hasta que el halcon no tenga alemanes en su Array
+            while( coordAleman.size() > 0 ){
+                recibeMensaje("recibir aleman rescatado");
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+                int x = objeto.get("posX").asInt();
+                int y = objeto.get("posY").asInt();
+                Pair<Integer,Integer> aleman = new Pair<Integer,Integer>(x,y);
+                if( coordAleman.contains(aleman) ) coordAleman.remove(aleman);
+            } 
+            
+           
             
         }       
         
