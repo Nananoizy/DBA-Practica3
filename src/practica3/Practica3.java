@@ -32,7 +32,7 @@ public class Practica3 {
         );
         
         Interlocutor agente;
-        String nombreInterlocutor = "Grupoe_prueba  ";
+        String nombreInterlocutor = "Grupoe_prueba   ";
         try {
             agente = new Interlocutor(new AgentID(nombreInterlocutor), "map1", true);
         } catch (Exception ex) {

@@ -147,7 +147,7 @@ public class Rescate extends Dron {
                     cargarPercepciones();
                     // compruebo si tengo que hacer refuel
                     
-                    int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                    int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5; 
                     // Hacemos refuel
                     if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
                         comando = calculaDireccion();
@@ -214,6 +214,7 @@ public class Rescate extends Dron {
             
             System.out.println(nombreDron + " : Estoy en la posicion x = " + posActualX + " , y = " +posActualY + " , mi altura es " + posActualZ);
             System.out.println("Y el aleman a rescatar esta en  x = " + objetivoActual.getKey() + " , y = " + objetivoActual.getValue() );
+            System.out.println("y me quedan " + fuel + " de fuel" );
             
            }// FIN DEL IF RESCATANDO          
            else{        // si ya he rescatado a todos los alemanes, voy a esperar moverme a la casilla desde la que parti

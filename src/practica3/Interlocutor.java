@@ -37,11 +37,11 @@ public class Interlocutor extends SuperAgent {
      * Nombres de los drones:
      */
   
-     String nombreInterlocutor = "Grupoe_prueba  ";
-     String nombreHalcon = "Grupoe_halcon_prueba  ";
-     String nombreMosca = "Grupoe_mosca_prueba  ";
-     String nombreRescate1 = "Grupoe_rescate1_prueba  ";
-     String nombreRescate2 = "Grupoe_rescate2_prueba  ";
+     String nombreInterlocutor = "Grupoe_prueba   ";
+     String nombreHalcon = "Grupoe_halcon_prueba   ";
+     String nombreMosca = "Grupoe_mosca_prueba   ";
+     String nombreRescate1 = "Grupoe_rescate1_prueba   ";
+     String nombreRescate2 = "Grupoe_rescate2_prueba   ";
 
     
     /**

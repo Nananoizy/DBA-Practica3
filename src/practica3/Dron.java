@@ -33,7 +33,7 @@ public abstract class Dron extends SuperAgent {
     /**
      * Nombre del interlocutor.
      */
-    String nombreInterlocutor = "Grupoe_prueba  ";
+    String nombreInterlocutor = "Grupoe_prueba   ";
     
     /**
      * Estado actual del agente.
@@ -966,17 +966,19 @@ public abstract class Dron extends SuperAgent {
         JsonObject respuesta;
         String resp = "";
         int i = numero_pasos_bajar;
+        String comando="";
 
         // Si estoy en el aire, bajo al suelo
         if (numero_pasos_bajar > 0) {
             // Hago un bucle con el número de pasos hasta llegar al suelo
-            objeto.add("command", "moveDW");
+            comando = "moveDW";
+            objeto.add("command", "comando");
             content = objeto.toString();
 
             // Bajo al suelo
             while (i > 0) {
                 mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                recibeMensaje("Efectua movimiento mosca");
+                recibeMensaje("Efectua movimiento " + nombreDron);
                 this.replyWth = inbox.getReplyWith();
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
@@ -986,7 +988,7 @@ public abstract class Dron extends SuperAgent {
                 else{
                     respuesta = Json.parse(inbox.getContent()).asObject();            
                     resp = respuesta.get("result").asString();
-                    System.out.println("Soy la mosca y no me he podido mover");
+                    System.out.println("Soy " + nombreDron + " y no me he podido mover");
                     System.out.println(resp);
                     online = false;
                 }
@@ -1000,15 +1002,16 @@ public abstract class Dron extends SuperAgent {
         }
 
         // Reposto
-        objeto.add("command","refuel");
+        comando = "refuel";
+        objeto.add("command",comando);
         content = objeto.toString();
         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
 
-        recibeMensaje("Efectua refuel mosca");
+        recibeMensaje("Efectua refuel " + nombreDron);
         this.replyWth = inbox.getReplyWith();
 
         if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-             System.out.println("La mosca ha hecho refuel");
+             System.out.println(nombreDron + " ha hecho refuel");
              cargarPercepciones();
         } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE || inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD){
             respuesta = Json.parse(inbox.getContent()).asObject();            
@@ -1020,13 +1023,14 @@ public abstract class Dron extends SuperAgent {
         if (numero_pasos_bajar > 0) {
             // Borramos el comando refuel para volver a subir
             objeto.remove("command");
-            objeto.add("command", "moveUP");
+            comando = "moveUP";
+            objeto.add("command", comando);
             content = objeto.toString();
             //Subo a la altura anterior
             i = numero_pasos_bajar;
             while (i > 0) {
                 mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                recibeMensaje("Efectua movimiento mosca");
+                recibeMensaje("Efectua movimiento " + nombreDron);
                 this.replyWth = inbox.getReplyWith();
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
@@ -1036,7 +1040,7 @@ public abstract class Dron extends SuperAgent {
                 else{
                     respuesta = Json.parse(inbox.getContent()).asObject();            
                     resp = respuesta.get("result").asString();
-                    System.out.println("Soy la mosca y no me he podido mover");
+                    System.out.println("Soy " + nombreDron + " y no me he podido mover");
                     System.out.println(resp);
                     online = false;
                 }
