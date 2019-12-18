@@ -791,12 +791,8 @@ public class Interlocutor extends SuperAgent {
             
             //SI NO ESTA TOCANDO NINGUNA ARISTA SE MOVERIA NW HASTA LA SIGUIENTE PARED
             if ((x == irAX && y == irAY)){
-                
-                siguientePosicionMosca = new Pair(30, 30);
-                    irAX = siguientePosicionMosca.getKey();
-                    irAY = siguientePosicionMosca.getValue();
                     
-                /*if ((x == dimX - 1)){
+                if ((x == dimX - 1)){
                     siguientePosicionMosca = new Pair(0, y + 9);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
@@ -810,7 +806,7 @@ public class Interlocutor extends SuperAgent {
                     siguientePosicionMosca = new Pair(dimX - 1, y);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
-                }*/
+                }
                 
                 System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
                 

@@ -93,9 +93,8 @@ public class Mosca extends Dron {
         while(online){  
             
             cargarPercepciones();
-            
-            System.out.println(infrared);
             obtenerAlemanesInfrarojos();
+            obtenerAlemanGonio();
                         
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
