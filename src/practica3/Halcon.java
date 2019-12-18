@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import org.codehaus.jettison.json.JSONArray;
 
 /**
@@ -39,6 +40,7 @@ public class Halcon extends Dron {
         super(aid, host,nombreArchivo);
         rol = "hawk";
         nombreDron = "halcon";
+        rescatando = true;
     }
     
     
@@ -88,45 +90,95 @@ public class Halcon extends Dron {
         //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
         recibeMensaje("todos los drones levantados");
         
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
-        if (online){
-           //La primera vez, pedimos percepciones por primera vez:
-            cargarPercepciones();
-            obtenerAlemanesInfrarojos();
-        }
-                
         // Una vez se ha inicializado continuamos en el bucle:
         while( online ){
+            cargarPercepciones();
+            obtenerAlemanesInfrarojos();
             
+            //obtenerAlemanGonio();
+
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
             if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
                 pedirSiguientePosicion();
                 recibeMensaje("Recibir siguiente posicion");
                 
-                JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
-                nextPosX = objeto.get("irAX").asInt();
-                nextPosY = objeto.get("irAY").asInt();
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();
                 
-                System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+                // si los dos son -1, es la señal de stop
+                if (objeto.get("irAX").asInt() == -1 && objeto.get("irAY").asInt() == -1){
+                    //System.out.println("El halcón va a detenerse");
+                    pideParar();
+                }
+                else{
+                    nextPosX = objeto.get("irAX").asInt();
+                    nextPosY = objeto.get("irAY").asInt();
+                }
+                
+                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+            }
+            else{
+                String siguienteDireccion = "";
+                siguienteDireccion = calculaDireccion();
+                
+                JsonObject objeto = new JsonObject();
+                
+                ///Si no tengo fuel suficiente, reposto. Else me muevo     
+                // Calculamos el número de pasos que necesitamos para bajar al suelo
+                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                // Hacemos refuel
+                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                    this.refuel(siguienteDireccion, numero_pasos_bajar);
+                }
+                else{
+                    
+                    objeto.add("command",siguienteDireccion);
+                    String content = objeto.toString();
+
+                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
+
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    //System.out.println(replyWth);
+                    recibeMensaje("Efectua movimiento halcon");
+                    this.replyWth = inbox.getReplyWith();
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         //System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
+                         //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
+                         fuel = fuel - fuelrate;
+                         
+                         //actualizamos la posicion localmente
+                         actualizaPosicion(siguienteDireccion);
+                    }
+                    else{
+                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
+                        String resp = respuesta.get("result").asString();
+                        System.out.println("Soy el halcon y no me he podido mover");
+                        System.out.println(resp);
+                        online = false;
+                    }
+                }
+                
+                
+                
             }
             
-            mandarCoordenadas();
+            mandarInformacionPercepciones();
             
-            // SI TIENE POSICION INDICADA Y NO ES LA POSICION ACTUAL
-                // COMPROBAMOS SI TIENE ALEMANES EN SU RADAR
-                    // SI TIENE ALEMANES, MANDA UN MENSAJE AL INTERLOCUTOR Y ESPERA A QUE LE CONTESTE
-                    // SI NO TIENE ALEMANES, AVANZA
-            online = false;
+            // este while va a estar recibiendo mensajes hasta que el halcon no tenga alemanes en su Array
+            while( coordAleman.size() > 0 ){
+                recibeMensaje("recibir aleman rescatado");
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+                int x = objeto.get("posX").asInt();
+                int y = objeto.get("posY").asInt();
+                Pair<Integer,Integer> aleman = new Pair<Integer,Integer>(x,y);
+                if( coordAleman.contains(aleman) ) coordAleman.remove(aleman);
+            } 
+            
+           
+            
         }       
-        
-        
-        
-        
+     
     }
     
     
@@ -157,22 +209,27 @@ public class Halcon extends Dron {
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
+                //System.out.println(replyWth);
                 objeto = Json.parse(inbox.getContent()).asObject();
                 System.out.println("Checkin halcon: " + objeto.get("result").asString());
                 posActualX = posInicioX;
                 posActualY = posInicioY;
+                posActualZ=consultaAltura(posActualX,posActualY);
                 
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.FAILURE) {
                 System.out.println("Error FAILURE\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.FAILURE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.REFUSE) {
                 System.out.println("Error REFUSE\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.REFUSE, "halcon");
             } else if (inbox.getPerformativeInt() == ACLMessage.NOT_UNDERSTOOD) {
                 System.out.println("Error NOT UNDERSTOOD\n");
+                this.replyWth = inbox.getReplyWith();
                 mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "halcon");
             }
     }

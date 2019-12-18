@@ -38,6 +38,7 @@ public class Mosca extends Dron {
         super(aid, host,nombreArchivo);
         rol = "fly";
         nombreDron = "mosca";
+        rescatando = true;
     }
     
     
@@ -82,28 +83,74 @@ public class Mosca extends Dron {
             
         }
         
-        //esperamos a que el interlocutor nos confirme que todos los drones se han levantado bien
+        // ESPERAMOS A QUE EL INTERLOCUTOR NOS COONFIRME QUE TODOS LOS DRONES SE LEVANTARON BIEN.
         recibeMensaje("todos los drones levantados");
         
-        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-            online = true;
-        }
-        else
-            online = false;
+        // SI TODO FUE CORRECTO ENTRAMOS EN MODO RESCATE.
+        if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
+        else online = false;
         
-        // cargamos las percepciones
         
-        if (online){
-            cargarPercepciones();
-        }
-        
-        while(online){
-            ///////////////////////////////////////////
-                
-            // COMPORTAMIENTO EN TIMEPO DE RESCATE.            
+        while(online){  
             
-            /////////////////////////////////////////////
-            online = false;
+            cargarPercepciones();
+            obtenerAlemanesInfrarojos();
+            //obtenerAlemanGonio();
+                        
+            // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
+            if (((nextPosX == -1) || (nextPosY == -1)) || ((posActualX == nextPosX) && (posActualY == nextPosY))){
+                pedirSiguientePosicion();
+                recibeMensaje("Recibir siguiente posicion");
+                
+                JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
+                nextPosX = objeto.get("irAX").asInt();
+                nextPosY = objeto.get("irAY").asInt();
+                
+                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
+            }else{
+                String siguienteDireccion = "";
+                siguienteDireccion = calculaDireccion();
+                
+                JsonObject objeto = new JsonObject();
+                
+                ///Si no tengo fuel suficiente, reposto. Else me muevo     
+                // Calculamos el número de pasos que necesitamos para bajar al suelo
+                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                // Hacemos refuel
+                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                    this.refuel(siguienteDireccion, numero_pasos_bajar);
+                }else{
+                    
+                    objeto.add("command",siguienteDireccion);
+                    String content = objeto.toString();
+
+                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
+
+                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    //System.out.println(replyWth);
+                    recibeMensaje("Efectua movimiento mosca");
+                    this.replyWth = inbox.getReplyWith();
+                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
+                         //System.out.println("Soy la mosca y me he movido al: " + siguienteDireccion);
+                         //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
+                         fuel = fuel - fuelrate;
+                         
+                         //actualizamos la posicion localmente
+                         //System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
+                         actualizaPosicion(siguienteDireccion);
+                    }
+                    else{
+                        JsonObject respuesta = Json.parse(inbox.getContent()).asObject();            
+                        String resp = respuesta.get("result").asString();
+                        System.out.println("Soy la mosca y no me he podido mover");
+                        System.out.println(resp);
+                        online = false;
+                    }
+                }
+                
+                mandarInformacionPercepciones();
+                
+            }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
+            
         }
         
         
@@ -138,7 +185,7 @@ public class Mosca extends Dron {
                 posActualX = posInicioX;
                 posActualY = posInicioY;
                 System.out.println("Checkin mosca: " + objeto.get("result").asString());
-                
+                posActualZ = consultaAltura(posActualX,posActualY);
                 datosCheckin();
                 //Enviamos al interlocutor que el check si ha sido correcto.
                 mandaMensaje(nombreInterlocutor, ACLMessage.CONFIRM, "mosca");
