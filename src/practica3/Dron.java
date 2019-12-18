@@ -650,10 +650,10 @@ public abstract class Dron extends SuperAgent {
             posActualY = posActualY - 1;
         }
         else if (direccion.equals("moveUP")){
-            posActualZ = posActualZ + 1;
+            posActualZ = posActualZ + 5;
         }
         else if (direccion.equals("moveDW")){
-            posActualZ = posActualZ - 1;
+            posActualZ = posActualZ - 5;
         }
         
         //System.out.println("Posicion actualizada: " + posActualX + " , " + posActualY);

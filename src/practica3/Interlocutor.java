@@ -281,7 +281,7 @@ public class Interlocutor extends SuperAgent {
             Pair<Integer,Integer> coordenada = new Pair(posx,posy);
             // si este aleman no habia sido informado por ningun otro:
             if( !alemanesTotalesDetectados.contains(coordenada) ){
-                System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
+                //System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                 alemanesTotalesDetectados.add(coordenada);
                 // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
                 decidirRescate(coordenada, aleman);
@@ -490,8 +490,8 @@ public class Interlocutor extends SuperAgent {
         
         /// HALCON
         
-        xTemp = 49;
-        yTemp = dimY - 49;
+        xTemp = 20;
+        yTemp = dimY - 20;
         
         posicionCorrecta = compruebaCasilla(xTemp,yTemp,230);
         
@@ -743,9 +743,9 @@ public class Interlocutor extends SuperAgent {
             irAY = siguientePosicionHalcon.getValue();
             
             ///si he llegado a la esquina superior derecha, bajo abajo del todo
-            if ((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
+            if ((x == irAX && y == irAY) && (x == (dimX - 20) && y == 20)){
 
-                siguientePosicionHalcon = new Pair(dimX - 49, dimY - 49);
+                siguientePosicionHalcon = new Pair(dimX - 20, dimY - 20);
                 
                 irAX = siguientePosicionHalcon.getKey();
                 irAY = siguientePosicionHalcon.getValue();
@@ -754,7 +754,7 @@ public class Interlocutor extends SuperAgent {
    
             }
             //si ya he llegado a la esquina de abajo, vuelvo a base
-            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == dimY - 49)){
+            else if((x == irAX && y == irAY) && (x == (dimX - 20) && y == dimY - 20)){
                 
                 siguientePosicionHalcon = new Pair(spawns.get(2), spawns.get(3));
                 
@@ -808,7 +808,7 @@ public class Interlocutor extends SuperAgent {
                     irAY = siguientePosicionMosca.getValue();
                 }
                 
-                System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
+                //System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
                 
             }
             

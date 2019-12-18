@@ -127,8 +127,7 @@ public class Halcon extends Dron {
                 
                 ///Si no tengo fuel suficiente, reposto. Else me muevo     
                 // Calculamos el número de pasos que necesitamos para bajar al suelo
-                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
-                // Hacemos refuel
+                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                // Hacemos refuel
                 if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
                     this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }

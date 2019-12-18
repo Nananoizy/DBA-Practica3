@@ -125,8 +125,8 @@ public class Rescate extends Dron {
                 Pair<Integer,Integer> nuevoAleman = new Pair(aleman.get("alemanX").asInt(),aleman.get("alemanY").asInt());
                 AlemanesPendientes.add(nuevoAleman);
                 
-                System.out.println("Aniadido: ");
-                System.out.println("Alemanes pendientes: " + AlemanesPendientes);
+                //System.out.println("Aniadido: ");
+                //System.out.println("Alemanes pendientes: " + AlemanesPendientes);
 
                    
                 if(!tengoObjetivo){
@@ -171,8 +171,8 @@ public class Rescate extends Dron {
                             // ASIGNA EL NUEVO OBJETIVO
                             objetivoActual = AlemanesPendientes.poll();
 
-                            System.out.println("Eliminado: ");
-                            System.out.println("Alemanes pendientes: " + AlemanesPendientes);
+                            //System.out.println("Eliminado: ");
+                            //System.out.println("Alemanes pendientes: " + AlemanesPendientes);
 
                             tengoObjetivo = true;
                             // MOVERSE:
@@ -222,8 +222,7 @@ public class Rescate extends Dron {
                if (sender.equals("Elnath")){
                 this.replyWth = inbox.getReplyWith();
                 if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
-                    int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
-                    
+                    int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                    
                     // Hacemos refuel
                     if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
                         comando = calculaDireccion();
