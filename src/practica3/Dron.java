@@ -121,6 +121,10 @@ public abstract class Dron extends SuperAgent {
     int nextPosX,nextPosY;
     
     /**
+     * Indica si se esta rescatando o se ha terminado ya.
+     */
+    boolean rescatando;
+    /**
      *  PERCEPCIONES
      */
     JsonObject gps;
@@ -855,25 +859,27 @@ public abstract class Dron extends SuperAgent {
         if (!(distancia == -1 || angulo == -1)){
             System.out.println("distancia: " + distancia + " angulo: "+ angulo);
         
-            // Según el ángulo calculamos la posición
-            if (angulo >= 0 && angulo <= 90) { // N-E
-                x_aleman = (int) (posActualX - Math.sin(Math.toRadians(angulo)) * distancia);
+             if (angulo >= 0 && angulo <= 90) { // N-E
+                x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
                 y_aleman = (int) (posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
             } else if (angulo > 90 && angulo <= 180) { // E-S
                 x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
                 y_aleman = (int) (posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
             } else if (angulo > 180 && angulo <= 270) { // S-W
-                x_aleman = (int) (posActualX - Math.sin(Math.toRadians(angulo)) * distancia);
+                x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
                 y_aleman = (int) (posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
             } else if (angulo > 270 && angulo <= 360) { // W-N
                 x_aleman = (int) (posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
                 y_aleman = (int) (posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
             }
+    
 
+            
             Pair<Integer,Integer> aleman = new Pair(x_aleman, y_aleman);
+            System.out.println("soy " + nombreDron);
             System.out.println(" Aleman en: " + x_aleman + " , " + y_aleman);
             if (!comprobarAlemanRepetido(aleman)) coordAleman.add(aleman);
-            else System.out.println("Alemán repetido detectado con infrarrojos");
+            else System.out.println("Alemán repetido detectado con gonio");
         }
         
     }

@@ -40,6 +40,7 @@ public class Halcon extends Dron {
         super(aid, host,nombreArchivo);
         rol = "hawk";
         nombreDron = "halcon";
+        rescatando = true;
     }
     
     
@@ -96,6 +97,7 @@ public class Halcon extends Dron {
         while( online ){
             cargarPercepciones();
             obtenerAlemanesInfrarojos();
+            
             //obtenerAlemanGonio();
 
             // SI NO TIENE UNA POSICION INDICADA O LA POSICION INDICADA ES LA ACTUAL, PETIDMOS NUEVA POS
@@ -177,10 +179,7 @@ public class Halcon extends Dron {
            
             
         }       
-        
-        
-        
-        
+     
     }
     
     

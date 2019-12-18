@@ -35,8 +35,6 @@ public class Rescate extends Dron {
     Pair<Integer,Integer> objetivoActual;
          
     String comando="";
-    
-    boolean rescatando;
    
     
     /**
@@ -105,8 +103,7 @@ public class Rescate extends Dron {
        
         if (inbox.getPerformativeInt() == ACLMessage.CONFIRM) online = true;
         else online = false;
-        
-        
+                
         //cargarPercepciones();
        // posActualZ = gps.get("z").asInt();
         
@@ -150,14 +147,11 @@ public class Rescate extends Dron {
                     cargarPercepciones();
                     // compruebo si tengo que hacer refuel
                     
-                    if (fuel <= fuelrate + 2){
-                        
-                        ///SUPONIENDO QUE TENGA QUE IR A RAS DE SUELO, meter aqui otras comprobaciones
-                        JsonObject objeto = new JsonObject();
-                        
-                        objeto.add("command","refuel");
-                        String content = objeto.toString();
-                        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                    // Hacemos refuel
+                    if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                        comando = calculaDireccion();
+                        this.refuel(comando, numero_pasos_bajar);
                     }
                     else{
                         if( tengoObjetivo ){
@@ -191,7 +185,7 @@ public class Rescate extends Dron {
                             if (torescue == 0){
                                 rescatando = false;
                                 nextPosX = posInicioX;
-                                nextPosY = nextPosY;
+                                nextPosY = posInicioY;
                                 
                                 if (posActualX == nextPosX && posActualY == nextPosY){
                                     pideParar();
@@ -224,31 +218,35 @@ public class Rescate extends Dron {
            }// FIN DEL IF RESCATANDO          
            else{        // si ya he rescatado a todos los alemanes, voy a esperar moverme a la casilla desde la que parti
                String sender = inbox.getSender().name;
-               
+                              
                if (sender.equals("Elnath")){
-                   
-                    if (fuel <= fuelrate + 2){
-                        
-                        ///SUPONIENDO QUE TENGA QUE IR A RAS DE SUELO, meter aqui otras comprobaciones
-                        JsonObject objeto = new JsonObject();
-                        
-                        objeto.add("command","refuel");
-                        String content = objeto.toString();
-                        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                this.replyWth = inbox.getReplyWith();
+                if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
+                    int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                    
+                    // Hacemos refuel
+                    if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                        comando = calculaDireccion();
+                        this.refuel(comando, numero_pasos_bajar);
                     }
                     else{
-                        if (posActualX == nextPosX && posActualY == nextPosY){
-                            pideParar();
-                            online = false;
-                        }
-                        else{
-                            comando = calculaDireccion();
-                            realizarMovimiento(comando);  
-                        }
+                            if (posActualX == nextPosX && posActualY == nextPosY){
+                                pideParar();
+                                online = false;
+                            }
+                            else{
+                                comando = calculaDireccion();
+                                realizarMovimiento(comando);  
+                            }
                     }
-                   
-                   
 
+                }
+                else{
+                    JsonObject objeto = Json.parse(inbox.getContent()).asObject();
+                    System.out.println("Error al volver a base: " + objeto.get("result").asString());
+                    
+                }
+                 
                }
            }
         } // FIN DEL WHILE ONLINE
@@ -282,7 +280,6 @@ public class Rescate extends Dron {
         System.out.println(nombreDron+ " : voy a hacer: " + comando);
         
         fuel = fuel - fuelrate;
-        
         actualizaPosicion(comando);
     }
     

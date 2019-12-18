@@ -38,6 +38,7 @@ public class Mosca extends Dron {
         super(aid, host,nombreArchivo);
         rol = "fly";
         nombreDron = "mosca";
+        rescatando = true;
     }
     
     
