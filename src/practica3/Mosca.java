@@ -113,18 +113,11 @@ public class Mosca extends Dron {
                 JsonObject objeto = new JsonObject();
                 
                 ///Si no tengo fuel suficiente, reposto. Else me muevo     
-                if (fuel <= fuelrate + 2){
-                    objeto.add("command","refuel");
-                    String content = objeto.toString();
-                    mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    
-                    recibeMensaje("Efectua refuel mosca");
-                    this.replyWth = inbox.getReplyWith();
-                    
-                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         System.out.println("La mosca ha hecho refuel");
-                         cargarPercepciones();
-                    }
+                // Calculamos el número de pasos que necesitamos para bajar al suelo
+                int numero_pasos_bajar = this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY);
+                // Hacemos refuel
+                if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
+                    this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }else{
                     
                     objeto.add("command",siguienteDireccion);
