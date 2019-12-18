@@ -1,7 +1,6 @@
 package practica3;
 
 import DBA.SuperAgent;
-import DBAMap.DBAMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -11,8 +10,6 @@ import es.upv.dsic.gti_ia.core.AgentID;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +17,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.imageio.ImageIO;
-import org.codehaus.jettison.json.JSONArray;
 
 /**
  * Clase abstracta Dron que define los comportamientos básicos y variables
  * 
  * @author David Infante Casas
  * @author Mariana Orihuela Cazorla
+ * @author Adrián Ruiz López
+ * @author Yang Chen
  */
 public abstract class Dron extends SuperAgent {
     
@@ -34,11 +32,6 @@ public abstract class Dron extends SuperAgent {
      * Nombre del interlocutor.
      */
     String nombreInterlocutor = "Grupoe_prueba   ";
-    
-    /**
-     * Estado actual del agente.
-     */
-    Estados estado;
     /**
      * Clave de sesión para hacer login y logout.
      */
@@ -98,28 +91,22 @@ public abstract class Dron extends SuperAgent {
     */
     //DBAMap mapa;
     BufferedImage mapa;
-    
-    
     /**
      * Nombre del dron.
      */
     String nombreDron;
-    
     /**
      * variable que indica que esta en funcionamiento.
      */
     boolean online = false;
-    
     /**
      * Posicion a la que tiene que ir.
      */
     int posActualX,posActualY,posActualZ;
-    
     /**
      * Posicion a la que tiene que ir.
      */
     int nextPosX,nextPosY;
-    
     /**
      * Indica si se esta rescatando o se ha terminado ya.
      */
@@ -137,9 +124,11 @@ public abstract class Dron extends SuperAgent {
     int torescue; 
     double energy;
     boolean cancel; 
-    
-    
+    /**
+     * Lista de coordenadas de los alemanes
+     */
     ArrayList<Pair<Integer,Integer>> coordAleman = new ArrayList<Pair<Integer,Integer>> ();
+    
     
     
     /**
@@ -192,13 +181,13 @@ public abstract class Dron extends SuperAgent {
         super.finalize();
     }
     
+    
+    
     /**
      * Método que interpreta los datos del checkin
      * 
-     * 
      * @author Mariana Orihuela Cazorla
      */
-    
     public void datosCheckin(){
         
          JsonObject objeto = Json.parse(inbox.getContent()).asObject();
@@ -210,13 +199,17 @@ public abstract class Dron extends SuperAgent {
          
     }
     
+    
+    
     /**
      * Método que crea un mensaje que se manda
      * 
+     * @param receptor Receptor del mensaje
+     * @param performativa Performativa del mensaje
+     * @param content Contenido del mensaje
      * 
      * @author Mariana Orihuela Cazorla
      */
-    
     public void mandaMensaje(String receptor, int performativa, String content) {
         outbox = new ACLMessage();
         outbox.setSender(this.getAid());
@@ -224,22 +217,21 @@ public abstract class Dron extends SuperAgent {
         outbox.setPerformative(performativa);
         outbox.setConversationId(cId);
         
-        if (!replyWth.equals("")){
+        if (!replyWth.equals("")) {
             outbox.setInReplyTo(replyWth);
         }
         
         outbox.setContent(content);
         this.send(outbox);
-        //System.out.println("El reply mandado es " + replyWth);
     }
+    
+    
     
     /**
      * Método que ejecuta el dron para preguntar acerca de la siguiente posición a la que moverse
-     * 
-     * 
+     *  
      * @author Mariana Orihuela Cazorla
      */
-    
     public void pedirSiguientePosicion() {
         JsonObject objetoJSON = new JsonObject();
         objetoJSON.add("posX", posActualX);
@@ -248,13 +240,15 @@ public abstract class Dron extends SuperAgent {
         mandaMensaje(nombreInterlocutor, ACLMessage.QUERY_REF, content);
     }
     
+    
+    
     /**
      * Método que recibe un mensaje
      * 
+     * @param cadena Descripción del mensaje
      * 
      * @author Mariana Orihuela Cazorla
      */
-    
     public void recibeMensaje( String cadena) {
         try {
             inbox = receiveACLMessage();
@@ -262,9 +256,6 @@ public abstract class Dron extends SuperAgent {
             Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("No se puede recibir el mensaje" + cadena);
         }
-        
-        //System.out.println("El reply recibido es " + inbox.getReplyWith().toString());
-        //System.out.println("mi reply actual es " + replyWth);
     }
     
     
@@ -272,19 +263,23 @@ public abstract class Dron extends SuperAgent {
     /**
     * Método que carga el mapa de disco
     * 
+    * @param urlArchivo Localización del archivo
     * 
     * @author Adrián Ruiz Lopez
     */
     public void cargarMapa( String urlArchivo ) throws IOException{
         mapa = ImageIO.read( new File(urlArchivo) );
-       // mapa.load(urlArchivo+".png");
-        
     }
     
      
+    
     /**
     * Método que consulta una altura en el mapa
     * 
+    * @param x Coordenada x para consultar la altura
+    * @param y Coordenada y para consultar la altura
+    * 
+    * @return altura Altura del suelo en la coordenada x, y del mapa
     * 
     * @author Adrián Ruiz Lopez
     */
@@ -293,27 +288,35 @@ public abstract class Dron extends SuperAgent {
         return altura;
     }
     
+    
+    
     /**
-
     * Método que manda un mensaje al controlador para parar a un dron
-    * 
     * 
     * @author Mariana Orihuela Cazorla
     */
-    public void pideParar(){
+    public void pideParar()  {
       JsonObject objetoJSON = new JsonObject();
         objetoJSON.add("command", "stop");
         String content = objetoJSON.toString();            
         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
     }
     
+    
+    
     /**
     * Método que consulta si el dron actual va a colisionar en la casilla objetivo
     * 
+    * @param otrodrondireccion Dirección del otro dron
+    * @param x Coordenada x del otro dron
+    * @param y Coordenada y del otro dron
+    * @param z Coordenada z del otro dron
+    * 
+    * @return posicionesDron Coordenadas de la siguiente casilla
     * 
     * @author Mariana Orihuela Cazorla
     */
-    public int[] casillaFuturaDron(String otrodrondireccion, int x, int y, int z){
+    public int[] casillaFuturaDron(String otrodrondireccion, int x, int y, int z) {
         
         switch(otrodrondireccion){
             case "moveUP":
@@ -370,13 +373,17 @@ public abstract class Dron extends SuperAgent {
     }
     
     
+    
     /**
     * Método que consulta si el dron actual va a colisionar en la casilla objetivo
     * 
+    * @param direccion Dirección a la me muevo
+    * 
+    * @return direccion Dirección a la que debemos movernos
     * 
     * @author Mariana Orihuela Cazorla
     */
-    public String compruebaAwacs(String direccion){
+    public String compruebaAwacs(String direccion) {
         
         
         for (int i = 0; i < awacs.size(); i++){
@@ -613,9 +620,11 @@ public abstract class Dron extends SuperAgent {
     }
     
     
+    
     /**
     * Método que actualiza la posicion del dron una vez se ha movido con exito
     * 
+    * @param direccion Dirección a la que se va a mover el dron
     * 
     * @author Mariana Orihuela Cazorla
     */
@@ -655,14 +664,14 @@ public abstract class Dron extends SuperAgent {
         else if (direccion.equals("moveDW")){
             posActualZ = posActualZ - 5;
         }
-        
-        //System.out.println("Posicion actualizada: " + posActualX + " , " + posActualY);
     }
+    
     
     
     /**
     * Método que calcula la direccion en la que tiene que ir el dron dado un punto de destino
     * 
+    * @return direccion Dirección a la que se tiene que mover a continuación el dron
     * 
     * @author Mariana Orihuela Cazorla
     */
@@ -670,8 +679,6 @@ public abstract class Dron extends SuperAgent {
         
         String direccion = "";
         
-        ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
-        //System.out.println("x: " + posActualX + " , " + nextPosX + " y " + posActualY + " , " + nextPosY);
         // Si la y es mayor y la x es igual, va al Norte
         if (posActualX == nextPosX && posActualY > nextPosY) {
             //si tengo un muro delante y no he subido al nivel maximo, asciendo
@@ -741,11 +748,11 @@ public abstract class Dron extends SuperAgent {
             else
                 direccion = manoDerecha("moveNW");
         }
-        
-        //direccion = compruebaAwacs(direccion);
 
         return direccion;
     }
+    
+    
     
     /**
      * Realiza las percepciones con el controlador
@@ -772,6 +779,7 @@ public abstract class Dron extends SuperAgent {
         }
         
     }
+    
     
 
     /**
@@ -835,19 +843,17 @@ public abstract class Dron extends SuperAgent {
                 }
             }
             // añadimos las posciones en el mundo al array:
-            //System.out.println(nombreDron + " he encontrado a un aleman en " + x + " , " + y);
             Pair<Integer,Integer> aleman = new Pair(x,y);
             coordAleman.add(aleman);
             
         }
-          
-
-    }// fin obetenerAlemanesInfrarojos
+    }
     
     
     
     /**
-     * Percibe un alemán con el sensor gonio
+     * Percibe un alemán con el sensor gonio y si no había sido detectado
+     * con el infrarrojos lo mete a la lista
      * 
      * @author David Infante Casas
      */
@@ -861,29 +867,15 @@ public abstract class Dron extends SuperAgent {
             
             x_aleman = (int)  Math.round(posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
             y_aleman = (int)  Math.round(posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
-                
-            /*if (angulo >= 0 && angulo <= 90) { // N-E
-                x_aleman = (int) Math.round(posActualX + Math.sin(Math.toRadians(angulo)) * distancia) ;
-                y_aleman = (int) Math.round(posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
-            } else if (angulo > 90 && angulo <= 180) { // E-S
-                x_aleman = (int)  Math.round(posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
-                y_aleman = (int)  Math.round(posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
-            } else if (angulo > 180 && angulo <= 270) { // S-W
-                x_aleman = (int)  Math.round(posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
-                y_aleman = (int)  Math.round(posActualY + Math.cos(Math.toRadians(angulo)) * distancia);
-            } else if (angulo > 270 && angulo <= 360) { // W-N
-                x_aleman = (int)  Math.round(posActualX + Math.sin(Math.toRadians(angulo)) * distancia);
-                y_aleman = (int)  Math.round(posActualY - Math.cos(Math.toRadians(angulo)) * distancia);
-            } */
       
             Pair<Integer,Integer> aleman = new Pair(x_aleman, y_aleman);
-            //System.out.println("soy " + nombreDron);
-            //System.out.println(" Aleman en: " + x_aleman + " , " + y_aleman);
             if (!comprobarAlemanRepetido(aleman)) coordAleman.add(aleman);
             else System.out.println("Alemán repetido detectado con gonio");
         }
         
     }
+    
+    
     
     /**
      * Comprueba que el alemán pasado como parámetro
@@ -908,7 +900,7 @@ public abstract class Dron extends SuperAgent {
     
     /**
      * Muestra la lista de alemanes por pantalla
-
+     * 
      * @author David Infante Casas
      */
     public void mostrarArrayAlemanes() {
@@ -918,9 +910,9 @@ public abstract class Dron extends SuperAgent {
     }    
     
     
+    
     /**
      * Mandar coordenadas de alemanes al interlocutor
-     * 
      * 
      * @author Yang Chen
      * @author Adrian Ruiz Lopez
@@ -951,7 +943,7 @@ public abstract class Dron extends SuperAgent {
     
     
     
-        /**
+    /**
      * Realiza la función de refuel
      * Baja al suelo si fuese necesario, refuel y vuelve a subir
      * 
@@ -983,8 +975,6 @@ public abstract class Dron extends SuperAgent {
                 this.replyWth = inbox.getReplyWith();
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
-                     //actualizamos la posicion localmente
-                     //actualizaPosicion(siguienteDireccion);
                      actualizaPosicion(comando);
                 }
                 else{
@@ -1036,8 +1026,6 @@ public abstract class Dron extends SuperAgent {
                 this.replyWth = inbox.getReplyWith();
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
-                     //actualizamos la posicion localmente
-                     //actualizaPosicion(siguienteDireccion);
                      actualizaPosicion(comando);
                 }
                 else{
@@ -1058,6 +1046,8 @@ public abstract class Dron extends SuperAgent {
     
     /**
      * Calcula la posición siguiente haciendo mano derecha
+     * 
+     * @param direccion Dirección a la que nos ibamos a mover en un primer momento
      * 
      * @return actual Devuelve la dirección a la que se tiene que mover
      * 

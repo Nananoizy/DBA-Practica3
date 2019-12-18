@@ -5,24 +5,14 @@ import DBAMap.DBAMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
-import javax.imageio.ImageIO;
-import org.codehaus.jettison.json.JSONArray;
 
 /**
  * Clase que define al agente, su comportamiento, sensores y comunicaciones
@@ -36,14 +26,11 @@ public class Interlocutor extends SuperAgent {
     /**
      * Nombres de los drones:
      */
-  
-     String nombreInterlocutor = "Grupoe_prueba   ";
-     String nombreHalcon = "Grupoe_halcon_prueba   ";
-     String nombreMosca = "Grupoe_mosca_prueba   ";
-     String nombreRescate1 = "Grupoe_rescate1_prueba   ";
-     String nombreRescate2 = "Grupoe_rescate2_prueba   ";
-
-    
+    String nombreInterlocutor = "Grupoe_prueba   ";
+    String nombreHalcon = "Grupoe_halcon_prueba   ";
+    String nombreMosca = "Grupoe_mosca_prueba   ";
+    String nombreRescate1 = "Grupoe_rescate1_prueba   ";
+    String nombreRescate2 = "Grupoe_rescate2_prueba   ";
     /**
      * Drones de la práctica.
      */
@@ -51,34 +38,24 @@ public class Interlocutor extends SuperAgent {
     Mosca mosca;
     Rescate rescate1;
     Rescate rescate2;
-    
-    /**
-     * Estado actual del agente.
-     */
-    Estados estado;
-    
     /**
      * Mapa que recorre el agente.
      */
     DBAMap mapaActual = new DBAMap();
     String nombreMapaActual;
-    
     /**
      * Clave de sesión para hacer login y logout.
      */
     String key;
-    
     /**
      * Dimensiones y alturas del mapa.
      */
     int dimX, dimY;
-    
     /**
      * Bandeja de entrada y salida de mensajes.
      */
     ACLMessage outbox = null;
     ACLMessage inbox = null;
-    
     /**
      * Array que contiene las parejas de puntos en las que van a aparecer los drones.
      * 
@@ -87,44 +64,47 @@ public class Interlocutor extends SuperAgent {
      * El orden es mosca - halcon - rescate1 - rescate2
      */
     ArrayList<Integer> spawns; 
-    
     /**
      * Booleano que indica si el agente empieza la partida (hostea) o no.
      */
-
     boolean hosting;
-    
     /**
      * Conversation ID.
      */
-    
     String cId = "";
-    
     /**
      * Clave de sesión.
      */
-    
     String sessionKey = "";
-    
     /**
      * Posiciones siguientes a las que tiene que ir cada dron.
     */
     Pair<Integer,Integer> siguientePosicionHalcon;
     Pair<Integer,Integer> siguientePosicionMosca;
     
+    /**
+     * True si está funcionando el interlocutor
+     */
     boolean online=true;
+    /**
+     * Controlador de alemanes a rescatar
+     */
     int rescatados = 1;
-    
+    /**
+     * Arrays de alemanes
+     */
     ArrayList<Pair<Integer,Integer>> alemanesTotalesDetectados = new ArrayList<Pair<Integer,Integer>> ();
     ArrayList<Pair<Integer,Integer>> ArrayRescate1 = new ArrayList<Pair<Integer,Integer>> ();
     ArrayList<Pair<Integer,Integer>> ArrayRescate2 = new ArrayList<Pair<Integer,Integer>> ();
    
+    
     
     /**
      * Crea un nuevo Agente
      * 
      * @param aid ID del agente
      * @param mapa Mapa que va a recorrer el agente
+     * @param host Host al que conectar
      * @throws Exception
      * 
      * @author Adrián Ruiz Lopez
@@ -155,6 +135,9 @@ public class Interlocutor extends SuperAgent {
      * Comportamiento del agente
      * 
      * @author Mariana Orihuela Cazorla
+     * @author David Infante Casas
+     * @author Yang Chen
+     * @author Adrian Ruiz Lopez
      */
     @Override
     public void execute() {        
@@ -204,7 +187,6 @@ public class Interlocutor extends SuperAgent {
                 String sender = inbox.getSender().name;
                 
                 if( sender.equals(nombreHalcon)  ){
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje del HALCON");
                     if (inbox.getPerformativeInt() == ACLMessage.QUERY_REF){ // informando de que necesita un objetivo
                         respondeDireccion(nombreHalcon);
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
@@ -216,8 +198,7 @@ public class Interlocutor extends SuperAgent {
                     }else if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de sus percepciones
                         recibirInformacion();
                     }
-                }else if( sender.equals(nombreRescate1) || sender.equals(nombreRescate2)){ 
-                    //System.out.println("INTERLOCUTOR: he recibo un mensaje de " + sender);
+                }else if( sender.equals(nombreRescate1) || sender.equals(nombreRescate2)){
                     if( inbox.getPerformativeInt() == ACLMessage.INFORM ){ // informando de aleman rescatado
                         recibirAleman();
                     }
@@ -234,6 +215,8 @@ public class Interlocutor extends SuperAgent {
             System.out.println("\nNo se ha podido hacer login con éxito");
         }
     }
+    
+    
     
     /**
     * Conjuntos de Tareas que realiza al recibir un aleman
@@ -254,8 +237,11 @@ public class Interlocutor extends SuperAgent {
     }
     
     
+    
     /**
      * Reenvia el mensaje de que se ha rescatado a un aleman al halcon
+     * 
+     * @param aleman Alemán a enviar
      * 
      * @author Adrian Ruiz Lopez
      */
@@ -263,7 +249,6 @@ public class Interlocutor extends SuperAgent {
         String mensaje = aleman.toString();
         mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
     }
-    
     
     
     
@@ -284,21 +269,20 @@ public class Interlocutor extends SuperAgent {
             Pair<Integer,Integer> coordenada = new Pair(posx,posy);
             // si este aleman no habia sido informado por ningun otro:
             if( !alemanesTotalesDetectados.contains(coordenada) ){
-                //System.out.println("INTERLOCUTOR: he recibo un mensaje de MOSCA");
                 alemanesTotalesDetectados.add(coordenada);
                 // decidimos a que cola de rescate meterlo:  (POR AHORA TODOS AL MISMO!)
                 decidirRescate(coordenada, aleman);
             }
-
         }
-  
-        // PODRIAMOS SEGUIR ANALIZANDO LA INFO OBTENIDA:
-        
     }
+   
    
    
     /**
      * Decidir a qué dron de rescate se le va a asignar
+     * 
+     * @param coordenada Coordenada del alemán
+     * @param aleman Alemán a enviar
      * 
      * @author Mariana Orihuela Cazorla
      * @author Adrian Ruiz Lopez
@@ -314,17 +298,18 @@ public class Interlocutor extends SuperAgent {
             mandaMensaje(nombreRescate2, ACLMessage.INFORM,content);
        }
        rescatados++;
-   }
-                   
+    }
+   
+   
+   
     /**
      * Método que levanta a los drones
      * 
+     * @throws java.lang.Exception
      * 
      * @author Mariana Orihuela Cazorla
      */
     public void levantarDrones() throws Exception{
-        
-        //System.out.println("\nLista de posiciones en las que se va a aparecer" + spawns);
         //Creamos los demás drones y les mandamos los datos necesarios para que empiecen a operar
         mosca = new Mosca(new AgentID(nombreMosca), true, nombreMapaActual + ".png");
         halcon = new Halcon(new AgentID(nombreHalcon), true, nombreMapaActual + ".png");
@@ -432,7 +417,6 @@ public class Interlocutor extends SuperAgent {
         for (int i = 0; i < 4; i++){
             recibeMensaje();  
             if (inbox.getPerformativeInt() == ACLMessage.CONFIRM){
-                //System.out.println ("Se ha podido hacer checkin de: " + inbox.getContent());
                 checked++;
             }
             else{
@@ -449,16 +433,17 @@ public class Interlocutor extends SuperAgent {
             mandaMensaje(nombreRescate2, ACLMessage.CONFIRM, "");
         }
        
-        
     }
+    
+    
     
     /**
      * Método que calcula las posiciones donde va a spawnear cada dron
      * 
+     * @return posicionCorrecta True si las posiciones a inicializar son correctas
      * 
      * @author Mariana Orihuela Cazorla
      */
-    
     public boolean calculaSpawn(){
         
         /// Sabiendo que la fly tiene una visibilidad de 20, habrá que encajarla en la esquina
@@ -491,9 +476,6 @@ public class Interlocutor extends SuperAgent {
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
-            
-            //System.out.println("\n Puedo spawnear mosca en: " + xTemp + " " + yTemp);
-
         }
         
         /// HALCON
@@ -519,7 +501,6 @@ public class Interlocutor extends SuperAgent {
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
-            //System.out.println("\n Puedo spawnear halcon en: " + xTemp + " " + yTemp);
         }
         
         /// RESCATE 1
@@ -544,7 +525,6 @@ public class Interlocutor extends SuperAgent {
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
-            //System.out.println("\n Puedo spawnear rescate1 en: " + xTemp + " " + yTemp);
         }
         
         /// RESCATE 2
@@ -569,13 +549,12 @@ public class Interlocutor extends SuperAgent {
         else{  // si la posicion es correcta, añadimos al array las posiciones
             spawns.add(xTemp);
             spawns.add(yTemp);
-            //System.out.println("\n Puedo spawnear rescate2 en: " + xTemp + " " + yTemp);
-
         }
-        
         
         return true;
     }
+    
+    
     
     /**
      * Método que comprueba unas casillas concretas
@@ -584,10 +563,11 @@ public class Interlocutor extends SuperAgent {
      * @param y Coordenada y que se va a comprobar
      * @param alturaMax altura maxima a la que puede volar el dron concreto
      * 
+     * @return sePuedeSpawnear True si es posible inicializar el dron en esa casilla
+     * 
      * @author Mariana Orihuela Cazorla
      * @author David Infante Casas
      */
-    
     public boolean compruebaCasilla(int x, int y, int alturaMax){
         
         /// Hay que comprobar tanto si van a spawnear drones en esa posicion como si
@@ -627,13 +607,17 @@ public class Interlocutor extends SuperAgent {
         return sePuedeSpawnear;
     }
     
+    
+    
     /**
      * Método que crea un mensaje que se manda
      * 
+     * @param receptor Receptor del mensaje
+     * @param performativa Performativa del mensaje
+     * @param content Contenido del mensaje
      * 
      * @author Mariana Orihuela Cazorla
      */
-    
     public void mandaMensaje(String receptor, int performativa, String content){
         
         outbox = new ACLMessage();
@@ -642,31 +626,30 @@ public class Interlocutor extends SuperAgent {
         outbox.setPerformative(performativa);
         outbox.setConversationId(cId);
         outbox.setContent(content);
-        this.send(outbox);
-        
+        this.send(outbox);    
     }
     
-        /**
+    
+    
+    /**
      * Método que recibe un mensaje
-     * 
      * 
      * @author Mariana Orihuela Cazorla
      */
     
     public void recibeMensaje(){
-        
         try {
-                inbox = receiveACLMessage();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("No se puede recibir el mensaje");
-            }
-        
+            inbox = receiveACLMessage();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Interlocutor.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("No se puede recibir el mensaje");
+        }
     }
+    
+    
     
     /**
      * Envío del mensaje para hacer login
-     * 
      * 
      * @author Mariana Orihuela Cazorla
      */
@@ -688,9 +671,10 @@ public class Interlocutor extends SuperAgent {
         this.send(outbox);
     }
     
+    
+    
     /**
      * Envío del mensaje para cancelar la partida
-     * 
      * 
      * @author Mariana Orihuela Cazorla
      */
@@ -709,13 +693,15 @@ public class Interlocutor extends SuperAgent {
         if(inbox.getPerformativeInt() == ACLMessage.AGREE)
             System.out.println("\nSe ha cerrado sesión");
         else
-            System.out.println("\nNo se ha cerrado sesión"); 
-            
+            System.out.println("\nNo se ha cerrado sesión");        
     }
+    
+    
     
     /**
      * Extracción de la traza del mapa
      * 
+     * @throws java.io.FileNotFoundException
      * 
      * @author Mariana Orihuela Cazorla
      */
@@ -728,13 +714,13 @@ public class Interlocutor extends SuperAgent {
     }
     
     
+    
     /**
      * Método que nos devuelve la dirección en la que tiene que ir el dron que pregunte
      * 
-     * @author Mariana Orihuela Cazorla
-     * @param x: posicion actual x del dron
-     * @param y: posicion actual y del dron
      * @param nombreDron: nombre del dron que pide dirección
+     * 
+     * @author Mariana Orihuela Cazorla
      */
     public void respondeDireccion(String nombreDron){
         JsonObject objeto = Json.parse(inbox.getContent()).asObject();
@@ -757,9 +743,6 @@ public class Interlocutor extends SuperAgent {
                 
                 irAX = siguientePosicionHalcon.getKey();
                 irAY = siguientePosicionHalcon.getValue();
-                
-                //System.out.println("Siguiente posicion del halcon: " + irAX + " , " + irAY);
-   
             }
             //si ya he llegado a la esquina de abajo, vuelvo a base
             else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == dimY - 49)){
@@ -786,7 +769,6 @@ public class Interlocutor extends SuperAgent {
             objetoJSON.add("irAY",irAY);   
             String mensaje = objetoJSON.toString();
             
-            //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreHalcon, ACLMessage.INFORM, mensaje);
         }
         
@@ -815,16 +797,13 @@ public class Interlocutor extends SuperAgent {
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
                 }
-                
-                //System.out.println("Siguiente posicion de la mosca: " + irAX + " , " + irAY);
-                
+                                
             }
             
             objetoJSON.add("irAX",irAX);
             objetoJSON.add("irAY",irAY);   
             String mensaje = objetoJSON.toString();
             
-            //System.out.println("Respondemos a halcon");
             mandaMensaje(nombreMosca, ACLMessage.INFORM, mensaje);
         }
         

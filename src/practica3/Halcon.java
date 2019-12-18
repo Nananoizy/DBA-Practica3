@@ -1,21 +1,10 @@
 package practica3;
 
-import DBA.SuperAgent;
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
-import org.codehaus.jettison.json.JSONArray;
 
 /**
  * Clase que define al agente, su comportamiento, sensores y comunicaciones
@@ -26,12 +15,12 @@ import org.codehaus.jettison.json.JSONArray;
  * @author Yang Chen
  */
 public class Halcon extends Dron {
-       
-    
     /**
      * Crea un nuevo Agente
      * 
      * @param aid ID del agente
+     * @param host Gost al que conectar
+     * @param nombreArchivo Nombre archivo
      * @throws Exception
      * 
      * @author Adrián Ruiz Lopez
@@ -62,6 +51,9 @@ public class Halcon extends Dron {
      * Comportamiento del agente
      * 
      * @author Mariana Orihuela Cazorla
+     * @author David Infante Casas
+     * @author Yang Chen
+     * @author Adrián Ruiz López
      */
     @Override
     public void execute() {        
@@ -109,15 +101,12 @@ public class Halcon extends Dron {
                 
                 // si los dos son -1, es la señal de stop
                 if (objeto.get("irAX").asInt() == -1 && objeto.get("irAY").asInt() == -1){
-                    //System.out.println("El halcón va a detenerse");
                     pideParar();
                 }
                 else{
                     nextPosX = objeto.get("irAX").asInt();
                     nextPosY = objeto.get("irAY").asInt();
                 }
-                
-                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }
             else{
                 String siguienteDireccion = "";
@@ -127,7 +116,8 @@ public class Halcon extends Dron {
                 
                 ///Si no tengo fuel suficiente, reposto. Else me muevo     
                 // Calculamos el número de pasos que necesitamos para bajar al suelo
-                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                // Hacemos refuel
+                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;
+                // Hacemos refuel
                 if (fuel-(numero_pasos_bajar*fuelrate) < 15.0 && torescue!=0) {
                     this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }
@@ -135,15 +125,10 @@ public class Halcon extends Dron {
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
-
-                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
-
                     mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    //System.out.println(replyWth);
                     recibeMensaje("Efectua movimiento halcon");
                     this.replyWth = inbox.getReplyWith();
                     if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         //System.out.println("Soy el halcon y me he movido al: " + siguienteDireccion);
                          //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
                          fuel = fuel - fuelrate;
                          
@@ -159,8 +144,6 @@ public class Halcon extends Dron {
                     }
                 }
                 
-                
-                
             }
             
             mandarInformacionPercepciones();
@@ -175,8 +158,6 @@ public class Halcon extends Dron {
                 if( coordAleman.contains(aleman) ) coordAleman.remove(aleman);
             } 
             
-           
-            
         }       
      
     }
@@ -185,6 +166,8 @@ public class Halcon extends Dron {
     
     /**
      * Manda el mensaje de check in al interlocutor y al controlador
+     * 
+     * @param objeto Objeto Json para hacer checkin
      * 
      * @author Mariana Orihuela Cazorla
      * @author Adrian Ruiz Lopez
@@ -209,7 +192,6 @@ public class Halcon extends Dron {
             if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                 this.cId = inbox.getConversationId();
                 this.replyWth = inbox.getReplyWith();
-                //System.out.println(replyWth);
                 objeto = Json.parse(inbox.getContent()).asObject();
                 System.out.println("Checkin halcon: " + objeto.get("result").asString());
                 posActualX = posInicioX;
@@ -233,7 +215,6 @@ public class Halcon extends Dron {
                 mandaMensaje(nombreInterlocutor, ACLMessage.NOT_UNDERSTOOD, "halcon");
             }
     }
-    
 
     
     
@@ -248,10 +229,6 @@ public class Halcon extends Dron {
         super.finalize();
  
     }
-    
-
-    
-    
     
     
 }// FIN CLASE HALCON

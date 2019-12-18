@@ -1,19 +1,9 @@
 package practica3;
 
-import DBA.SuperAgent;
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.codehaus.jettison.json.JSONArray;
 
 /**
  * Clase que define al agente, su comportamiento, sensores y comunicaciones
@@ -24,12 +14,12 @@ import org.codehaus.jettison.json.JSONArray;
  * @author Yang Chen
  */
 public class Mosca extends Dron {
-   
-    
     /**
      * Crea un nuevo Agente
      * 
      * @param aid ID del agente
+     * @param host Gost al que conectar
+     * @param nombreArchivo Nombre archivo
      * @throws Exception
      * 
      * @author David Infante Casas
@@ -60,9 +50,12 @@ public class Mosca extends Dron {
      * Comportamiento del agente
      * 
      * @author Mariana Orihuela Cazorla
+     * @author David Infante Casas
+     * @author Yang Chen
+     * @author Adrián Ruiz López
      */
     @Override
-    public void execute() {        
+    public void execute() {
  
         recibeMensaje("primer mensaje de levantar mosca");
               
@@ -91,7 +84,7 @@ public class Mosca extends Dron {
         else online = false;
         
         
-        while(online){  
+        while(online) {
             
             cargarPercepciones();
             obtenerAlemanesInfrarojos();
@@ -105,8 +98,6 @@ public class Mosca extends Dron {
                 JsonObject objeto = Json.parse(inbox.getContent()).asObject();            
                 nextPosX = objeto.get("irAX").asInt();
                 nextPosY = objeto.get("irAY").asInt();
-                
-                //System.out.println("La siguiente posicion a ir es: " + nextPosX + " , " + nextPosY);
             }else{
                 String siguienteDireccion = "";
                 siguienteDireccion = calculaDireccion();
@@ -115,27 +106,22 @@ public class Mosca extends Dron {
                 
                 ///Si no tengo fuel suficiente, reposto. Else me muevo     
                 // Calculamos el número de pasos que necesitamos para bajar al suelo
-                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;                // Hacemos refuel
+                int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5;
+                // Hacemos refuel
                 if (fuel-(numero_pasos_bajar*fuelrate) < 15.0 && torescue!=0) {
                     this.refuel(siguienteDireccion, numero_pasos_bajar);
                 }else{
                     
                     objeto.add("command",siguienteDireccion);
                     String content = objeto.toString();
-
-                    //System.out.println("Me quiero mover a: " + siguienteDireccion);
-
                     mandaMensaje("Elnath", ACLMessage.REQUEST, content);
-                    //System.out.println(replyWth);
                     recibeMensaje("Efectua movimiento mosca");
                     this.replyWth = inbox.getReplyWith();
-                    if(inbox.getPerformativeInt() == ACLMessage.INFORM){
-                         //System.out.println("Soy la mosca y me he movido al: " + siguienteDireccion);
+                    if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                          //Si se mueve a una determinada casilla, habra que actualizar la posActual segun su movimiento
                          fuel = fuel - fuelrate;
                          
                          //actualizamos la posicion localmente
-                         //System.out.println("Mi posicion actual es: " + posActualX + " , " + posActualY + " , " + posActualZ);
                          actualizaPosicion(siguienteDireccion);
                     }
                     else{
@@ -149,7 +135,7 @@ public class Mosca extends Dron {
                 
                 mandarInformacionPercepciones();
                 
-            }// FIN DEL ELSE ( como no ha llegado a la posicion objetivo, se mueve)
+            }// FIN DEL ELSE (como no ha llegado a la posicion objetivo, se mueve)
             
         }
         
@@ -160,6 +146,8 @@ public class Mosca extends Dron {
     
     /**
      * Manda el mensaje de check in al interlocutor y al controlador
+     * 
+     * @param objeto Objeto Json para hacer checkin
      * 
      * @author Mariana Orihuela Cazorla
      * @author Adrian Ruiz Lopez
@@ -201,6 +189,7 @@ public class Mosca extends Dron {
             } 
     
     }
+    
     
     
     /**
