@@ -673,25 +673,25 @@ public abstract class Dron extends SuperAgent {
         ///TIENE QUE COMPROBAR ALTURAS Y REFUEL
         //System.out.println("x: " + posActualX + " , " + nextPosX + " y " + posActualY + " , " + nextPosY);
         // Si la y es mayor y la x es igual, va al Norte
-        if (posActualX == nextPosX && posActualY > nextPosY){
+        if (posActualX == nextPosX && posActualY > nextPosY) {
             //si tengo un muro delante y no he subido al nivel maximo, asciendo
             if (consultaAltura(posActualX , posActualY - 1) > posActualZ && maxlevel > posActualZ){
                 direccion = "moveUP";
             }
             
             ///SI NO PUEDEN ASCENDER MAS Y TIENEN UN OBJETO DELANTE, HACER MANO DERECHA...
-            else{
-                direccion = "moveN";
+            else {
+                direccion = manoDerecha("moveN");
             }
             
         }
         //Si la x de destino es mayor y la y es menor, va hacia el noreste
-        else if (posActualX < nextPosX && posActualY > nextPosY){
+        else if (posActualX < nextPosX && posActualY > nextPosY) {
             if (consultaAltura(posActualX + 1, posActualY - 1) > posActualZ && maxlevel > posActualZ){
                 direccion = "moveUP";
             }
             else
-                direccion = "moveNE";
+                direccion = manoDerecha("moveNE");
         }
         //Si la x de destino es mayor y la y es igual, va hacia el este
         else if (posActualX < nextPosX && posActualY == nextPosY){
@@ -699,7 +699,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveE";
+                direccion = manoDerecha("moveE");
         }
         //Si la x de destino es mayor y la y es mayor, va hacia el sureste
         else if (posActualX < nextPosX && posActualY < nextPosY){
@@ -707,7 +707,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveSE";
+                direccion = manoDerecha("moveSE");
         }
         //Si la y de destino es menor y la x es igual, va hacia el sur
         else if (posActualX == nextPosX && posActualY < nextPosY){
@@ -715,7 +715,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveS";
+                direccion = manoDerecha("moveS");
         }
         //Si la x de destino es menor y la y es mayor, va hacia el suroeste
         else if (posActualX > nextPosX && posActualY < nextPosY){
@@ -723,7 +723,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveSW";
+                direccion = manoDerecha("moveSW");
         }
         //Si la x de destino es menor y la y es igual, va hacia el oeste
         else if (posActualX > nextPosX && posActualY == nextPosY){
@@ -731,7 +731,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveW";
+                direccion = manoDerecha("moveW");
         }
         //Si la x de destino es menor y la y es menor, va hacia el noroeste
         else if (posActualX > nextPosX && posActualY > nextPosY){
@@ -739,7 +739,7 @@ public abstract class Dron extends SuperAgent {
                 direccion = "moveUP";
             }
             else
-                direccion = "moveNW";
+                direccion = manoDerecha("moveNW");
         }
         
         //direccion = compruebaAwacs(direccion);
@@ -1053,6 +1053,95 @@ public abstract class Dron extends SuperAgent {
         }
     }
     
+    
+    
+    /**
+     * Calcula la posición siguiente haciendo mano derecha
+     * 
+     * @return actual Devuelve la dirección a la que se tiene que mover
+     * 
+     * @author David Infante Casas
+     */
+    public String manoDerecha(String direccion) {
+        String actual = direccion;
+        boolean puedo_avanzar = false;
+        int contador = 0;
+        
+        // Mientras no pueda avanzar o no haya comprobado todas las direcciones
+        while ((!puedo_avanzar) && (contador < 8)) {
+            switch (actual) {
+                case "moveN":
+                    // Si la casilla siguiente está más alta
+                    if (consultaAltura(posActualX, posActualY - 1) > posActualZ) {
+                        actual = "moveNE";
+                    // Si no está más alta, avanzo
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveNE":
+                    if (consultaAltura(posActualX + 1, posActualY - 1) > posActualZ) {
+                        actual = "moveE";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveE":
+                    if (consultaAltura(posActualX + 1, posActualY) > posActualZ) {
+                        actual = "moveSE";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveSE":
+                    if (consultaAltura(posActualX + 1, posActualY + 1) > posActualZ) {
+                        actual = "moveS";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveS":
+                    if (consultaAltura(posActualX, posActualY + 1) > posActualZ) {
+                        actual = "moveSW";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveSW":
+                    if (consultaAltura(posActualX - 1, posActualY + 1) > posActualZ) {
+                        actual = "moveW";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveW":
+                    if (consultaAltura(posActualX - 1, posActualY) > posActualZ) {
+                        actual = "moveNW";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+                case "moveNW":
+                    if (consultaAltura(posActualX - 1, posActualY - 1) > posActualZ) {
+                        actual = "moveN";
+                    } else {
+                        puedo_avanzar = true;
+                    }
+                    ++contador;
+                    break;
+            }
+        }
+        
+        return actual;
+        
+    }
     
     
 }
