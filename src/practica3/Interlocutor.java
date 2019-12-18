@@ -793,12 +793,12 @@ public class Interlocutor extends SuperAgent {
             if ((x == irAX && y == irAY)){
                     
                 if ((x == dimX - 1)){
-                    siguientePosicionMosca = new Pair(0, y + 9);
+                    siguientePosicionMosca = new Pair(0, y + 3);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
                 }
                 else if((x == 0)){
-                    siguientePosicionMosca = new Pair(dimX - 1, y + 9);
+                    siguientePosicionMosca = new Pair(dimX - 1, y + 3);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
                 }
