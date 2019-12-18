@@ -133,10 +133,10 @@ public abstract class Dron extends SuperAgent {
     JsonObject gonio;
     float fuel;
     boolean goal;
-    String status; // Y ESTE STATUS?
-    int torescue; // ni idea de que es tamapoco
-    double energy; // ni idea
-    boolean cancel; // ni idea
+    String status;
+    int torescue; 
+    double energy;
+    boolean cancel; 
     
     
     ArrayList<Pair<Integer,Integer>> coordAleman = new ArrayList<Pair<Integer,Integer>> ();

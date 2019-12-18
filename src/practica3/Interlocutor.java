@@ -113,9 +113,11 @@ public class Interlocutor extends SuperAgent {
     Pair<Integer,Integer> siguientePosicionMosca;
     
     boolean online=true;
-   
+    int rescatados = 1;
+    
     ArrayList<Pair<Integer,Integer>> alemanesTotalesDetectados = new ArrayList<Pair<Integer,Integer>> ();
     ArrayList<Pair<Integer,Integer>> ArrayRescate1 = new ArrayList<Pair<Integer,Integer>> ();
+    ArrayList<Pair<Integer,Integer>> ArrayRescate2 = new ArrayList<Pair<Integer,Integer>> ();
    
     
     /**
@@ -246,8 +248,9 @@ public class Interlocutor extends SuperAgent {
         int posx= alemanJSON.get("posX").asInt();
         int posy= alemanJSON.get("posY").asInt();
         Pair<Integer,Integer> aleman = new Pair<Integer,Integer>(posx,posy);
-        if( ArrayRescate1.contains(aleman) ) ArrayRescate1.remove(aleman);
-        //if( ArrayRescate2.contains(aleman) ) ArrayRescate2.remove(aleman);
+        
+        if( ArrayRescate1.contains(aleman)) ArrayRescate1.remove(aleman);
+        if( ArrayRescate2.contains(aleman) ) ArrayRescate2.remove(aleman);
     }
     
     
@@ -301,11 +304,16 @@ public class Interlocutor extends SuperAgent {
      * @author Adrian Ruiz Lopez
      */
    public void decidirRescate(Pair<Integer,Integer> coordenada, JsonObject aleman){
-       
-       ArrayRescate1.add(coordenada);
-       String content = aleman.toString();
-       mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
-    
+       if( rescatados%2==0 ){
+            ArrayRescate1.add(coordenada);
+            String content = aleman.toString();
+            mandaMensaje(nombreRescate1, ACLMessage.INFORM,content);
+       }else{
+            ArrayRescate2.add(coordenada);
+            String content = aleman.toString();
+            mandaMensaje(nombreRescate2, ACLMessage.INFORM,content);
+       }
+       rescatados++;
    }
                    
     /**
