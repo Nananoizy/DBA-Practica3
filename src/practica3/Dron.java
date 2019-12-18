@@ -972,7 +972,7 @@ public abstract class Dron extends SuperAgent {
         if (numero_pasos_bajar > 0) {
             // Hago un bucle con el número de pasos hasta llegar al suelo
             comando = "moveDW";
-            objeto.add("command", "comando");
+            objeto.add("command", comando);
             content = objeto.toString();
 
             // Bajo al suelo
@@ -983,7 +983,8 @@ public abstract class Dron extends SuperAgent {
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
                      //actualizamos la posicion localmente
-                     actualizaPosicion(siguienteDireccion);
+                     //actualizaPosicion(siguienteDireccion);
+                     actualizaPosicion(comando);
                 }
                 else{
                     respuesta = Json.parse(inbox.getContent()).asObject();            
@@ -1035,7 +1036,8 @@ public abstract class Dron extends SuperAgent {
                 if (inbox.getPerformativeInt() == ACLMessage.INFORM) {
                      fuel = fuel - fuelrate;
                      //actualizamos la posicion localmente
-                     actualizaPosicion(siguienteDireccion);
+                     //actualizaPosicion(siguienteDireccion);
+                     actualizaPosicion(comando);
                 }
                 else{
                     respuesta = Json.parse(inbox.getContent()).asObject();            

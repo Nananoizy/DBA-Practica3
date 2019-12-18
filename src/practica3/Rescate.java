@@ -150,8 +150,10 @@ public class Rescate extends Dron {
                     int numero_pasos_bajar = (this.posActualZ - this.consultaAltura(this.posActualX, this.posActualY)) / 5; 
                     // Hacemos refuel
                     if (fuel-(numero_pasos_bajar*fuelrate) < 15.0) {
-                        comando = calculaDireccion();
+                        
                         this.refuel(comando, numero_pasos_bajar);
+                        comando = calculaDireccion();
+                        realizarMovimiento(comando);
                     }
                     else{
                         if( tengoObjetivo ){
