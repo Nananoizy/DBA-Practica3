@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
+import org.apache.qpid.transport.Sender;
 import org.codehaus.jettison.json.JSONArray;
 
 /**
@@ -34,6 +35,8 @@ public class Rescate extends Dron {
     Pair<Integer,Integer> objetivoActual;
          
     String comando="";
+    
+    boolean rescatando;
    
     
     /**
@@ -49,6 +52,7 @@ public class Rescate extends Dron {
         rol = "rescue";
         tengoObjetivo = false;
         nombreDron = "rescate";
+        rescatando = true;
     }
     
     
@@ -111,12 +115,14 @@ public class Rescate extends Dron {
             
             recibeMensaje("recibiendo un mensaje");
            // this.replyWth = inbox.getReplyWith();
+           
+           if (rescatando){
 
             //Obtenemos quien es el SENDER:
             String sender = inbox.getSender().name;
             
             // SI RECIVE UN ALEMAN, LO PONE EN SU LISTA
-            if( sender.equals(nombreInterlocutor)  ){
+            if(sender.equals(nombreInterlocutor)){
                 // Obtenemos las coordenadas y lo metemos en la cola del rescate:
                 JsonObject aleman = Json.parse(inbox.getContent()).asObject();
                 Pair<Integer,Integer> nuevoAleman = new Pair(aleman.get("alemanX").asInt(),aleman.get("alemanY").asInt());
@@ -140,48 +146,65 @@ public class Rescate extends Dron {
                 this.replyWth = inbox.getReplyWith();
                 // DISTINGUIR SI LA RESPUESTA RECIBIDA ES DE UN MOVIMIENTO O DE EXITO DE RESCATE:
                 if( inbox.getPerformativeInt() == ACLMessage.INFORM ){
-                    System.out.println("Soy el " + nombreDron + " y me he movido al: " + comando);
-                
-                
-
-                    if( tengoObjetivo ){
-                        // MOVIMIENTO Y COMUNICACION CON EL CONTROLADOR PERO EL ULTIMO RECIBE MENSAJE NO SE HACE! ( YA QUE SE VOLVERA A HACER EN EL INICIO DEL BUCLE )
-                        // CUANDO RESCATE A UN ALEMAN, PONER LA VARIABLE TENGOOBJETIVO A FALSE.
-                        /*
-                            1º deicidirMovimiento / accion rescatar
-                            2º EnviarMov al controlador ( o mensaje de rescate ) 
-                        */
-                      comando=obtenerComando();
-                      realizarMovimiento(comando);
-                      
-                      if(comando.equals("rescue")){
-                          tengoObjetivo = false;
-                          notificarInterlocutor();
-                      }
-                      else if(comando.equals("stop")){
-                          tengoObjetivo = false;
-                      }
+                    //System.out.println("Soy el " + nombreDron + " y me he movido al: " + comando);
+                    cargarPercepciones();
+                    // compruebo si tengo que hacer refuel
+                    
+                    if (fuel <= fuelrate + 2){
                         
-                    }else if( !tengoObjetivo && AlemanesPendientes.size() > 0 ){
-                        // ASIGNA EL NUEVO OBJETIVO
-                        objetivoActual = AlemanesPendientes.poll();
+                        ///SUPONIENDO QUE TENGA QUE IR A RAS DE SUELO, meter aqui otras comprobaciones
+                        JsonObject objeto = new JsonObject();
                         
-                        System.out.println("Eliminado: ");
-                        System.out.println("Alemanes pendientes: " + AlemanesPendientes);
-                        
-                        tengoObjetivo = true;
-                        // MOVERSE:
-                        comando = obtenerComando();
-                        realizarMovimiento(comando);
+                        objeto.add("command","refuel");
+                        String content = objeto.toString();
+                        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
                     }
-                    /*else if(!tengoObjetivo && AlemanesPendientes.size() == 0){
-                        // ESPERAR HASTA QUE EL INTERLOCUTOR NOS DIGA QUE NO HAY ALEMANES EN EL MAPA Y VOLVEMOS A BASE ENTONCES
-                        objetivoActual = new Pair(posInicioX,posInicioY);
-                        tengoObjetivo = true;
-                        //MOVERSE
-                        comando=obtenerComando();
-                        realizarMovimiento(comando);
-                    }*/
+                    else{
+                        if( tengoObjetivo ){
+
+                          comando=obtenerComando();
+                          realizarMovimiento(comando);
+
+                          if(comando.equals("rescue")){
+                              tengoObjetivo = false;
+                              notificarInterlocutor();
+                          }
+                          else if(comando.equals("stop")){
+                              tengoObjetivo = false;
+                          }
+
+                        }else if( !tengoObjetivo && AlemanesPendientes.size() > 0 ){
+                            // ASIGNA EL NUEVO OBJETIVO
+                            objetivoActual = AlemanesPendientes.poll();
+
+                            System.out.println("Eliminado: ");
+                            System.out.println("Alemanes pendientes: " + AlemanesPendientes);
+
+                            tengoObjetivo = true;
+                            // MOVERSE:
+                            comando = obtenerComando();
+                            realizarMovimiento(comando);
+                        }
+                        else if(!tengoObjetivo && AlemanesPendientes.size() == 0){
+                            
+                            //si no hay alemanes en el mapa, vuelvo a la casilla de salida
+                            if (torescue == 0){
+                                rescatando = false;
+                                nextPosX = posInicioX;
+                                nextPosY = nextPosY;
+                                
+                                if (posActualX == nextPosX && posActualY == nextPosY){
+                                    pideParar();
+                                    online = false;
+                                }
+                                else{
+                                    comando = calculaDireccion();
+                                    realizarMovimiento(comando);  
+                                }
+                            }
+                            
+                        }
+                    }
                     
                 }// FIN IF SI ES UNA RESPUESTA DE UN MOV.
                 else{
@@ -197,7 +220,37 @@ public class Rescate extends Dron {
             
             System.out.println(nombreDron + " : Estoy en la posicion x = " + posActualX + " , y = " +posActualY + " , mi altura es " + posActualZ);
             System.out.println("Y el aleman a rescatar esta en  x = " + objetivoActual.getKey() + " , y = " + objetivoActual.getValue() );
-                              
+            
+           }// FIN DEL IF RESCATANDO          
+           else{        // si ya he rescatado a todos los alemanes, voy a esperar moverme a la casilla desde la que parti
+               String sender = inbox.getSender().name;
+               
+               if (sender.equals("Elnath")){
+                   
+                    if (fuel <= fuelrate + 2){
+                        
+                        ///SUPONIENDO QUE TENGA QUE IR A RAS DE SUELO, meter aqui otras comprobaciones
+                        JsonObject objeto = new JsonObject();
+                        
+                        objeto.add("command","refuel");
+                        String content = objeto.toString();
+                        mandaMensaje("Elnath", ACLMessage.REQUEST, content);
+                    }
+                    else{
+                        if (posActualX == nextPosX && posActualY == nextPosY){
+                            pideParar();
+                            online = false;
+                        }
+                        else{
+                            comando = calculaDireccion();
+                            realizarMovimiento(comando);  
+                        }
+                    }
+                   
+                   
+
+               }
+           }
         } // FIN DEL WHILE ONLINE
     }
     
@@ -227,6 +280,8 @@ public class Rescate extends Dron {
         String content = objeto.toString();
         mandaMensaje("Elnath", ACLMessage.REQUEST, content);
         System.out.println(nombreDron+ " : voy a hacer: " + comando);
+        
+        fuel = fuel - fuelrate;
         
         actualizaPosicion(comando);
     }
