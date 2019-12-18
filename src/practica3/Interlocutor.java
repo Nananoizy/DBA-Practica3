@@ -490,8 +490,8 @@ public class Interlocutor extends SuperAgent {
         
         /// HALCON
         
-        xTemp = 20;
-        yTemp = dimY - 20;
+        xTemp = 49;
+        yTemp = dimY - 49;
         
         posicionCorrecta = compruebaCasilla(xTemp,yTemp,230);
         
@@ -743,9 +743,9 @@ public class Interlocutor extends SuperAgent {
             irAY = siguientePosicionHalcon.getValue();
             
             ///si he llegado a la esquina superior derecha, bajo abajo del todo
-            if ((x == irAX && y == irAY) && (x == (dimX - 20) && y == 20)){
+            if ((x == irAX && y == irAY) && (x == (dimX - 49) && y == 49)){
 
-                siguientePosicionHalcon = new Pair(dimX - 20, dimY - 20);
+                siguientePosicionHalcon = new Pair(dimX - 49, dimY - 49);
                 
                 irAX = siguientePosicionHalcon.getKey();
                 irAY = siguientePosicionHalcon.getValue();
@@ -754,7 +754,7 @@ public class Interlocutor extends SuperAgent {
    
             }
             //si ya he llegado a la esquina de abajo, vuelvo a base
-            else if((x == irAX && y == irAY) && (x == (dimX - 20) && y == dimY - 20)){
+            else if((x == irAX && y == irAY) && (x == (dimX - 49) && y == dimY - 49)){
                 
                 siguientePosicionHalcon = new Pair(spawns.get(2), spawns.get(3));
                 
@@ -793,12 +793,12 @@ public class Interlocutor extends SuperAgent {
             if ((x == irAX && y == irAY)){
                     
                 if ((x == dimX - 1)){
-                    siguientePosicionMosca = new Pair(0, y + 3);
+                    siguientePosicionMosca = new Pair(0, y + 9);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
                 }
                 else if((x == 0)){
-                    siguientePosicionMosca = new Pair(dimX - 1, y + 3);
+                    siguientePosicionMosca = new Pair(dimX - 1, y + 9);
                     irAX = siguientePosicionMosca.getKey();
                     irAY = siguientePosicionMosca.getValue();
                 }
